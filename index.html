@@ -5,9 +5,50 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AchaAí - Plataforma de Busca Local via WhatsApp</title>
+    <meta name="description" content="Encontre produtos em lojas físicas de Ariquemes-RO usando apenas o WhatsApp. Rápido, fácil e direto." />
+    <meta name="keywords" content="busca local, produtos, Ariquemes, WhatsApp, lojas físicas" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="AchaAí - Plataforma de Busca Local via WhatsApp" />
+    <meta property="og:description" content="Encontre produtos em lojas físicas de Ariquemes-RO usando apenas o WhatsApp. Rápido, fácil e direto." />
+    <meta property="og:locale" content="pt_BR" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="AchaAí - Plataforma de Busca Local via WhatsApp" />
+    <meta property="twitter:description" content="Encontre produtos em lojas físicas de Ariquemes-RO usando apenas o WhatsApp. Rápido, fácil e direto." />
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Analytics placeholder - replace with real IDs -->
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    
+    <!-- Facebook Pixel -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', 'FB_PIXEL_ID');
+      fbq('track', 'PageView');
+    </script>
   </body>
 </html>
