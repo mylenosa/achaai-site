@@ -7,7 +7,7 @@ import { config } from '../lib/config';
 
 export const Hero: React.FC = () => {
   const examples = [
-    "Tem tinta spray vermelha em Ariquemes?",
+    "Onde encontro garrafa com tampa hermética em Ariquemes?",
     "Onde encontro WD-40 hoje?"
   ];
 
@@ -38,13 +38,13 @@ export const Hero: React.FC = () => {
 
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
-            O {config.app.name} encontra pra você onde tem o que você procura — direto no WhatsApp 💬
+            Receba endereço e telefone das lojas que têm o que você procura — direto no WhatsApp 💬
           </p>
 
           {/* Trust Badge */}
           <div className="inline-flex items-center bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-sm font-medium mb-8">
             <MessageCircle className="w-4 h-4 mr-2" />
-            Funciona 100% no WhatsApp
+            100% no WhatsApp • Sem app • Gratuito
           </div>
         </motion.div>
 
@@ -63,7 +63,7 @@ export const Hero: React.FC = () => {
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 max-w-2xl mx-auto">
             <div className="flex items-center justify-center mb-4">
               <MapPin className="h-5 w-5 text-emerald-600 mr-2" />
-              <span className="text-sm font-medium text-gray-600">Exemplos de busca:</span>
+              <span className="text-sm font-medium text-gray-600">Pergunte assim:</span>
             </div>
             <div className="space-y-3">
               {examples.map((example, index) => (
@@ -77,6 +77,11 @@ export const Hero: React.FC = () => {
                   "{example}"
                 </motion.div>
               ))}
+            </div>
+            <div className="mt-4 text-center">
+              <span className="text-sm text-emerald-600 font-medium">
+                📍 Você recebe endereço e telefone das lojas
+              </span>
             </div>
           </div>
         </motion.div>

@@ -1,6 +1,6 @@
 # AchaAí - Landing Page
 
-Landing page completa para o AchaAí, plataforma que conecta consumidores e lojistas em Ariquemes-RO via WhatsApp.
+Landing page completa para o AchaAí, plataforma que informa onde encontrar produtos em lojas físicas de Ariquemes-RO via WhatsApp.
 
 ## 🏗️ Arquitetura SOLID
 
@@ -8,6 +8,8 @@ Este projeto foi desenvolvido seguindo rigorosamente os princípios SOLID:
 
 ### Single Responsibility Principle (SRP)
 - Cada componente tem uma única responsabilidade
+- `HomePage.tsx` - Página para consumidores finais
+- `StoresPage.tsx` - Página dedicada para lojistas
 - `Hero.tsx` - Seção hero
 - `Pricing.tsx` - Seção de preços
 - `WhatsAppButton.tsx` - Botão específico para WhatsApp
@@ -30,6 +32,7 @@ Este projeto foi desenvolvido seguindo rigorosamente os princípios SOLID:
 ### Dependency Inversion Principle (DIP)
 - Configurações centralizadas em `lib/config.ts`
 - URLs, cores e textos injetados via configuração
+- Hook `useSEO` para gerenciar meta tags por página
 
 ## 🚀 Como usar
 
@@ -54,6 +57,7 @@ export const config = {
     name: 'AchaAí',
     city: 'Ariquemes', // Altere aqui
     whatsappUrl: 'https://bit.ly/AchaAi', // Altere aqui
+    salesWhatsappUrl: 'https://bit.ly/AchaAi', // Para vendas
   },
   theme: {
     primary: 'emerald', // Altere as cores aqui
@@ -89,13 +93,28 @@ export const faqs: FAQ[] = [
 ]
 ```
 
+### Adicionar/editar FAQs para lojas
+Edite `src/data/storesFaqs.ts`:
+
+```typescript
+export const storesFaqs: FAQ[] = [
+  {
+    id: 'nova-pergunta-loja',
+    question: 'Nova pergunta para lojas?',
+    answer: 'Nova resposta...'
+  }
+]
+```
+
 ## 📊 Analytics
 
 ### Seletores para tracking
 Todos os CTAs possuem `data-cta` attributes:
 
 - `data-cta="whatsapp-hero"` - CTA principal do hero
-- `data-cta="whatsapp-stores"` - CTA para lojistas
+- `data-cta="whatsapp-stores"` - CTA para lojistas na home
+- `data-cta="whatsapp-stores-hero"` - CTA principal página lojas
+- `data-cta="whatsapp-stores-final"` - CTA final página lojas
 - `data-cta="whatsapp-final"` - CTA final
 - `data-cta="ver-planos"` - Link para planos
 - `data-cta="whatsapp-plan-{id}"` - CTAs dos planos
@@ -136,7 +155,7 @@ Usando Framer Motion para:
 
 ## 🔧 Tecnologias
 
-- **React 18** + TypeScript
+- **React 18** + TypeScript + React Router
 - **Tailwind CSS** para styling
 - **Framer Motion** para animações
 - **Lucide React** para ícones
@@ -158,6 +177,14 @@ Meta Lighthouse:
 
 ## 🔗 Links importantes
 
-- WhatsApp principal: https://bit.ly/AchaAi
+- WhatsApp consumidores: https://bit.ly/AchaAi
+- WhatsApp vendas/lojas: https://bit.ly/AchaAi
 - Todas as configurações em: `src/lib/config.ts`
 - Dados editáveis em: `src/data/`
+
+## 📱 Páginas
+
+- `/` - Página principal para consumidores finais
+- `/lojas` - Página dedicada para lojistas e fornecedores
+
+Cada página tem SEO otimizado e conteúdo específico para seu público-alvo.

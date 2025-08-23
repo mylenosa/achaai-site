@@ -8,13 +8,13 @@ export const faqs: FAQ[] = [
   },
   {
     id: '2',
-    question: 'Como o AchaAí ganha dinheiro?',
-    answer: 'Oferecemos planos opcionais para lojas que querem destaque e ferramentas avançadas. O uso básico é gratuito.'
+    question: 'O AchaAí faz entregas?',
+    answer: 'Não fazemos entregas. Informamos onde encontrar o produto (endereço e telefone) para você ir até a loja.'
   },
   {
     id: '3',
-    question: 'Como atualizo meu estoque?',
-    answer: 'Você pode atualizar via planilha simples, nossa API ou pelo painel web. Escolha o que for mais fácil para você.'
+    question: 'Como vocês sabem se a loja tem o produto?',
+    answer: 'As lojas cadastram seus produtos conosco e mantêm atualizados. Sempre confirmamos disponibilidade antes de informar.'
   },
   {
     id: '4',
@@ -23,7 +23,7 @@ export const faqs: FAQ[] = [
   },
   {
     id: '5',
-    question: 'Quanto tempo demora para aparecer nas buscas?',
-    answer: 'Após o cadastro, sua loja já aparece nas buscas em até 24 horas. É rápido e automático.'
+    question: 'É gratuito para usar?',
+    answer: 'Sim! Para quem procura produtos é 100% gratuito. Só as lojas pagam planos opcionais para destaque.'
   }
 ];

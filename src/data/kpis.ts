@@ -9,7 +9,7 @@ export const kpis: KPI[] = [
   },
   {
     id: '2',
-    value: '< 5 min',
+    value: '< 2 min',
     label: 'tempo de resposta',
     icon: 'clock'
   },
@@ -21,8 +21,8 @@ export const kpis: KPI[] = [
   },
   {
     id: '4',
-    value: '98%',
-    label: 'produtos encontrados',
+    value: '95%',
+    label: 'consultas atendidas',
     icon: 'target'
   }
 ];

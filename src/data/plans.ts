@@ -10,8 +10,9 @@ export const pricingPlans: PricingPlan[] = [
     description: 'Ideal para começar a receber pedidos',
     features: [
       'Até 50 itens no catálogo',
-      'Receber pedidos via WhatsApp',
-      'Aparecer em buscas próximas',
+      'Aparecer nas buscas locais',
+      'Clientes recebem seu endereço',
+      'Atualização via WhatsApp',
       'Suporte por email',
       'Perfil básico da loja'
     ],
@@ -27,11 +28,12 @@ export const pricingPlans: PricingPlan[] = [
     features: [
       'Itens ilimitados no catálogo',
       'Destaque nas buscas',
-      'Relatórios de demanda',
+      'Relatórios de consultas',
       'Integração com planilhas',
       'API para sistemas próprios',
       'Suporte prioritário',
-      'Analytics detalhados'
+      'Analytics detalhados',
+      'Badge "Loja Verificada"'
     ],
     highlighted: true,
     ctaText: 'Assinar Pro',
@@ -49,7 +51,8 @@ export const pricingPlans: PricingPlan[] = [
       'Treinamento personalizado',
       'Gerente de conta dedicado',
       'Relatórios customizados',
-      'Suporte 24/7'
+      'Suporte 24/7',
+      'Destaque premium nas buscas'
     ],
     ctaText: 'Falar com Vendas',
     ctaType: 'contact'

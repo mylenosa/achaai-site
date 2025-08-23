@@ -5,21 +5,21 @@ export const testimonials: Testimonial[] = [
     id: '1',
     name: 'Daniel',
     location: 'Jardim Europa',
-    content: 'Achei WD-40 em 2 minutos e retirei na hora. Muito prático!',
+    content: 'Encontrei WD-40 em 2 minutos. Recebi 3 endereços e liguei no mais próximo!',
     type: 'customer'
   },
   {
     id: '2',
     name: 'Mariana',
     location: 'Loja de Tintas',
-    content: 'Entram pedidos prontos pelo Whats. Vendo estoque parado que ficava encalhado.',
+    content: 'Clientes chegam sabendo que temos o produto. Movimento aumentou 40%!',
     type: 'store'
   },
   {
     id: '3',
     name: 'Rogério',
     location: 'Bazar Central',
-    content: 'Atendemos tudo num só número. Simples e direto, sem complicação.',
+    content: 'Apareço nas buscas sem fazer nada. Só cadastrei meus produtos uma vez.',
     type: 'store'
   }
 ];

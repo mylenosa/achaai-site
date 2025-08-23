@@ -5,6 +5,7 @@ export const config = {
     city: 'Ariquemes',
     state: 'RO',
     whatsappUrl: 'https://bit.ly/AchaAi',
+    salesWhatsappUrl: 'https://bit.ly/AchaAi', // Para vendas/fornecedores
   },
   theme: {
     primary: 'emerald',
@@ -12,9 +13,13 @@ export const config = {
     accent: 'green',
   },
   seo: {
-    title: 'AchaAí - Plataforma de Busca Local via WhatsApp',
-    description: 'Encontre produtos em lojas físicas de Ariquemes-RO usando apenas o WhatsApp. Rápido, fácil e direto.',
+    title: 'AchaAí - Encontre Produtos em Ariquemes via WhatsApp',
+    description: 'Descubra onde encontrar qualquer produto em Ariquemes-RO. Receba endereço e telefone das lojas direto no WhatsApp.',
     keywords: 'busca local, produtos, Ariquemes, WhatsApp, lojas físicas',
+    stores: {
+      title: 'AchaAí para Lojas - Conecte seu Estoque',
+      description: 'Cadastre seus produtos no AchaAí e apareça quando clientes procurarem. Impacto econômico e visibilidade local.',
+    }
   },
   analytics: {
     gtag: 'GA_MEASUREMENT_ID', // Substituir pelo ID real
