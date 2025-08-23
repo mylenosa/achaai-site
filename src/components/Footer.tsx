@@ -17,11 +17,11 @@ export const Footer: React.FC = () => {
               <h3 className="text-2xl font-bold">{config.app.name}</h3>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
-              Encontre produtos em lojas físicas de {config.app.city}-{config.app.state}. 
-              Receba endereços e telefones via WhatsApp.
+              A plataforma que conecta quem procura com quem tem em {config.app.city}-{config.app.state}. 
+              Tudo via WhatsApp, simples e direto.
             </p>
             <p className="text-emerald-400 font-medium">
-              Tem uma loja? <a href="/lojas" className="underline hover:text-emerald-300">Conecte-se ao {config.app.name}</a> 📦
+              Tem uma loja? Conecte seu estoque ao {config.app.name} 📦
             </p>
           </div>
 

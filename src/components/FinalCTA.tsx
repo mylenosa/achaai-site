@@ -20,11 +20,11 @@ export const FinalCTA: React.FC = () => {
           </div>
           
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Encontre qualquer produto em {config.app.city}
+            Pronto para encontrar o que precisa?
           </h2>
           
           <p className="text-xl text-emerald-100 mb-8 max-w-2xl mx-auto">
-            Descubra onde tem o que você procura. Receba endereço e telefone das lojas direto no WhatsApp
+            Junte-se a milhares de pessoas em {config.app.city} que já usam o {config.app.name} para encontrar produtos rapidamente
           </p>
           
           <WhatsAppButton 
@@ -33,11 +33,11 @@ export const FinalCTA: React.FC = () => {
             data-cta="whatsapp-final"
             className="bg-white text-emerald-600 hover:bg-gray-50"
           >
-            Fazer uma Busca
+            Abrir no WhatsApp
           </WhatsAppButton>
           
           <p className="text-emerald-100 mt-6 text-sm">
-            Gratuito • Sem app • Resposta em minutos
+            Gratuito • Sem cadastro • Direto no seu WhatsApp
           </p>
         </motion.div>
       </div>

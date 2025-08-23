@@ -9,23 +9,23 @@ export const ForStores: React.FC = () => {
   const benefits = [
     {
       icon: Users,
-      title: 'Clientes Qualificados',
-      description: 'Receba apenas clientes que já sabem que você tem o produto que procuram'
+      title: 'Pedidos Qualificados',
+      description: 'Receba apenas clientes que realmente querem comprar seus produtos'
     },
     {
       icon: TrendingUp,
       title: 'Destaque nas Buscas',
-      description: 'Apareça quando alguém procurar seus produtos em Ariquemes'
+      description: 'Apareça primeiro quando alguém procurar seus produtos'
     },
     {
       icon: Store,
-      title: 'Cadastro Simples',
-      description: 'Cadastre produtos via planilha, WhatsApp ou painel web'
+      title: 'Gestão Simples',
+      description: 'Atualize seu estoque via planilha, API ou painel web'
     },
     {
       icon: BarChart3,
-      title: 'Impacto Local',
-      description: 'Fortaleça o comércio local e aumente sua visibilidade na cidade'
+      title: 'Relatórios de Demanda',
+      description: 'Saiba quais produtos seus clientes mais procuram'
     }
   ];
 
@@ -40,10 +40,10 @@ export const ForStores: React.FC = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
-            Conecte sua Loja ao AchaAí
+            Para Lojas e Fornecedores
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Cadastre seus produtos e apareça quando clientes procurarem em Ariquemes
+            Conecte seu estoque ao AchaAí e receba pedidos qualificados direto no seu WhatsApp
           </p>
         </motion.div>
 
@@ -78,11 +78,11 @@ export const ForStores: React.FC = () => {
           className="text-center space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center"
         >
           <CTAButton
-            href="/lojas"
+            href="#planos"
             variant="secondary"
             data-cta="ver-planos"
           >
-            Página para Lojas
+            Ver Planos
           </CTAButton>
           <WhatsAppButton data-cta="whatsapp-stores">
             Falar com Vendas
