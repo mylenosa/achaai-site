@@ -7,7 +7,7 @@ import { config } from '../lib/config';
 
 export const FinalCTA: React.FC = () => {
   return (
-    <section className="py-20 bg-gradient-to-br from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700">
+    <section className="py-20 bg-gradient-to-br from-emerald-500 to-emerald-600">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -15,7 +15,7 @@ export const FinalCTA: React.FC = () => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <div className="bg-white/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-8 animate-bounce-gentle">
+          <div className="bg-white/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-8">
             <MessageCircle className="w-10 h-10 text-white" />
           </div>
           
@@ -31,7 +31,7 @@ export const FinalCTA: React.FC = () => {
             variant="secondary"
             size="lg"
             data-cta="whatsapp-final"
-            className="bg-white text-emerald-600 hover:bg-gray-50 shadow-2xl hover:shadow-3xl transform hover:scale-110"
+            className="bg-white text-emerald-600 hover:bg-gray-50"
           >
             Abrir no WhatsApp
           </WhatsAppButton>

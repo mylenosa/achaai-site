@@ -1,20 +1,6 @@
 # AchaAí - Landing Page
 
-Landing page completa e moderna para o AchaAí, plataforma que conecta consumidores e lojistas em Ariquemes-RO via WhatsApp.
-
-## ✨ Novos Recursos
-
-### Visual e UX Aprimorados
-- 📱 **Mockup de celular** no hero com exemplo real de conversa
-- 🎠 **Carrossel de frases** de exemplo com transições suaves
-- 🌙 **Dark mode** opcional com toggle no header
-- 🎯 **Scrollspy** para navegação inteligente
-- 👤 **Avatars reais** nos depoimentos
-- 🏆 **Seção de Impacto na Comunidade** com métricas de sustentabilidade
-- ✨ **Animações aprimoradas** com Framer Motion
-- 🎨 **Estados de hover/focus** bem definidos e acessíveis
-- 📱 **FAQ colapsável** com animações suaves
-- 🛡️ **Selos de confiança** ("Lojas verificadas", etc.)
+Landing page completa para o AchaAí, plataforma que conecta consumidores e lojistas em Ariquemes-RO via WhatsApp.
 
 ## 🏗️ Arquitetura SOLID
 
@@ -103,22 +89,6 @@ export const faqs: FAQ[] = [
 ]
 ```
 
-### Adicionar/editar impactos da comunidade
-Edite `src/data/community-impact.ts`:
-
-```typescript
-export const communityImpacts: CommunityImpact[] = [
-  {
-    id: 'novo-impacto',
-    title: 'Novo Impacto',
-    description: 'Descrição do impacto...',
-    value: '100%',
-    label: 'melhoria alcançada',
-    icon: 'trending-up'
-  }
-]
-```
-
 ## 📊 Analytics
 
 ### Seletores para tracking
@@ -137,9 +107,6 @@ Todos os CTAs possuem `data-cta` attributes:
 
 ## 🎨 Customização Visual
 
-### Dark Mode
-O dark mode é ativado automaticamente baseado na preferência do sistema ou pode ser alternado manualmente via toggle no header.
-
 ### Cores
 As cores são baseadas no Tailwind CSS. Para alterar:
 - Verde principal: `emerald-500`
@@ -147,20 +114,10 @@ As cores são baseadas no Tailwind CSS. Para alterar:
 - Cinzas: `gray-50` a `gray-800`
 
 ### Animações
-Usando Framer Motion e CSS para:
+Usando Framer Motion para:
 - Fade in ao scroll
 - Hover effects
 - Micro-interações
-- Carrossel de exemplos
-- FAQ colapsável
-- Elementos flutuantes no hero
-
-### Componentes Interativos
-- **PhoneMockup**: Simulação realista de conversa no WhatsApp
-- **ExampleCarousel**: Rotação automática de frases de exemplo
-- **TrustBadge**: Selos de confiança configuráveis
-- **Avatar**: Componente de avatar com fallback
-- **DarkModeToggle**: Alternador de tema
 
 ## 📱 Responsividade
 
@@ -171,33 +128,11 @@ Usando Framer Motion e CSS para:
 
 ## ♿ Acessibilidade
 
-Melhorias implementadas:
 - Semântica HTML5 (`header`, `main`, `section`, `footer`)
 - ARIA labels nos botões
-- Estados de foco visíveis e bem definidos
 - Contraste AA compliant
-- Suporte a navegação por teclado
-- Indicadores de estado para elementos interativos
+- Foco visível em todos os elementos interativos
 - Navegação por teclado
-- Textos alternativos em imagens
-- Roles ARIA apropriados
-
-## 🎭 Funcionalidades Avançadas
-
-### Scrollspy
-O menu do header destaca automaticamente a seção atual baseada na posição do scroll.
-
-### Dark Mode
-- Detecção automática da preferência do sistema
-- Persistência da escolha no localStorage
-- Transições suaves entre temas
-- Todos os componentes adaptados
-
-### Carrossel de Exemplos
-- Rotação automática a cada 3 segundos
-- Indicadores visuais
-- Controle manual via clique
-- Animações suaves de entrada/saída
 
 ## 🔧 Tecnologias
 
@@ -205,20 +140,16 @@ O menu do header destaca automaticamente a seção atual baseada na posição do
 - **Tailwind CSS** para styling
 - **Framer Motion** para animações
 - **Lucide React** para ícones
-- **Radix UI** para componentes acessíveis
 - **Vite** para build
-- **class-variance-authority** para variantes de componentes
 
 ## 📈 Performance
 
 Otimizações implementadas:
 - Lazy loading de componentes
 - Preconnect para fonts
-- Otimização de imagens via Pexels
 - CSS crítico inline
+- Imagens otimizadas
 - Bundle splitting automático
-- Animações otimizadas com GPU
-- Debounce em eventos de scroll
 
 Meta Lighthouse:
 - Performance: ≥ 90
@@ -227,42 +158,6 @@ Meta Lighthouse:
 
 ## 🔗 Links importantes
 
-- **WhatsApp principal**: https://bit.ly/AchaAi
+- WhatsApp principal: https://bit.ly/AchaAi
 - Todas as configurações em: `src/lib/config.ts`
 - Dados editáveis em: `src/data/`
-- Hooks customizados em: `src/hooks/`
-- Componentes UI em: `src/components/ui/`
-
-## 🚀 Novos Hooks
-
-### useScrollSpy
-```typescript
-const activeSection = useScrollSpy(['hero', 'about', 'contact']);
-```
-
-### useDarkMode
-```typescript
-const [isDark, setIsDark] = useDarkMode();
-```
-
-## 🎨 Novos Componentes UI
-
-- **PhoneMockup**: Mockup realista de celular com conversa
-- **ExampleCarousel**: Carrossel animado de exemplos
-- **TrustBadge**: Selos de confiança
-- **Avatar**: Avatar com fallback automático
-- **DarkModeToggle**: Toggle de tema
-
-## 📝 Melhorias de Conteúdo
-
-### Bot Esclarecido
-Agora fica claro que o bot apenas informa endereço e contato das lojas, não faz pedidos nem entregas.
-
-### Microcopy de Confiança
-- "Lojas verificadas"
-- "Sem cadastro necessário"  
-- "Resposta em minutos"
-- "Gratuito"
-
-### Seção de Impacto
-Nova seção destacando o impacto positivo na economia local, sustentabilidade e geração de empregos.

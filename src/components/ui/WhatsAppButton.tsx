@@ -52,9 +52,8 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className} focus:ring-4 focus:ring-emerald-500/20 focus:outline-none`}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       data-cta={dataCta}
-      aria-label="Abrir conversa no WhatsApp"
       {...props}
     >
       <MessageCircle className="mr-3 h-6 w-6" />

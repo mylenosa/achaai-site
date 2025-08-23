@@ -5,7 +5,6 @@ import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { HowItWorks } from './components/HowItWorks';
 import { KPIs } from './components/KPIs';
-import { CommunityImpact } from './components/CommunityImpact';
 import { ForStores } from './components/ForStores';
 import { Pricing } from './components/Pricing/Pricing';
 import { Testimonials } from './components/Testimonials';
@@ -71,13 +70,12 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors">
+    <div className="min-h-screen">
       <Header />
       <main>
         <Hero />
         <HowItWorks />
         <KPIs />
-        <CommunityImpact />
         <ForStores />
         <Pricing />
         <Testimonials />

@@ -17,7 +17,6 @@ export interface Testimonial {
   location: string;
   content: string;
   type: 'customer' | 'store';
-  avatar: string;
 }
 
 export interface FAQ {
@@ -38,15 +37,6 @@ export interface FeatureStep {
   step: number;
   title: string;
   description: string;
-  icon: string;
-}
-
-export interface CommunityImpact {
-  id: string;
-  title: string;
-  description: string;
-  value: string;
-  label: string;
   icon: string;
 }
 
