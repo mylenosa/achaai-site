@@ -30,7 +30,7 @@ export const ForStores: React.FC = () => {
   ];
 
   return (
-    <section id="para-lojas" className="py-20 bg-gray-50">
+    <section id="para-lojas" className="py-20 bg-gray-50 dark:bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -39,10 +39,10 @@ export const ForStores: React.FC = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold text-gray-800 mb-4">
+          <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
             Para Lojas e Fornecedores
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Conecte seu estoque ao AchaAí e receba pedidos qualificados direto no seu WhatsApp
           </p>
         </motion.div>
@@ -55,15 +55,15 @@ export const ForStores: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+              className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group"
             >
-              <div className="bg-emerald-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <benefit.icon className="w-8 h-8 text-emerald-600" />
+              <div className="bg-emerald-100 dark:bg-emerald-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <benefit.icon className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-3 text-center">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-3 text-center">
                 {benefit.title}
               </h3>
-              <p className="text-gray-600 text-center text-sm">
+              <p className="text-gray-600 dark:text-gray-300 text-center text-sm">
                 {benefit.description}
               </p>
             </motion.div>

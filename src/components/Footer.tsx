@@ -5,7 +5,7 @@ import { config } from '../lib/config';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-gray-800 text-white py-12">
+    <footer className="bg-gray-800 dark:bg-gray-900 text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -17,10 +17,10 @@ export const Footer: React.FC = () => {
               <h3 className="text-2xl font-bold">{config.app.name}</h3>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
-              A plataforma que conecta quem procura com quem tem em {config.app.city}-{config.app.state}. 
+              A plataforma que conecta quem procura com quem tem em {config.app.city}-{config.app.state}.
               Tudo via WhatsApp, simples e direto.
             </p>
-            <p className="text-emerald-400 font-medium">
+            <p className="text-emerald-400 font-medium animate-pulse">
               Tem uma loja? Conecte seu estoque ao {config.app.name} 📦
             </p>
           </div>
@@ -30,22 +30,31 @@ export const Footer: React.FC = () => {
             <h4 className="font-semibold mb-4">Links Úteis</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#como-funciona" className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center">
+                <button 
+                  onClick={() => document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center"
+                >
                   <HelpCircle className="w-4 h-4 mr-2" />
                   Como funciona
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#faq" className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center">
+                <button 
+                  onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center"
+                >
                   <HelpCircle className="w-4 h-4 mr-2" />
                   FAQ
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#planos" className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center">
+                <button 
+                  onClick={() => document.getElementById('planos')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center"
+                >
                   <CreditCard className="w-4 h-4 mr-2" />
                   Planos
-                </a>
+                </button>
               </li>
             </ul>
           </div>

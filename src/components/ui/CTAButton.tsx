@@ -16,8 +16,8 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
   const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4';
   
   const variantClasses = {
-    primary: 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg hover:shadow-xl focus:ring-emerald-500/20',
-    secondary: 'bg-white hover:bg-gray-50 text-emerald-600 border-2 border-emerald-500 hover:border-emerald-600 focus:ring-emerald-500/20'
+    primary: 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg hover:shadow-xl focus:ring-emerald-500/20 active:scale-95',
+    secondary: 'bg-white hover:bg-gray-50 text-emerald-600 border-2 border-emerald-500 hover:border-emerald-600 focus:ring-emerald-500/20 active:scale-95 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-emerald-400'
   };
   
   const sizeClasses = {

@@ -13,7 +13,7 @@ const iconMap = {
 
 export const KPIs: React.FC = () => {
   return (
-    <section className="py-16 bg-emerald-50">
+    <section className="py-16 bg-emerald-50 dark:bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -22,7 +22,7 @@ export const KPIs: React.FC = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
             Números que comprovam nossa eficiência
           </h2>
         </motion.div>
@@ -38,17 +38,17 @@ export const KPIs: React.FC = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="text-center"
+                className="text-center group"
               >
                 {IconComponent && (
-                  <div className="bg-emerald-500 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <div className="bg-emerald-500 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                     <IconComponent className="w-8 h-8 text-white" />
                   </div>
                 )}
-                <div className="text-3xl font-bold text-emerald-600 mb-2">
+                <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">
                   {kpi.value}
                 </div>
-                <div className="text-gray-600 text-sm">
+                <div className="text-gray-600 dark:text-gray-300 text-sm">
                   {kpi.label}
                 </div>
               </motion.div>

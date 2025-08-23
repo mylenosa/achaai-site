@@ -7,7 +7,7 @@ import { PricingCard } from './PricingCard';
 
 export const Pricing: React.FC = () => {
   return (
-    <section id="planos" className="py-20 bg-white">
+    <section id="planos" className="py-20 bg-white dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -16,10 +16,10 @@ export const Pricing: React.FC = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold text-gray-800 mb-4">
+          <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
             Planos para sua Loja
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Escolha o plano ideal para o tamanho do seu negócio
           </p>
         </motion.div>
@@ -37,7 +37,7 @@ export const Pricing: React.FC = () => {
           viewport={{ once: true }}
           className="text-center mt-12"
         >
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Todos os planos incluem suporte técnico e atualizações gratuitas
           </p>
         </motion.div>
