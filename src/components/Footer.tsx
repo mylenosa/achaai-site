@@ -56,17 +56,6 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2">
               <li>
                 <a 
-                  href={config.app.whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center"
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  WhatsApp
-                </a>
-              </li>
-              <li>
-                <a 
                   href={`mailto:${config.app.contactEmail}`}
                   className="text-gray-300 hover:text-emerald-400 transition-colors flex items-center"
                 >
@@ -80,7 +69,7 @@ export const Footer: React.FC = () => {
 
         <div className="border-t border-gray-700 mt-8 pt-8 text-center">
           <p className="text-gray-400 text-sm">
-            © 2024 {config.app.name} — Um produto {config.app.teamName}.
+            © 2025 {config.app.name}. Todos os direitos reservados. Um produto {config.app.teamName}.
           </p>
         </div>
       </div>
