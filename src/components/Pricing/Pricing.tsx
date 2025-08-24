@@ -24,11 +24,9 @@ export const Pricing: React.FC = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
           {pricingPlans.map((plan, index) => (
-            <div key={plan.id} className="flex">
-              <PricingCard plan={plan} index={index} />
-            </div>
+            <PricingCard key={plan.id} plan={plan} index={index} />
           ))}
         </div>
 

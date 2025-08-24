@@ -19,9 +19,9 @@ export const PricingCard: React.FC<PricingCardProps> = ({ plan, index }) => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
       viewport={{ once: true }}
-      className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 relative ${
+      className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 md:p-8 relative ${
         plan.highlighted ? 'ring-2 ring-emerald-500 scale-105' : ''
-      } flex flex-col h-full`}
+      } flex flex-col min-h-[500px] w-full`}
     >
       {plan.highlighted && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -31,7 +31,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({ plan, index }) => {
         </div>
       )}
 
-      <div className="text-center mb-8">
+      <div className="text-center mb-6 md:mb-8">
         <h3 className="text-2xl font-bold text-gray-800 mb-2">{plan.name}</h3>
         <div className="mb-4">
           <span className="text-4xl font-bold text-gray-800">{plan.price}</span>
@@ -42,7 +42,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({ plan, index }) => {
         <p className="text-gray-600">{plan.description}</p>
       </div>
 
-      <ul className="space-y-4 mb-8">
+      <ul className="space-y-3 md:space-y-4 mb-6 md:mb-8 flex-grow">
         {plan.features.map((feature, featureIndex) => (
           <li key={featureIndex} className="flex items-start">
             <Check className="w-5 h-5 text-emerald-500 mr-3 mt-0.5 flex-shrink-0" />
@@ -51,7 +51,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({ plan, index }) => {
         ))}
       </ul>
 
-      <div className="text-center mt-auto">
+      <div className="text-center">
         {plan.ctaType === 'whatsapp' ? (
           <WhatsAppButton
             size="md"

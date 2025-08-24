@@ -2,10 +2,12 @@
 export const config = {
   app: {
     name: 'AchaAí',
+    teamName: 'Arikeme',
     city: 'Ariquemes',
     state: 'RO',
     domain: 'achai.arikeme.com',
     whatsappUrl: 'https://bit.ly/AchaAi',
+    contactEmail: 'contato@arikeme.com',
   },
   theme: {
     primary: 'emerald',
