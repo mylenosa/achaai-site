@@ -1,163 +1,174 @@
-# AchaAí - Landing Page
+# 🔍 AchaAí - Encontre Produtos em Ariquemes
 
-Landing page completa para o AchaAí, plataforma que conecta consumidores e lojistas em Ariquemes-RO via WhatsApp.
+> **Plataforma que conecta consumidores e lojistas em Ariquemes-RO via WhatsApp**
 
-## 🏗️ Arquitetura SOLID
+## 🚀 Como Executar
 
-Este projeto foi desenvolvido seguindo rigorosamente os princípios SOLID:
+### 1. Instalar dependências
+```bash
+npm install
+```
 
-### Single Responsibility Principle (SRP)
-- Cada componente tem uma única responsabilidade
-- `Hero.tsx` - Seção hero
-- `Pricing.tsx` - Seção de preços
-- `WhatsAppButton.tsx` - Botão específico para WhatsApp
-- etc.
-
-### Open/Closed Principle (OCP)
-- Planos configuráveis via `data/plans.ts`
-- Depoimentos via `data/testimonials.ts`
-- FAQs via `data/faqs.ts`
-- Adicione novos itens sem modificar componentes
-
-### Liskov Substitution Principle (LSP)
-- `CTAButton` e `WhatsAppButton` são intercambiáveis
-- Interface `CTAButtonProps` garante compatibilidade
-
-### Interface Segregation Principle (ISP)
-- Props específicas e enxutas para cada componente
-- `PricingCardProps`, `TestimonialProps`, etc.
-
-### Dependency Inversion Principle (DIP)
-- Configurações centralizadas em `lib/config.ts`
-- URLs, cores e textos injetados via configuração
-
-## 🚀 Como usar
-
-### Desenvolvimento
+### 2. Executar em desenvolvimento
 ```bash
 npm run dev
 ```
 
-### Build para produção
+### 3. Gerar build para produção
 ```bash
 npm run build
 ```
 
-## ⚙️ Configuração
+## ⚙️ Como Personalizar
 
-### Personalizar cidade, links e cores
+### 🏙️ Alterar Cidade e Links
 Edite o arquivo `src/lib/config.ts`:
 
 ```typescript
 export const config = {
   app: {
     name: 'AchaAí',
-    city: 'Ariquemes', // Altere aqui
-    whatsappUrl: 'https://bit.ly/AchaAi', // Altere aqui
-  },
-  theme: {
-    primary: 'emerald', // Altere as cores aqui
+    city: 'SUA_CIDADE',           // ← Altere aqui
+    state: 'SEU_ESTADO',          // ← Altere aqui
+    domain: 'seu-dominio.com',    // ← Altere aqui
+    whatsappUrl: 'SEU_LINK_WHATS', // ← Altere aqui
   }
 }
 ```
 
-### Adicionar/editar planos
+### 💰 Editar Planos de Preços
 Edite `src/data/plans.ts`:
 
 ```typescript
-export const pricingPlans: PricingPlan[] = [
+export const pricingPlans = [
   {
-    id: 'novo-plano',
-    name: 'Novo Plano',
-    price: 'R$ 99',
-    features: ['Feature 1', 'Feature 2'],
-    // ...
+    id: 'free',
+    name: 'Gratuito',
+    price: 'R$ 0',
+    features: [
+      'Até 50 itens',
+      'WhatsApp básico',
+      // Adicione mais features aqui
+    ]
   }
+  // Adicione mais planos aqui
 ]
 ```
 
-### Adicionar/editar FAQs
+### ❓ Adicionar/Editar FAQs
 Edite `src/data/faqs.ts`:
 
 ```typescript
-export const faqs: FAQ[] = [
+export const faqs = [
   {
-    id: 'nova-pergunta',
-    question: 'Nova pergunta?',
-    answer: 'Nova resposta...'
+    id: '1',
+    question: 'Sua pergunta aqui?',
+    answer: 'Sua resposta aqui...'
+  }
+  // Adicione mais FAQs aqui
+]
+```
+
+### 📊 Atualizar Métricas (KPIs)
+Edite `src/data/kpis.ts`:
+
+```typescript
+export const kpis = [
+  {
+    id: '1',
+    value: '+10 mil',      // ← Altere o número
+    label: 'buscas feitas', // ← Altere a descrição
+    icon: 'search'
+  }
+  // Adicione mais métricas aqui
+]
+```
+
+### 💬 Modificar Depoimentos
+Edite `src/data/testimonials.ts`:
+
+```typescript
+export const testimonials = [
+  {
+    id: '1',
+    name: 'Nome da Pessoa',
+    location: 'Bairro/Loja',
+    content: 'Depoimento aqui...',
+    avatar: 'URL_DA_FOTO',
+    type: 'customer' // ou 'store'
   }
 ]
 ```
 
-## 📊 Analytics
+## 🎨 Personalizar Cores
 
-### Seletores para tracking
-Todos os CTAs possuem `data-cta` attributes:
+No arquivo `src/lib/config.ts`, altere as cores do tema:
 
-- `data-cta="whatsapp-hero"` - CTA principal do hero
-- `data-cta="whatsapp-stores"` - CTA para lojistas
-- `data-cta="whatsapp-final"` - CTA final
+```typescript
+theme: {
+  primary: 'emerald',    // Verde principal
+  secondary: 'blue',     // Azul secundário
+  accent: 'green',       // Verde de destaque
+}
+```
+
+Cores disponíveis: `emerald`, `blue`, `green`, `purple`, `red`, `yellow`, `orange`, `pink`
+
+## 📱 Estrutura do Projeto
+
+```
+src/
+├── components/          # Componentes React
+│   ├── ui/             # Componentes de interface
+│   └── Pricing/        # Componentes de preços
+├── data/               # Dados configuráveis
+│   ├── plans.ts        # Planos de preço
+│   ├── faqs.ts         # Perguntas frequentes
+│   ├── kpis.ts         # Métricas
+│   └── testimonials.ts # Depoimentos
+├── hooks/              # Hooks customizados
+├── lib/                # Configurações e tipos
+│   ├── config.ts       # ← ARQUIVO PRINCIPAL DE CONFIG
+│   └── types.ts        # Tipos TypeScript
+└── pages/              # Páginas da aplicação
+```
+
+## 📈 Analytics
+
+### Configurar Google Analytics
+1. Substitua `GA_MEASUREMENT_ID` no `index.html` pelo seu ID real
+2. Os botões já têm `data-cta` attributes para tracking
+
+### Seletores para Tracking
+- `data-cta="whatsapp-hero"` - Botão principal
+- `data-cta="whatsapp-stores"` - Botão para lojistas
 - `data-cta="ver-planos"` - Link para planos
-- `data-cta="whatsapp-plan-{id}"` - CTAs dos planos
+- `data-cta="whatsapp-plan-{id}"` - Botões dos planos
 
-### Configurar IDs reais
-1. Substitua `GA_MEASUREMENT_ID` pelo seu Google Analytics ID
-2. Substitua `FB_PIXEL_ID` pelo seu Facebook Pixel ID
-3. Atualize em `src/lib/config.ts` e `index.html`
+## 🌐 Deploy
 
-## 🎨 Customização Visual
+### Netlify (Recomendado)
+1. Conecte seu repositório
+2. Build command: `npm run build`
+3. Publish directory: `dist`
 
-### Cores
-As cores são baseadas no Tailwind CSS. Para alterar:
-- Verde principal: `emerald-500`
-- Azul secundário: `blue-500`
-- Cinzas: `gray-50` a `gray-800`
+### Outros Provedores
+O projeto gera arquivos estáticos na pasta `dist/` após `npm run build`
 
-### Animações
-Usando Framer Motion para:
-- Fade in ao scroll
-- Hover effects
-- Micro-interações
-
-## 📱 Responsividade
-
-- Mobile-first design
-- Breakpoints: `sm`, `md`, `lg`, `xl`
-- Grid responsivo em todas as seções
-- Botões e textos adaptáveis
-
-## ♿ Acessibilidade
-
-- Semântica HTML5 (`header`, `main`, `section`, `footer`)
-- ARIA labels nos botões
-- Contraste AA compliant
-- Foco visível em todos os elementos interativos
-- Navegação por teclado
-
-## 🔧 Tecnologias
+## 🛠️ Tecnologias
 
 - **React 18** + TypeScript
 - **Tailwind CSS** para styling
 - **Framer Motion** para animações
 - **Lucide React** para ícones
-- **Vite** para build
+- **Vite** para build rápido
 
-## 📈 Performance
+## 📞 Suporte
 
-Otimizações implementadas:
-- Lazy loading de componentes
-- Preconnect para fonts
-- CSS crítico inline
-- Imagens otimizadas
-- Bundle splitting automático
+Dúvidas? Entre em contato:
+- WhatsApp: https://bit.ly/AchaAi
+- Site: https://achai.arikeme.com
 
-Meta Lighthouse:
-- Performance: ≥ 90
-- Accessibility: ≥ 95  
-- SEO: ≥ 90
+---
 
-## 🔗 Links importantes
-
-- WhatsApp principal: https://bit.ly/AchaAi
-- Todas as configurações em: `src/lib/config.ts`
-- Dados editáveis em: `src/data/`
+**Desenvolvido pelo Grupo Arikeme** 🏙️ Fortalecendo Ariquemes-RO

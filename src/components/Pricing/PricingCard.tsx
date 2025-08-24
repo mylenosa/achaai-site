@@ -21,7 +21,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({ plan, index }) => {
       viewport={{ once: true }}
       className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 relative ${
         plan.highlighted ? 'ring-2 ring-emerald-500 scale-105' : ''
-      }`}
+      } flex flex-col h-full`}
     >
       {plan.highlighted && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -51,7 +51,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({ plan, index }) => {
         ))}
       </ul>
 
-      <div className="text-center">
+      <div className="text-center mt-auto">
         {plan.ctaType === 'whatsapp' ? (
           <WhatsAppButton
             size="md"

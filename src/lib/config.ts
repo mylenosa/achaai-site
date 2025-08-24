@@ -4,6 +4,7 @@ export const config = {
     name: 'AchaAí',
     city: 'Ariquemes',
     state: 'RO',
+    domain: 'achai.arikeme.com',
     whatsappUrl: 'https://bit.ly/AchaAi',
   },
   theme: {

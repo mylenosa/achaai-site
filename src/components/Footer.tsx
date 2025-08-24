@@ -69,6 +69,21 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
+        {/* Seção Sobre */}
+        <div className="border-t border-gray-700 mt-8 pt-8">
+          <div className="text-center mb-6">
+            <h4 className="text-xl font-semibold mb-4 text-emerald-400">Sobre o Grupo Arikeme</h4>
+            <p className="text-gray-300 max-w-3xl mx-auto leading-relaxed">
+              O Grupo Arikeme é uma iniciativa local focada em fortalecer a economia de Ariquemes-RO 
+              através de soluções tecnológicas inovadoras. Nosso objetivo é conectar a comunidade, 
+              facilitar o comércio local e promover o desenvolvimento sustentável da região.
+            </p>
+            <p className="text-gray-400 mt-4 text-sm">
+              Desenvolvido com ❤️ em Ariquemes-RO • <a href="https://achai.arikeme.com" className="text-emerald-400 hover:text-emerald-300">achai.arikeme.com</a>
+            </p>
+          </div>
+        </div>
+
         <div className="border-t border-gray-700 mt-8 pt-8 text-center">
           <p className="text-gray-400 text-sm">
             © 2024 {config.app.name}. Todos os direitos reservados.
