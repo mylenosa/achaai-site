@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Store, TrendingUp, Users, BarChart3 } from 'lucide-react';
 import { WhatsAppButton } from './ui/WhatsAppButton';
 import { CTAButton } from './ui/CTAButton';
+import { config } from '../lib/config';
 
 export const ForStores: React.FC = () => {
   const benefits = [
@@ -84,9 +85,13 @@ export const ForStores: React.FC = () => {
           >
             Ver Planos
           </CTAButton>
-          <WhatsAppButton data-cta="whatsapp-stores">
+          <CTAButton
+            href={salesMailtoLink}
+            data-cta="contact-stores"
+            variant="primary"
+          >
             Falar com Vendas
-          </WhatsAppButton>
+          </CTAButton>
         </motion.div>
       </div>
     </section>
