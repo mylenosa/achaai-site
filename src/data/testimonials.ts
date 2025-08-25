@@ -4,22 +4,22 @@ export const testimonials: Testimonial[] = [
   {
     id: '1',
     name: 'Daniel',
-    location: 'Jardim Europa',
-    content: 'Achei WD-40 em 2 minutos e retirei na hora. Muito prático!',
+    location: 'Setor 2, Ariquemes',
+    content: 'Rodei a cidade toda atrás de WD-40 e não achava. Mandei no AchaAí e em 5 minutos me indicaram 3 lojas que tinham. Fui na mais perto e resolvi o problema. Salvou meu dia!',
     type: 'customer'
   },
   {
     id: '2',
     name: 'Mariana',
-    location: 'Loja de Tintas',
-    content: 'Entram pedidos prontos pelo Whats. Vendo estoque parado que ficava encalhado.',
+    location: 'Loja de Tintas (Centro)',
+    content: 'Tinha umas latas de tinta de uma cor específica paradas no estoque. Pelo AchaAí, toda semana aparece alguém procurando exatamente por elas. Vendi tudo e ganhei novos clientes.',
     type: 'store'
   },
   {
     id: '3',
     name: 'Rogério',
     location: 'Bazar Central',
-    content: 'Atendemos tudo num só número. Simples e direto, sem complicação.',
+    content: 'Antes, o WhatsApp da loja era uma loucura de gente perguntando "tem isso?". Agora, o cliente que chega pelo AchaAí já vem pra comprar. Otimizou demais nosso atendimento.',
     type: 'store'
   }
 ];
