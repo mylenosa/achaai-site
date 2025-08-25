@@ -1,9 +1,8 @@
-@@ .. @@
-+import { PricingPlan } from './types';
-+import { config } from './config';
-+
- export function cn(...inputs: (string | undefined)[]): string {
-   return inputs.filter(Boolean).join(' ');
+import { PricingPlan } from './types';
+import { config } from './config';
+
+export function cn(...inputs: (string | undefined)[]): string {
+  return inputs.filter(Boolean).join(' ');
 }
 
 // Single Responsibility: Função específica para criar links mailto dos planos
@@ -36,4 +35,4 @@ export function createPlanMailtoLink(plan: PricingPlan): string {
   });
   
   return `mailto:${config.app.contactEmail}?${params.toString()}`;
--}
+}
