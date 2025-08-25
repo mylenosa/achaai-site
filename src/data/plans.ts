@@ -16,7 +16,7 @@ export const pricingPlans: PricingPlan[] = [
       'Perfil básico da loja'
     ],
     ctaText: 'Começar Grátis',
-    ctaType: 'whatsapp'
+    ctaType: 'contact'
   },
   {
     id: 'pro',
@@ -35,7 +35,7 @@ export const pricingPlans: PricingPlan[] = [
     ],
     highlighted: true,
     ctaText: 'Assinar Pro',
-    ctaType: 'whatsapp'
+    ctaType: 'contact'
   },
   {
     id: 'enterprise',

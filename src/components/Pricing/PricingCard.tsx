@@ -6,6 +6,7 @@ import { Check } from 'lucide-react';
 import { PricingPlan } from '../../lib/types';
 import { WhatsAppButton } from '../ui/WhatsAppButton';
 import { CTAButton } from '../ui/CTAButton';
+import { createPlanMailtoLink } from '../../lib/utils';
 
 interface PricingCardProps {
   plan: PricingPlan;
@@ -62,6 +63,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({ plan, index }) => {
           </WhatsAppButton>
         ) : (
           <CTAButton
+            href={createPlanMailtoLink(plan)}
             size="md"
             className="w-full"
             data-cta={`contact-plan-${plan.id}`}
