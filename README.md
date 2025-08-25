@@ -162,6 +162,9 @@ O projeto gera arquivos estáticos na pasta `dist/` após `npm run build`
 - **Framer Motion** para animações
 - **Lucide React** para ícones
 - **Vite** para build rápido
+- **Dark Mode** com persistência
+- **Scrollspy** para navegação
+- **E-mails pré-formatados** para contato comercial
 
 ## 📞 Suporte
 

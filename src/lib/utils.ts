@@ -34,5 +34,8 @@ export function createPlanMailtoLink(plan: PricingPlan): string {
     body
   });
   
-  return `mailto:${config.app.contactEmail}?${params.toString()}`;
+  // Substituir + por %20 para melhor legibilidade no cliente de e-mail
+  const encodedParams = params.toString().replace(/\+/g, '%20');
+  
+  return `mailto:${config.app.contactEmail}?${encodedParams}`;
 }
