@@ -1,284 +1,390 @@
-# 🔍 AchaAí - Encontre Produtos em Ariquemes via WhatsApp
+# 🔍 AchaAí - Plataforma de Busca Local
 
-> **Conecte consumidores e lojistas em Ariquemes-RO através do WhatsApp de forma simples e direta**
+> **Plataforma que conecta consumidores e lojistas via WhatsApp em Ariquemes-RO**
 
-## 🚀 Começar Rapidamente
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 
-### 1. Instalar dependências
-```bash
-npm install
+## 📋 Índice
+
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Tecnologias](#tecnologias)
+- [Arquitetura SOLID](#arquitetura-solid)
+- [Instalação e Execução](#instalação-e-execução)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Configuração](#configuração)
+- [Desenvolvimento](#desenvolvimento)
+- [Deploy](#deploy)
+- [Contribuição](#contribuição)
+
+## 🎯 Sobre o Projeto
+
+O **AchaAí** é uma plataforma inovadora que permite aos consumidores encontrar produtos em lojas físicas de Ariquemes-RO através do WhatsApp. A solução conecta a demanda local com o estoque disponível, otimizando o comércio da cidade.
+
+### Funcionalidades Principais:
+- 🔍 **Busca via WhatsApp** - Interface familiar para todos os usuários
+- 🏪 **Gestão de Estoque** - Lojas podem cadastrar e atualizar produtos
+- 📊 **Analytics** - Relatórios de demanda e performance
+- 💰 **Planos Flexíveis** - Desde gratuito até enterprise
+- 📧 **E-mails Pré-formatados** - CTAs geram contatos estruturados
+
+## 🛠️ Tecnologias
+
+- **Frontend**: React 18 + TypeScript
+- **Styling**: Tailwind CSS
+- **Animações**: Framer Motion
+- **Ícones**: Lucide React
+- **Build Tool**: Vite
+- **Deploy**: Vercel (automático)
+- **Domínio**: `achai.arikeme.com` (configurado)
+
+## 🏗️ Arquitetura SOLID
+
+Este projeto segue rigorosamente os princípios SOLID para garantir código limpo, testável e extensível:
+
+### **S** - Single Responsibility Principle
+Cada componente tem uma responsabilidade específica:
+```typescript
+// ✅ Correto - Responsabilidade única
+export const Hero: React.FC = () => { /* Apenas seção hero */ }
+export const Pricing: React.FC = () => { /* Apenas seção de preços */ }
 ```
 
-### 2. Executar o projeto
+### **O** - Open/Closed Principle
+Componentes extensíveis sem modificação:
+```typescript
+// ✅ Extensível via props e configuração
+export const CTAButton: React.FC<CTAButtonProps> = ({ variant, size, ... })
+```
+
+### **L** - Liskov Substitution Principle
+Interfaces consistentes:
+```typescript
+// ✅ WhatsAppButton implementa CTAButtonProps
+export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ ... })
+```
+
+### **I** - Interface Segregation Principle
+Interfaces específicas e enxutas:
+```typescript
+// ✅ Props específicas para cada contexto
+interface PricingCardProps { plan: PricingPlan; index: number; }
+interface WhatsAppButtonProps extends Omit<CTAButtonProps, 'href'> { ... }
+```
+
+### **D** - Dependency Inversion Principle
+Configurações centralizadas e injetáveis:
+```typescript
+// ✅ Dependências abstraídas em config
+import { config } from '../lib/config';
+```
+
+## 🚀 Instalação e Execução
+
+### Pré-requisitos
+- Node.js 18+ 
+- npm ou yarn
+
+### Instalação
 ```bash
+# Clone o repositório
+git clone <repository-url>
+cd achai-platform
+
+# Instale as dependências
+npm install
+
+# Execute o projeto
 npm run dev
 ```
 
-### 3. Abrir no navegador
-O projeto abrirá automaticamente em `http://localhost:5173`
-
-### 4. Para produção
+### Scripts Disponíveis
 ```bash
-npm run build
+npm run dev      # Servidor de desenvolvimento
+npm run build    # Build para produção
+npm run preview  # Preview do build
+npm run lint     # Verificação de código
 ```
 
-## 🎯 O que é o AchaAí?
+## 📁 Estrutura do Projeto
 
-Uma plataforma que permite:
-- **Consumidores**: Encontrar produtos em lojas físicas via WhatsApp
-- **Lojistas**: Receber pedidos qualificados e gerenciar estoque
-- **Cidade**: Fortalecer o comércio local de Ariquemes-RO
+```
+src/
+├── components/              # Componentes React (SRP)
+│   ├── ui/                 # Componentes base reutilizáveis
+│   │   ├── CTAButton.tsx   # Botão genérico para CTAs
+│   │   └── WhatsAppButton.tsx # Botão específico WhatsApp
+│   ├── Pricing/            # Módulo de preços
+│   │   ├── Pricing.tsx     # Container principal
+│   │   └── PricingCard.tsx # Card individual
+│   ├── Header.tsx          # Cabeçalho da aplicação
+│   ├── Hero.tsx           # Seção principal
+│   ├── HowItWorks.tsx     # Como funciona
+│   ├── KPIs.tsx           # Métricas e números
+│   ├── ForStores.tsx      # Seção para lojistas
+│   ├── Testimonials.tsx   # Depoimentos
+│   ├── FAQ.tsx            # Perguntas frequentes
+│   ├── FinalCTA.tsx       # CTA final
+│   └── Footer.tsx         # Rodapé
+├── data/                   # Dados configuráveis (OCP)
+│   ├── plans.ts           # Planos de preço
+│   ├── faqs.ts            # Perguntas frequentes
+│   ├── kpis.ts            # Métricas
+│   ├── testimonials.ts    # Depoimentos
+│   └── steps.ts           # Passos do "como funciona"
+├── lib/                    # Utilitários e configurações
+│   ├── config.ts          # Configuração central (DIP)
+│   ├── types.ts           # Interfaces TypeScript (ISP)
+│   └── utils.ts           # Funções utilitárias (SRP)
+├── App.tsx                # Componente raiz
+├── main.tsx              # Entry point
+└── index.css             # Estilos globais
+```
 
-## ⚙️ Personalizar para Sua Cidade
+## ⚙️ Configuração
 
-### 🏙️ Alterar Informações Básicas
-Edite `src/lib/config.ts`:
+### Configuração Principal
+Edite `src/lib/config.ts` para personalizar:
 
 ```typescript
 export const config = {
   app: {
     name: 'AchaAí',                    // Nome da plataforma
-    teamName: 'Arikeme',               // Nome do seu grupo/empresa
-    city: 'Ariquemes',                 // ← Sua cidade aqui
-    state: 'RO',                       // ← Seu estado aqui
-    domain: 'achai.arikeme.com',       // ← Seu domínio aqui
-    whatsappUrl: 'https://bit.ly/AchaAi', // ← Seu link do WhatsApp
-    contactEmail: 'contato@arikeme.com',  // ← Seu e-mail aqui
-  }
-}
-```
-
-### 💰 Configurar Planos de Preço
-Edite `src/data/plans.ts`:
-
-```typescript
-export const pricingPlans = [
-  {
-    id: 'free',
-    name: 'Gratuito',
-    price: 'R$ 0',                    // ← Altere o preço
-    period: '/mês',
-    description: 'Ideal para começar', // ← Altere a descrição
-    features: [
-      'Até 50 itens no catálogo',     // ← Altere as funcionalidades
-      'Receber pedidos via WhatsApp',
-      // Adicione mais features aqui
-    ],
-    ctaText: 'Começar Grátis',        // ← Altere o texto do botão
-    ctaType: 'contact'                // 'contact' = e-mail | 'whatsapp' = WhatsApp
-  }
-  // Adicione mais planos copiando a estrutura acima
-]
-```
-
-### ❓ Editar Perguntas Frequentes
-Edite `src/data/faqs.ts`:
-
-```typescript
-export const faqs = [
-  {
-    id: '1',
-    question: 'Preciso baixar algum app?',        // ← Sua pergunta
-    answer: 'Não! Tudo funciona 100% pelo WhatsApp...' // ← Sua resposta
+    city: 'Ariquemes',                 // Sua cidade
+    state: 'RO',                       // Seu estado
+    whatsappUrl: 'https://bit.ly/AchaAi', // Link do WhatsApp
+    contactEmail: 'contato@arikeme.com',   // E-mail de contato
   },
-  // Adicione mais FAQs copiando a estrutura acima
-]
-```
-
-### 📊 Atualizar Números/Métricas
-Edite `src/data/kpis.ts`:
-
-```typescript
-export const kpis = [
-  {
-    id: '1',
-    value: '+5 mil',           // ← Seu número aqui
-    label: 'buscas realizadas', // ← Sua descrição aqui
-    icon: 'search'             // Ícones: search, clock, store, target
+  seo: {
+    title: 'AchaAí - Plataforma de Busca Local via WhatsApp',
+    description: 'Encontre produtos em lojas físicas...',
+    keywords: 'busca local, produtos, Ariquemes, WhatsApp',
   }
-  // Adicione mais métricas copiando a estrutura acima
-]
-```
-
-### 💬 Modificar Depoimentos
-Edite `src/data/testimonials.ts`:
-
-```typescript
-export const testimonials = [
-  {
-    id: '1',
-    name: 'Daniel',                    // ← Nome da pessoa
-    location: 'Jardim Europa',         // ← Bairro ou nome da loja
-    content: 'Achei WD-40 em 2 minutos...', // ← Depoimento
-    type: 'customer'                   // 'customer' = cliente | 'store' = loja
-  }
-  // Adicione mais depoimentos copiando a estrutura acima
-]
-```
-
-### 🎨 Alterar Cores do Site
-No `src/lib/config.ts`, seção theme:
-
-```typescript
-theme: {
-  primary: 'emerald',    // Verde principal (emerald, blue, purple, red, etc.)
-  secondary: 'blue',     // Cor secundária
-  accent: 'green',       // Cor de destaque
 }
 ```
 
-## 📱 Como Funciona o Site
+### Favicon
+1. Adicione `favicon.ico` na pasta `public/`
+2. Formatos suportados: `.ico`, `.svg`, `.png`
+3. Tamanhos recomendados: 16x16, 32x32, 48x48 pixels
 
-### Seções Principais:
-1. **Hero** - Apresentação inicial com botão do WhatsApp
-2. **Como Funciona** - 3 passos simples
-3. **Métricas (KPIs)** - Números de sucesso
-4. **Para Lojas** - Benefícios para lojistas
-5. **Planos** - Preços e funcionalidades
-6. **Depoimentos** - Feedback de usuários
-7. **FAQ** - Perguntas frequentes
-8. **CTA Final** - Último chamado para ação
+## 🔧 Desenvolvimento
 
-### Funcionalidades Especiais:
-- ✅ **E-mails automáticos** - Botões dos planos geram e-mails pré-prontos
-- ✅ **WhatsApp integrado** - Links diretos para conversas
-- ✅ **Responsivo** - Funciona em celular, tablet e desktop
-- ✅ **Animações suaves** - Transições profissionais
-- ✅ **SEO otimizado** - Meta tags configuradas
+### Adicionando Novos Componentes
 
-### 🎨 Personalizar Visual:
+1. **Crie o componente** seguindo SRP:
+```typescript
+// src/components/NovoComponente.tsx
+// Single Responsibility: [Descreva a responsabilidade]
+import React from 'react';
 
-#### Alterar Favicon (Ícone do Site):
-1. **Crie ou baixe** um arquivo `favicon.ico` (16x16 ou 32x32 pixels)
-2. **Coloque o arquivo** na pasta `public/` com o nome `favicon.ico`
-   ```
-   public/
-   ├── favicon.ico  ← Seu arquivo aqui
-   └── vite.svg
-   ```
-3. **Substitua o arquivo existente** se já houver um
-4. **Recarregue o site** - o novo ícone aparecerá na aba do navegador
-
-**Dica**: Use ferramentas como [Favicon.io](https://favicon.io) para converter imagens em .ico
-
-**Formatos Suportados**:
-- ✅ `.ico` (recomendado) - Funciona em todos os browsers
-- ✅ `.svg` - Moderno, escalável
-- ✅ `.png` - Alternativa simples
-
-**Tamanhos Recomendados**:
-- 16x16 pixels (mínimo)
-- 32x32 pixels (padrão)
-- 48x48 pixels (alta resolução)
-## 🌐 Colocar no Ar (Deploy)
-
-### Opção 1: Netlify (Mais Fácil)
-1. Faça uma conta no [Netlify](https://netlify.com)
-2. Conecte seu repositório GitHub
-3. Configure:
-   - **Build command**: `npm run build`
-   - **Publish directory**: `dist`
-4. Deploy automático a cada commit!
-
-### Opção 2: Vercel
-1. Faça uma conta no [Vercel](https://vercel.com)
-2. Importe seu projeto do GitHub
-3. Deploy automático configurado!
-
-### Opção 3: Qualquer Hospedagem
-1. Execute `npm run build`
-2. Suba a pasta `dist/` para seu servidor
-3. Configure domínio e SSL
-
-## 📈 Analytics e Tracking
-
-### Configurar Google Analytics
-1. No `index.html`, substitua `GA_MEASUREMENT_ID` pelo seu ID real
-2. Os botões já têm tracking automático configurado
-
-### Botões que são Rastreados:
-- `whatsapp-hero` - Botão principal do topo
-- `whatsapp-stores` - Botão para lojistas
-- `whatsapp-final` - Botão do final da página
-- `contact-plan-free` - Botão do plano gratuito
-- `contact-plan-pro` - Botão do plano pro
-- `contact-plan-enterprise` - Botão do plano enterprise
-
-## 🛠️ Estrutura dos Arquivos
-
-```
-src/
-├── components/          # Componentes da interface
-│   ├── ui/             # Botões e elementos básicos
-│   ├── Pricing/        # Seção de preços
-│   ├── Header.tsx      # Cabeçalho
-│   ├── Hero.tsx        # Seção principal
-│   ├── HowItWorks.tsx  # Como funciona
-│   ├── KPIs.tsx        # Métricas
-│   ├── ForStores.tsx   # Para lojistas
-│   ├── Testimonials.tsx # Depoimentos
-│   ├── FAQ.tsx         # Perguntas frequentes
-│   ├── FinalCTA.tsx    # Chamada final
-│   └── Footer.tsx      # Rodapé
-├── data/               # ← ARQUIVOS PARA EDITAR
-│   ├── plans.ts        # ← Planos de preço
-│   ├── faqs.ts         # ← Perguntas frequentes
-│   ├── kpis.ts         # ← Números/métricas
-│   ├── testimonials.ts # ← Depoimentos
-│   └── steps.ts        # Passos do "como funciona"
-├── lib/
-│   ├── config.ts       # ← CONFIGURAÇÃO PRINCIPAL
-│   ├── types.ts        # Tipos do TypeScript
-│   └── utils.ts        # Funções auxiliares
-└── App.tsx             # Aplicação principal
+export const NovoComponente: React.FC = () => {
+  return (
+    <section className="py-20">
+      {/* Conteúdo do componente */}
+    </section>
+  );
+};
 ```
 
-## 🎯 Dicas Importantes
+2. **Adicione ao App.tsx**:
+```typescript
+import { NovoComponente } from './components/NovoComponente';
 
-### ✅ Para Modificar Conteúdo:
-- **Textos gerais**: `src/lib/config.ts`
-- **Planos**: `src/data/plans.ts`
-- **FAQs**: `src/data/faqs.ts`
-- **Números**: `src/data/kpis.ts`
-- **Depoimentos**: `src/data/testimonials.ts`
+// No JSX
+<NovoComponente />
+```
 
-### ✅ Para Modificar Visual:
-- **Cores**: `src/lib/config.ts` (seção theme)
-- **Layout**: Arquivos em `src/components/`
+### Adicionando Dados Configuráveis
 
-### ✅ Para Adicionar Funcionalidades:
-- Crie novos componentes em `src/components/`
-- Adicione dados em `src/data/`
-- Importe no `src/App.tsx`
+1. **Crie arquivo de dados** em `src/data/`:
+```typescript
+// src/data/novos-dados.ts
+export const novosDados = [
+  {
+    id: '1',
+    titulo: 'Exemplo',
+    descricao: 'Descrição do exemplo'
+  }
+];
+```
 
-## 🆘 Problemas Comuns
+2. **Importe no componente**:
+```typescript
+import { novosDados } from '../data/novos-dados';
+```
 
-### Site não abre?
+### Adicionando Novas Interfaces
+
+1. **Defina tipos** em `src/lib/types.ts`:
+```typescript
+export interface NovoTipo {
+  id: string;
+  titulo: string;
+  descricao: string;
+}
+```
+
+### Padrões de Código
+
+- **Componentes**: PascalCase (`MeuComponente.tsx`)
+- **Arquivos de dados**: kebab-case (`meus-dados.ts`)
+- **Interfaces**: PascalCase (`MinhaInterface`)
+- **Funções**: camelCase (`minhaFuncao`)
+
+### Convenções de Comentários
+```typescript
+// Single Responsibility: [Descreva a responsabilidade única]
+// Open/Closed: [Como é extensível]
+// Liskov Substitution: [Como implementa interfaces]
+// Interface Segregation: [Interfaces específicas]
+// Dependency Inversion: [Dependências abstraídas]
+```
+
+## 🚀 Deploy
+
+### Deploy Automático (Vercel)
+
+O projeto está configurado para deploy automático:
+
+1. **Push para main** → Deploy automático
+2. **Pull Requests** → Preview deployments
+3. **Domínio**: `achai.arikeme.com` (já configurado)
+
+### Configuração Manual (se necessário)
+
 ```bash
-# Limpe e reinstale
+# Build local
+npm run build
+
+# Preview do build
+npm run preview
+```
+
+### Variáveis de Ambiente (Produção)
+
+No painel do Vercel, configure:
+```
+GA_MEASUREMENT_ID=seu-google-analytics-id
+FB_PIXEL_ID=seu-facebook-pixel-id
+```
+
+## 🤝 Contribuição
+
+### Fluxo de Desenvolvimento
+
+1. **Clone e configure**:
+```bash
+git clone <repository-url>
+cd achai-platform
+npm install
+```
+
+2. **Crie uma branch**:
+```bash
+git checkout -b feature/nova-funcionalidade
+```
+
+3. **Desenvolva seguindo SOLID**:
+   - Uma responsabilidade por componente
+   - Dados configuráveis em `src/data/`
+   - Tipos em `src/lib/types.ts`
+   - Configurações em `src/lib/config.ts`
+
+4. **Teste localmente**:
+```bash
+npm run dev
+npm run build  # Verificar se builda sem erros
+```
+
+5. **Commit e push**:
+```bash
+git add .
+git commit -m "feat: adicionar nova funcionalidade"
+git push origin feature/nova-funcionalidade
+```
+
+6. **Abra Pull Request** para `main`
+
+### Diretrizes de Código
+
+- ✅ **Siga os princípios SOLID**
+- ✅ **Mantenha componentes < 200 linhas**
+- ✅ **Use TypeScript rigorosamente**
+- ✅ **Adicione comentários SOLID**
+- ✅ **Teste responsividade**
+- ✅ **Verifique acessibilidade**
+
+### Adicionando Funcionalidades
+
+#### Nova Seção na Landing Page:
+1. Crie componente em `src/components/`
+2. Adicione dados em `src/data/` (se necessário)
+3. Importe no `src/App.tsx`
+4. Adicione link no `src/components/Header.tsx`
+
+#### Novo Plano de Preço:
+1. Adicione objeto em `src/data/plans.ts`
+2. O componente `PricingCard` renderiza automaticamente
+
+#### Nova Pergunta FAQ:
+1. Adicione objeto em `src/data/faqs.ts`
+2. O componente `FAQ` renderiza automaticamente
+
+## 📊 Analytics e Tracking
+
+### Eventos Rastreados:
+- `whatsapp-hero` - Botão principal do topo
+- `whatsapp-final` - Botão do CTA final
+- `contact-plan-free` - Plano gratuito
+- `contact-plan-pro` - Plano pro
+- `contact-plan-enterprise` - Plano enterprise
+- `contact-stores` - Contato para lojistas
+
+### Configuração:
+Substitua os IDs no `index.html`:
+- `GA_MEASUREMENT_ID` → Seu Google Analytics ID
+- `FB_PIXEL_ID` → Seu Facebook Pixel ID
+
+## 🆘 Troubleshooting
+
+### Erro de Build
+```bash
+# Limpar cache e reinstalar
 rm -rf node_modules package-lock.json
 npm install
-npm run dev
-```
-
-### Erro de build?
-```bash
-# Verifique se todos os arquivos estão salvos
-# Execute o build para testar
 npm run build
 ```
 
-### WhatsApp não funciona?
-- Verifique se o `whatsappUrl` em `config.ts` está correto
-- Teste o link manualmente no navegador
+### Erro de Desenvolvimento
+```bash
+# Verificar sintaxe TypeScript
+npm run lint
+
+# Reiniciar servidor
+npm run dev
+```
+
+### Favicon não Aparece
+1. Verifique se `favicon.ico` está em `public/`
+2. Limpe cache do browser (Ctrl+F5)
+3. Verifique console do browser por erros
 
 ## 📞 Suporte
 
 **Desenvolvido pelo Grupo Arikeme**
-- 🌐 Site: https://achai.arikeme.com
-- 📧 E-mail: contato@arikeme.com
-- 💬 WhatsApp: https://bit.ly/AchaAi
+- 🌐 **Site**: https://achai.arikeme.com
+- 📧 **E-mail**: contato@arikeme.com
+- 💬 **WhatsApp**: https://bit.ly/AchaAi
 
 ---
 
-**💡 Dica**: Comece editando apenas os arquivos da pasta `src/data/` e `src/lib/config.ts`. Eles contêm 90% do que você precisa personalizar!
+## 📄 Licença
+
+Este projeto é propriedade do Grupo Arikeme. Todos os direitos reservados.
+
+---
+
+**💡 Para Desenvolvedores**: Comece explorando `src/lib/config.ts` e `src/data/` para entender a estrutura de dados. Todos os componentes seguem SOLID e são facilmente extensíveis.
