@@ -146,6 +146,16 @@ theme: {
 - ✅ **Animações suaves** - Transições profissionais
 - ✅ **SEO otimizado** - Meta tags configuradas
 
+### 🎨 Personalizar Visual:
+
+#### Alterar Favicon (Ícone do Site):
+1. **Crie ou baixe** um arquivo `favicon.ico` (16x16 ou 32x32 pixels)
+2. **Coloque na pasta** `public/favicon.ico`
+3. **Substitua o arquivo existente** ou renomeie o seu para `favicon.ico`
+4. **Recarregue o site** - o novo ícone aparecerá na aba do navegador
+
+**Dica**: Use ferramentas como [Favicon.io](https://favicon.io) para converter imagens em .ico
+
 ## 🌐 Colocar no Ar (Deploy)
 
 ### Opção 1: Netlify (Mais Fácil)
