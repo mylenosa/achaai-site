@@ -150,12 +150,26 @@ theme: {
 
 #### Alterar Favicon (Ícone do Site):
 1. **Crie ou baixe** um arquivo `favicon.ico` (16x16 ou 32x32 pixels)
-2. **Coloque na pasta** `public/favicon.ico`
-3. **Substitua o arquivo existente** ou renomeie o seu para `favicon.ico`
+2. **Coloque o arquivo** na pasta `public/` com o nome `favicon.ico`
+   ```
+   public/
+   ├── favicon.ico  ← Seu arquivo aqui
+   └── vite.svg
+   ```
+3. **Substitua o arquivo existente** se já houver um
 4. **Recarregue o site** - o novo ícone aparecerá na aba do navegador
 
 **Dica**: Use ferramentas como [Favicon.io](https://favicon.io) para converter imagens em .ico
 
+**Formatos Suportados**:
+- ✅ `.ico` (recomendado) - Funciona em todos os browsers
+- ✅ `.svg` - Moderno, escalável
+- ✅ `.png` - Alternativa simples
+
+**Tamanhos Recomendados**:
+- 16x16 pixels (mínimo)
+- 32x32 pixels (padrão)
+- 48x48 pixels (alta resolução)
 ## 🌐 Colocar no Ar (Deploy)
 
 ### Opção 1: Netlify (Mais Fácil)
