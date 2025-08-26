@@ -5,7 +5,7 @@ export const testimonials: Testimonial[] = [
     id: '1',
     name: 'Daniel',
     location: 'Setor 2, Ariquemes',
-    content: 'Rodei a cidade toda atrás de WD-40 e não achava. Mandei no AchaAí e em 5 minutos me indicaram 3 lojas que tinham. Fui na mais perto e resolvi o problema. Salvou meu dia!',
+    content: 'Rodei a cidade toda atrás de WD-40 e não achava. Mandei no AchaAí e em 1 minuto me indicaram 3 lojas que tinham. Fui na mais perto e resolvi o problema. Salvou meu dia!',
     type: 'customer'
   },
   {
