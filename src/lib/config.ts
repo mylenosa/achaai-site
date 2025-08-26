@@ -20,7 +20,7 @@ export const config = {
     keywords: 'busca local, produtos, Ariquemes, WhatsApp, lojas físicas',
   },
   analytics: {
-    gtag: 'GA_MEASUREMENT_ID', // Substituir pelo ID real
+    gtag: 'G-VYMZFE3EB6', // Substituir pelo ID real
     fbPixel: 'FB_PIXEL_ID', // Substituir pelo ID real
   }
 } as const;
