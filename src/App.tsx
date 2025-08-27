@@ -12,6 +12,7 @@ import { FAQ } from './components/FAQ';
 import { FinalCTA } from './components/FinalCTA';
 import { Footer } from './components/Footer';
 import { NotFound } from './components/NotFound';
+import { ServerError } from './components/ServerError';
 import { config } from './lib/config';
 
 // Declaração global para analytics
@@ -24,6 +25,7 @@ declare global {
 
 function App() {
   const [is404, setIs404] = useState(false);
+  const [isServerError, setIsServerError] = useState(false);
 
   useEffect(() => {
     // Verificar se é uma rota 404 (qualquer coisa além da raiz)
@@ -32,6 +34,12 @@ function App() {
       setIs404(true);
       return;
     }
+
+    // Simular erro de servidor para teste (remover em produção)
+    // if (path.includes('?error=500')) {
+    //   setIsServerError(true);
+    //   return;
+    // }
 
     // SEO Meta Tags
     document.title = config.seo.title;
@@ -78,6 +86,11 @@ function App() {
       document.head.appendChild(meta);
     }
   }, []);
+
+  // Renderizar página de erro de servidor se necessário
+  if (isServerError) {
+    return <ServerError />;
+  }
 
   // Renderizar página 404 se necessário
   if (is404) {
