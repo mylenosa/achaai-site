@@ -52,7 +52,6 @@ export const NotFound: React.FC = () => {
               data-cta="404-whatsapp"
               className="w-full sm:w-auto"
             >
-              <Search className="w-5 h-5 mr-2" />
               Buscar Produtos
             </WhatsAppButton>
           </div>
