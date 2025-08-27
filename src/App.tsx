@@ -1,6 +1,6 @@
 // Single Responsibility: Componente principal da aplicação
 // Dependency Inversion: Usa configurações injetadas
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { HowItWorks } from './components/HowItWorks';
@@ -11,6 +11,7 @@ import { Testimonials } from './components/Testimonials';
 import { FAQ } from './components/FAQ';
 import { FinalCTA } from './components/FinalCTA';
 import { Footer } from './components/Footer';
+import { NotFound } from './components/NotFound';
 import { config } from './lib/config';
 
 // Declaração global para analytics
@@ -22,7 +23,16 @@ declare global {
 }
 
 function App() {
+  const [is404, setIs404] = useState(false);
+
   useEffect(() => {
+    // Verificar se é uma rota 404 (qualquer coisa além da raiz)
+    const path = window.location.pathname;
+    if (path !== '/' && path !== '/index.html') {
+      setIs404(true);
+      return;
+    }
+
     // SEO Meta Tags
     document.title = config.seo.title;
     
@@ -68,6 +78,11 @@ function App() {
       document.head.appendChild(meta);
     }
   }, []);
+
+  // Renderizar página 404 se necessário
+  if (is404) {
+    return <NotFound />;
+  }
 
   return (
     <div className="min-h-screen">

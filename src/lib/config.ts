@@ -15,9 +15,9 @@ export const config = {
     accent: 'green',
   },
   seo: {
-    title: 'AchaAí - Plataforma de Busca Local via WhatsApp',
-    description: 'Encontre produtos em lojas físicas de Ariquemes-RO usando apenas o WhatsApp. Rápido, fácil e direto.',
-    keywords: 'busca local, produtos, Ariquemes, WhatsApp, lojas físicas',
+    title: 'AchaAí - Encontre Produtos em Ariquemes via WhatsApp',
+    description: 'Encontre produtos em lojas físicas de Ariquemes-RO usando apenas o WhatsApp. Conecte consumidores e lojistas de forma simples e direta.',
+    keywords: 'busca local, produtos, Ariquemes, WhatsApp, lojas físicas, comércio local, Rondônia',
   },
   analytics: {
     gtag: '%VITE_GA_MEASUREMENT_ID%',
