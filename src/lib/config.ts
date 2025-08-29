@@ -6,7 +6,7 @@ export const config = {
     city: 'Ariquemes',
     state: 'RO',
     domain: 'achai.arikeme.com',
-    whatsappUrl: 'http://zap.arikeme.com',
+    whatsappUrl: 'http://chat.arikeme.com',
     contactEmail: 'contato@arikeme.com',
   },
   theme: {
