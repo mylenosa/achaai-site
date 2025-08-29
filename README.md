@@ -25,10 +25,22 @@ npm install
 npm run dev
 ```
 
-### 3. Abrir no navegador
+### 3. Configurar Supabase (Para Portal do Lojista)
+```bash
+# Copie o arquivo de exemplo
+cp .env.example .env
+
+# Edite o .env com suas credenciais do Supabase
+# VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+# VITE_SUPABASE_ANON_KEY=sua-chave-anonima-aqui
+```
+
+**Nota**: O portal do lojista (`/login` e `/dashboard`) requer configuração do Supabase. O site principal funciona normalmente sem essas variáveis.
+
+### 4. Abrir no navegador
 O projeto abrirá automaticamente em `http://localhost:5173`
 
-### 4. Para produção
+### 5. Para produção
 ```bash
 npm run build
 ```
@@ -38,7 +50,55 @@ npm run build
 Uma plataforma que permite:
 - **Consumidores**: Encontrar produtos em lojas físicas via WhatsApp
 - **Lojistas**: Receber pedidos qualificados e gerenciar estoque
+- **Portal do Lojista**: Dashboard para gerenciar perfil e ver analytics
 - **Cidade**: Fortalecer o comércio local de Ariquemes-RO
+
+## 🏪 Portal do Lojista
+
+### 🔐 Funcionalidades de Autenticação
+- **Login seguro** via email/senha
+- **Dashboard protegido** com informações da loja
+- **Perfil editável** (nome, telefone, horário, localização)
+- **Analytics** (em desenvolvimento)
+
+### 🛣️ Rotas Disponíveis
+- `/` - Site principal (público)
+- `/login` - Login do lojista
+- `/dashboard` - Dashboard do lojista (protegido)
+
+### 🗄️ Estrutura do Banco (Supabase)
+```sql
+-- Tabela de perfis das lojas
+CREATE TABLE store_profiles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  phone text,
+  hours text,
+  maps_url text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- RLS (Row Level Security)
+ALTER TABLE store_profiles ENABLE ROW LEVEL SECURITY;
+
+-- Políticas de segurança
+CREATE POLICY "Users can read own profile"
+  ON store_profiles FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own profile"
+  ON store_profiles FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own profile"
+  ON store_profiles FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+```
 
 ## ⚙️ Personalizar para Sua Cidade
 
