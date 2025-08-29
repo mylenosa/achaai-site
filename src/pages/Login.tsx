@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, LogIn, Search, AlertTriangle } from 'lucide-react';
@@ -64,5 +64,113 @@ export const Login: React.FC = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await signIn(email, password);
+      // Redirecionamento será automático via useAuthContext
+    } catch (err: any) {
+      setError(err.message || 'Erro ao fazer login');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center px-4">
+      <div className="max-w-md mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="bg-white rounded-2xl shadow-lg p-8"
+        >
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="bg-emerald-500 rounded-full p-3 w-16 h-16 mx-auto mb-4">
+              <Search className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Portal {config.app.name}
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Acesse sua conta de lojista
+            </p>
+          </div>
+
+          {/* Formulário */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                E-mail
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="seu@email.com"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Senha
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center"
+            >
+              {isLoading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                <>
+                  <LogIn className="w-5 h-5 mr-2" />
+                  Entrar
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Link para voltar */}
+          <div className="text-center mt-6">
+            <a
+              href="/"
+              className="text-emerald-600 hover:text-emerald-700 text-sm transition-colors"
+            >
+              ← Voltar ao site
+            </a>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
 };
