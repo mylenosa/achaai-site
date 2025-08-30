@@ -227,11 +227,11 @@ export const StoreProfileForm: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Perfil da Loja</h1>
-        <p className="text-gray-600 mt-1">Mantenha as informações da sua loja sempre atualizadas</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Perfil da Loja</h1>
+        <p className="text-gray-600 mt-1 text-sm sm:text-base">Mantenha as informações da sua loja sempre atualizadas</p>
       </div>
 
       {/* Mensagem de Feedback */}
@@ -254,14 +254,14 @@ export const StoreProfileForm: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+          className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6"
         >
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <Store className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Informações Básicas</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Informações Básicas</h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Nome da Loja *
@@ -273,7 +273,7 @@ export const StoreProfileForm: React.FC = () => {
                 value={profile.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="Digite o nome da sua loja"
               />
             </div>
@@ -282,17 +282,17 @@ export const StoreProfileForm: React.FC = () => {
               <label htmlFor="categories" className="block text-sm font-medium text-gray-700 mb-2">
                 Categorias/Tags
               </label>
-              <div className="border border-gray-300 rounded-lg p-3 max-h-32 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-2">
+              <div className="border border-gray-300 rounded-lg p-2 sm:p-3 max-h-32 overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2">
                   {availableCategories.map(category => (
-                    <label key={category} className="flex items-center space-x-2 cursor-pointer">
+                    <label key={category} className="flex items-center space-x-2 cursor-pointer p-1">
                       <input
                         type="checkbox"
                         checked={selectedCategories.includes(category)}
                         onChange={() => handleCategoryToggle(category)}
-                        className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                        className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 flex-shrink-0"
                       />
-                      <span className="text-sm text-gray-700">{category}</span>
+                      <span className="text-xs sm:text-sm text-gray-700">{category}</span>
                     </label>
                   ))}
                 </div>
@@ -303,7 +303,7 @@ export const StoreProfileForm: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
               Descrição da Loja
             </label>
@@ -312,8 +312,8 @@ export const StoreProfileForm: React.FC = () => {
               name="description"
               value={profile.description}
               onChange={handleChange}
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+              rows={3}
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base resize-none"
               placeholder="Descreva sua loja, produtos principais e diferenciais..."
             />
           </div>
@@ -324,14 +324,14 @@ export const StoreProfileForm: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+          className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6"
         >
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <MapPin className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Endereço</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Endereço</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             <div>
               <label htmlFor="cep" className="block text-sm font-medium text-gray-700 mb-2">
                 CEP *
@@ -345,7 +345,7 @@ export const StoreProfileForm: React.FC = () => {
                   onChange={handleCepChange}
                   maxLength={8}
                   required
-                  className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                   placeholder="00000000"
                 />
                 {isCepLoading && (
@@ -354,7 +354,7 @@ export const StoreProfileForm: React.FC = () => {
               </div>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="sm:col-span-2">
               <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-2">
                 Rua/Avenida *
               </label>
@@ -365,13 +365,13 @@ export const StoreProfileForm: React.FC = () => {
                 value={profile.street}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="Nome da rua ou avenida"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-4 sm:mt-6">
             <div>
               <label htmlFor="number" className="block text-sm font-medium text-gray-700 mb-2">
                 Número *
@@ -383,12 +383,12 @@ export const StoreProfileForm: React.FC = () => {
                 value={profile.number}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="123"
               />
             </div>
 
-            <div className="md:col-span-2">
+            <div className="sm:col-span-1 lg:col-span-2">
               <label htmlFor="neighborhood" className="block text-sm font-medium text-gray-700 mb-2">
                 Bairro *
               </label>
@@ -399,7 +399,7 @@ export const StoreProfileForm: React.FC = () => {
                 value={profile.neighborhood}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="Nome do bairro"
               />
             </div>
@@ -414,7 +414,7 @@ export const StoreProfileForm: React.FC = () => {
                 name="city"
                 value={profile.city}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm sm:text-base"
                 readOnly
               />
             </div>
@@ -426,21 +426,24 @@ export const StoreProfileForm: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+          className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6"
         >
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <Clock className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Horário de Funcionamento</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Horário de Funcionamento</h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {weekDays.map(day => (
-              <div key={day.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="w-20">
-                  <span className="text-sm font-medium text-gray-700">{day.shortName}</span>
+              <div key={day.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
+                <div className="w-full sm:w-16">
+                  <span className="text-sm font-medium text-gray-700">
+                    <span className="sm:hidden">{day.name}</span>
+                    <span className="hidden sm:inline">{day.shortName}</span>
+                  </span>
                 </div>
                 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -448,30 +451,30 @@ export const StoreProfileForm: React.FC = () => {
                       onChange={(e) => handleScheduleChange(day.id, 'isOpen', e.target.checked)}
                       className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Aberto</span>
+                    <span className="ml-2 text-xs sm:text-sm text-gray-700">Aberto</span>
                   </label>
                 </div>
 
                 {schedule[day.id].isOpen && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                     <input
                       type="time"
                       value={schedule[day.id].openTime}
                       onChange={(e) => handleScheduleChange(day.id, 'openTime', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      className="px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent w-20 sm:w-auto"
                     />
-                    <span className="text-gray-500">às</span>
+                    <span className="text-gray-500 text-xs sm:text-sm">às</span>
                     <input
                       type="time"
                       value={schedule[day.id].closeTime}
                       onChange={(e) => handleScheduleChange(day.id, 'closeTime', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      className="px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent w-20 sm:w-auto"
                     />
                   </div>
                 )}
 
                 {!schedule[day.id].isOpen && (
-                  <span className="text-sm text-gray-500 italic">Fechado</span>
+                  <span className="text-xs sm:text-sm text-gray-500 italic">Fechado</span>
                 )}
               </div>
             ))}
@@ -483,14 +486,14 @@ export const StoreProfileForm: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+          className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6"
         >
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <Phone className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Contatos</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Contatos</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                 <Phone className="w-4 h-4 inline mr-1" />
@@ -502,7 +505,7 @@ export const StoreProfileForm: React.FC = () => {
                 name="phone"
                 value={profile.phone}
                 onChange={handlePhoneChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="(69) 99999-9999"
               />
             </div>
@@ -519,7 +522,7 @@ export const StoreProfileForm: React.FC = () => {
                 value={profile.whatsapp}
                 onChange={handleWhatsAppChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="(69) 99999-9999"
               />
             </div>
@@ -535,7 +538,7 @@ export const StoreProfileForm: React.FC = () => {
                 name="instagram"
                 value={profile.instagram}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="@sualojainstagram"
               />
             </div>
@@ -551,7 +554,7 @@ export const StoreProfileForm: React.FC = () => {
                 name="facebook"
                 value={profile.facebook}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="facebook.com/sualoja"
               />
             </div>
@@ -563,12 +566,12 @@ export const StoreProfileForm: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="flex justify-end"
+          className="flex justify-center sm:justify-end"
         >
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-8 rounded-lg transition-all duration-200 flex items-center gap-3 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
+            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
           >
             {isLoading ? (
               <Loader2 className="w-6 h-6 animate-spin" />
