@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Allow: /login
+Disallow: /dashboard
+Disallow: /reset-password
+
+# Sitemaps
+Sitemap: https://achai.arikeme.com/sitemap.xml
+
+# Crawl-delay para ser gentil com o servidor
+Crawl-delay: 1
+
+# Permitir bots específicos importantes
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
