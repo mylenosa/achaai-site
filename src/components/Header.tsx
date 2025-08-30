@@ -30,7 +30,23 @@ export const Header: React.FC = () => {
             <a href="#faq" className="text-gray-600 hover:text-emerald-600 transition-colors">
               FAQ
             </a>
+            <a 
+              href="/acesso" 
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+            >
+              Acesso do Lojista
+            </a>
           </nav>
+          
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <a 
+              href="/acesso" 
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 rounded-lg transition-colors font-medium text-sm"
+            >
+              Acesso
+            </a>
+          </div>
         </div>
       </div>
     </header>

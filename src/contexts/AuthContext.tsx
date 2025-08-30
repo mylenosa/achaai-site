@@ -10,10 +10,11 @@ interface AuthContextType {
   isConfigured: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithMagicLink: (email: string) => Promise<void>;
-  signInWithGitHub: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -111,25 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: getRedirectUrl('/dashboard'),
-      },
-    });
-
-    if (error) {
-      throw error;
-    }
-  };
-
-  // Login com GitHub
-  const signInWithGitHub = async () => {
-    if (!supabase) {
-      throw new Error('Supabase não configurado');
-    }
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: getRedirectUrl('/dashboard'),
+        emailRedirectTo: getRedirectUrl('/login'),
       },
     });
 
@@ -147,7 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: getRedirectUrl('/dashboard'),
+        redirectTo: getRedirectUrl('/login'),
       },
     });
 
@@ -187,16 +170,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Reset de senha
+  const resetPassword = async (email: string) => {
+    if (!supabase) {
+      throw new Error('Supabase não configurado');
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: getRedirectUrl('/reset-password'),
+    });
+
+    if (error) {
+      throw error;
+    }
+  };
+
+  // Atualizar senha
+  const updatePassword = async (newPassword: string) => {
+    if (!supabase) {
+      throw new Error('Supabase não configurado');
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      throw error;
+    }
+  };
+
   const value: AuthContextType = {
     user,
     loading,
     isConfigured: configured,
     signIn,
     signInWithMagicLink,
-    signInWithGitHub,
     signInWithGoogle,
     signUp,
     signOut,
+    resetPassword,
+    updatePassword,
   };
 
   return (

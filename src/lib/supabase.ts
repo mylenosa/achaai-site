@@ -55,14 +55,8 @@ export const getSupabaseErrorMessage = (): string => {
   return 'Configuração do Supabase incompleta';
 };
 
-// Helper para obter URL de redirecionamento baseada no ambiente
+// Helper para obter URL de redirecionamento baseada no ambiente atual
 export const getRedirectUrl = (path: string = '/dashboard'): string => {
-  // Em produção, usar o domínio configurado
-  if (import.meta.env.PROD) {
-    return `https://achai.arikeme.com${path}`;
-  }
-  
-  // Em desenvolvimento, usar localhost com porta do Vite
   return `${window.location.origin}${path}`;
 };
 

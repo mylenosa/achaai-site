@@ -1,8 +1,9 @@
 // Single Responsibility: Componente principal da aplicação com roteamento
 import React, { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { LandingPage } from './components/LandingPage';
 import { Login } from './pages/Login';
+import { ResetPassword } from './pages/ResetPassword';
 import { Dashboard } from './pages/Dashboard';
 import { NotFound } from './components/NotFound';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -71,6 +72,12 @@ function App() {
       
       {/* Login */}
       <Route path="/login" element={<Login />} />
+      
+      {/* Reset Password */}
+      <Route path="/reset-password" element={<ResetPassword />} />
+      
+      {/* Alias /acesso → /login */}
+      <Route path="/acesso" element={<Navigate to="/login" replace />} />
       
       {/* Dashboard protegido */}
       <Route 
