@@ -44,22 +44,22 @@ export const DashboardLayout: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-3 sm:px-4 lg:px-6">
           <div className="flex justify-between items-center h-16">
             {/* Logo e Menu Mobile */}
             <div className="flex items-center">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 aria-label="Abrir menu"
               >
                 {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
-              <div className="flex items-center ml-2 md:ml-0">
+              <div className="flex items-center ml-2 lg:ml-0">
                 <div className="bg-emerald-500 rounded-full p-2 mr-3">
                   <Search className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="text-xl font-bold text-gray-800">
+                <h1 className="text-lg sm:text-xl font-bold text-gray-800">
                   Portal {config.app.name}
                 </h1>
               </div>
@@ -69,16 +69,16 @@ export const DashboardLayout: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center space-x-3 text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="flex items-center space-x-2 sm:space-x-3 text-gray-700 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 aria-expanded={userMenuOpen}
                 aria-haspopup="true"
               >
                 <div className="bg-emerald-100 rounded-full p-2">
                   <Store className="w-5 h-5 text-emerald-600" />
                 </div>
-                <div className="hidden sm:block text-left">
-                  <div className="text-sm font-medium">{storeName}</div>
-                  <div className="text-xs text-gray-500">{user?.email}</div>
+                <div className="hidden sm:block text-left min-w-0">
+                  <div className="text-sm font-medium truncate max-w-32 lg:max-w-none">{storeName}</div>
+                  <div className="text-xs text-gray-500 truncate max-w-32 lg:max-w-none">{user?.email}</div>
                 </div>
                 <ChevronDown className={`w-4 h-4 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -91,10 +91,10 @@ export const DashboardLayout: React.FC = () => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                    className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
                   >
                     <div className="px-4 py-3 border-b border-gray-100">
-                      <div className="text-sm font-medium text-gray-900">{storeName}</div>
+                      <div className="text-sm font-medium text-gray-900 truncate">{storeName}</div>
                       <div className="text-xs text-gray-500 truncate">{user?.email}</div>
                     </div>
                     
@@ -128,11 +128,11 @@ export const DashboardLayout: React.FC = () => {
         {/* Sidebar */}
         <aside className={`
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:translate-x-0 fixed md:static inset-y-0 left-0 z-30
-          w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out
+          lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-30
+          w-64 sm:w-72 lg:w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out
           border-r border-gray-200
         `}>
-          <nav className="mt-8 px-4">
+          <nav className="mt-6 px-3 sm:px-4">
             <ul className="space-y-2">
               {menuItems.map((item) => (
                 <li key={item.id}>
@@ -144,13 +144,13 @@ export const DashboardLayout: React.FC = () => {
                     className={`
                       w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200
                       ${activeTab === item.id
-                        ? 'bg-emerald-50 text-emerald-700 border-r-4 border-emerald-500 shadow-sm'
+                        ? 'bg-emerald-50 text-emerald-700 shadow-sm font-medium'
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }
                     `}
                   >
                     <item.icon className="w-5 h-5 mr-3" />
-                    {item.label}
+                    <span className="text-sm sm:text-base">{item.label}</span>
                   </button>
                 </li>
               ))}
@@ -161,13 +161,13 @@ export const DashboardLayout: React.FC = () => {
         {/* Overlay para mobile */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+            className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-6 md:p-8 max-w-full overflow-hidden">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 xl:p-8 max-w-full overflow-hidden">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 20 }}

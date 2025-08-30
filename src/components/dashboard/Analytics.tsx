@@ -99,18 +99,18 @@ export const Analytics: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Acompanhe o desempenho da sua loja</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">Acompanhe o desempenho da sua loja</p>
         </div>
-        <div className="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-lg text-sm font-medium">
+        <div className="bg-emerald-50 text-emerald-700 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium self-start sm:self-auto">
           Última atualização: agora
         </div>
       </div>
 
       {/* Métricas Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
         {metrics.map((metric, index) => (
           <motion.div
             key={metric.title}
@@ -124,17 +124,17 @@ export const Analytics: React.FC = () => {
       </div>
 
       {/* Gráfico Simples e Atividade Recente */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Gráfico de Visualizações */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+          className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Visualizações dos Últimos 7 Dias</h3>
-            <div className="flex items-center text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Visualizações dos Últimos 7 Dias</h3>
+            <div className="flex items-center text-xs sm:text-sm text-gray-600">
               <TrendingUp className="w-4 h-4 mr-1" />
               +12% vs semana anterior
             </div>
@@ -148,9 +148,9 @@ export const Analytics: React.FC = () => {
               const percentage = (values[index] / maxValue) * 100;
               
               return (
-                <div key={day} className="flex items-center space-x-3">
-                  <span className="text-sm font-medium text-gray-600 w-8">{day}</span>
-                  <div className="flex-1 bg-gray-100 rounded-full h-3 relative overflow-hidden">
+                <div key={day} className="flex items-center space-x-2 sm:space-x-3">
+                  <span className="text-xs sm:text-sm font-medium text-gray-600 w-6 sm:w-8">{day}</span>
+                  <div className="flex-1 bg-gray-100 rounded-full h-2 sm:h-3 relative overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${percentage}%` }}
@@ -158,7 +158,7 @@ export const Analytics: React.FC = () => {
                       className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full"
                     />
                   </div>
-                  <span className="text-sm font-semibold text-gray-900 w-8 text-right">
+                  <span className="text-xs sm:text-sm font-semibold text-gray-900 w-6 sm:w-8 text-right">
                     {values[index]}
                   </span>
                 </div>
@@ -172,27 +172,27 @@ export const Analytics: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+          className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6"
         >
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Atividade Recente</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Atividade Recente</h3>
           
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {recentActivity.map((activity, index) => (
               <motion.div
                 key={activity.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
-                className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-start space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex-shrink-0 mt-1">
                   {getActivityIcon(activity.type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-gray-900 leading-relaxed">
                     {activity.action}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1">
                     {activity.time}
                   </p>
                 </div>
@@ -207,43 +207,43 @@ export const Analytics: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
-        className="grid md:grid-cols-3 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"
       >
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Produtos em Destaque</h3>
+        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 sm:p-6 text-white">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold">Produtos em Destaque</h3>
             <ShoppingBag className="w-6 h-6 opacity-80" />
           </div>
-          <p className="text-emerald-100 text-sm mb-4">
+          <p className="text-emerald-100 text-xs sm:text-sm mb-3 sm:mb-4">
             Promova seus produtos mais vendidos
           </p>
-          <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+          <button className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors">
             Gerenciar
           </button>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Horários Especiais</h3>
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 sm:p-6 text-white">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold">Horários Especiais</h3>
             <Calendar className="w-6 h-6 opacity-80" />
           </div>
-          <p className="text-blue-100 text-sm mb-4">
+          <p className="text-blue-100 text-xs sm:text-sm mb-3 sm:mb-4">
             Configure feriados e horários especiais
           </p>
-          <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+          <button className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors">
             Configurar
           </button>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Suporte</h3>
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white md:col-span-2 xl:col-span-1">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold">Suporte</h3>
             <Users className="w-6 h-6 opacity-80" />
           </div>
-          <p className="text-purple-100 text-sm mb-4">
+          <p className="text-purple-100 text-xs sm:text-sm mb-3 sm:mb-4">
             Precisa de ajuda? Fale conosco
           </p>
-          <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+          <button className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors">
             Contatar
           </button>
         </div>
