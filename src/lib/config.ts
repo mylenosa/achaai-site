@@ -18,6 +18,7 @@ export const config = {
     title: 'AchaAí - Encontre Produtos em Ariquemes via WhatsApp',
     description: 'Encontre produtos em lojas físicas de Ariquemes-RO usando apenas o WhatsApp. Conecte consumidores e lojistas de forma simples e direta.',
     keywords: 'busca local, produtos, Ariquemes, WhatsApp, lojas físicas, comércio local, Rondônia',
+    canonicalUrl: 'https://achai.arikeme.com', // Altere para seu domínio real
   },
   analytics: {
     gtag: '%VITE_GA_MEASUREMENT_ID%',

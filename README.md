@@ -219,20 +219,29 @@ theme: {
 
 ## 🌐 Colocar no Ar (Deploy)
 
-### Opção 1: Netlify (Mais Fácil)
-1. Faça uma conta no [Netlify](https://netlify.com)
-2. Conecte seu repositório GitHub
-3. Configure:
+### Cloudflare Pages (Recomendado)
+1. Conecte seu repositório GitHub ao [Cloudflare Pages](https://pages.cloudflare.com)
+2. Configure:
    - **Build command**: `npm run build`
-   - **Publish directory**: `dist`
-4. Deploy automático a cada commit!
+   - **Build output directory**: `dist`
+   - **Root directory**: `/` (deixe vazio)
+3. Configure as variáveis de ambiente:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_GA_MEASUREMENT_ID`
+4. Deploy automático a cada push!
 
-### Opção 2: Vercel
-1. Faça uma conta no [Vercel](https://vercel.com)
-2. Importe seu projeto do GitHub
-3. Deploy automático configurado!
+### Outras Opções
+#### Netlify
+1. Conecte seu repositório GitHub
+2. Build command: `npm run build`
+3. Publish directory: `dist`
 
-### Opção 3: Qualquer Hospedagem
+#### Vercel
+1. Importe projeto do GitHub
+2. Deploy automático configurado
+
+#### Hospedagem Tradicional
 1. Execute `npm run build`
 2. Suba a pasta `dist/` para seu servidor
 3. Configure domínio e SSL

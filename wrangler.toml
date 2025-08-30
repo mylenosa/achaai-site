@@ -1,0 +1,33 @@
+# Configuração para Cloudflare Pages (opcional)
+name = "achai-arikeme"
+compatibility_date = "2024-01-01"
+
+[build]
+command = "npm run build"
+cwd = "."
+publish = "dist"
+
+[[redirects]]
+from = "/acesso"
+to = "/login"
+status = 302
+
+[[redirects]]
+from = "/portal"
+to = "/login"
+status = 302
+
+[[redirects]]
+from = "/lojista"
+to = "/login"
+status = 302
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+[env.production]
+VITE_SUPABASE_URL = ""
+VITE_SUPABASE_ANON_KEY = ""
+VITE_GA_MEASUREMENT_ID = ""
