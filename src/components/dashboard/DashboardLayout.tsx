@@ -128,11 +128,11 @@ export const DashboardLayout: React.FC = () => {
         {/* Sidebar */}
         <aside className={`
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 fixed lg:fixed inset-y-0 left-0 z-30
+          lg:translate-x-0 fixed lg:fixed top-16 lg:top-16 bottom-0 left-0 z-30
           w-64 sm:w-72 lg:w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out
-          border-r border-gray-200 lg:top-16
+          border-r border-gray-200
         `}>
-          <nav className="mt-6 px-3 sm:px-4">
+          <nav className="mt-4 sm:mt-6 px-3 sm:px-4 h-full overflow-y-auto">
             <ul className="space-y-2">
               {menuItems.map((item) => (
                 <li key={item.id}>
