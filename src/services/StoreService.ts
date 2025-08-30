@@ -1,14 +1,16 @@
 // Single Responsibility: Serviço para operações de loja
 // Dependency Inversion: Usa cliente Supabase injetado
 import { supabase } from '../lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 export interface StoreProfile {
   id: string;
+  user_id: string;
   name: string;
   phone: string;
-  hours: string;
-  maps_url: string;
-  user_id: string;
+  description: string;
+  address: string;
+  opening_hours: string;
   created_at: string;
   updated_at: string;
 }
