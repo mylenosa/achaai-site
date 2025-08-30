@@ -25,8 +25,10 @@ interface WeekDay {
 
 interface DaySchedule {
   isOpen: boolean;
-  openTime: string;
-  closeTime: string;
+  schedules: {
+    openTime: string;
+    closeTime: string;
+  }[];
 }
 
 type WeekSchedule = Record<string, DaySchedule>;
@@ -53,13 +55,13 @@ export const StoreProfileForm: React.FC = () => {
   });
 
   const [schedule, setSchedule] = useState<WeekSchedule>({
-    monday: { isOpen: true, openTime: '08:00', closeTime: '18:00' },
-    tuesday: { isOpen: true, openTime: '08:00', closeTime: '18:00' },
-    wednesday: { isOpen: true, openTime: '08:00', closeTime: '18:00' },
-    thursday: { isOpen: true, openTime: '08:00', closeTime: '18:00' },
-    friday: { isOpen: true, openTime: '08:00', closeTime: '18:00' },
-    saturday: { isOpen: true, openTime: '08:00', closeTime: '12:00' },
-    sunday: { isOpen: false, openTime: '08:00', closeTime: '18:00' }
+    monday: { isOpen: true, schedules: [{ openTime: '08:00', closeTime: '18:00' }] },
+    tuesday: { isOpen: true, schedules: [{ openTime: '08:00', closeTime: '18:00' }] },
+    wednesday: { isOpen: true, schedules: [{ openTime: '08:00', closeTime: '18:00' }] },
+    thursday: { isOpen: true, schedules: [{ openTime: '08:00', closeTime: '18:00' }] },
+    friday: { isOpen: true, schedules: [{ openTime: '08:00', closeTime: '18:00' }] },
+    saturday: { isOpen: true, schedules: [{ openTime: '08:00', closeTime: '12:00' }] },
+    sunday: { isOpen: false, schedules: [{ openTime: '08:00', closeTime: '18:00' }] }
   });
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -106,7 +108,22 @@ export const StoreProfileForm: React.FC = () => {
         if (data.opening_hours) {
           try {
             const parsedSchedule = JSON.parse(data.opening_hours);
-            setSchedule({ ...schedule, ...parsedSchedule });
+            // Migrar formato antigo para novo se necessário
+            const migratedSchedule: WeekSchedule = {};
+            Object.keys(parsedSchedule).forEach(day => {
+              const dayData = parsedSchedule[day];
+              if (dayData.openTime && dayData.closeTime) {
+                // Formato antigo - migrar
+                migratedSchedule[day] = {
+                  isOpen: dayData.isOpen,
+                  schedules: [{ openTime: dayData.openTime, closeTime: dayData.closeTime }]
+                };
+              } else {
+                // Formato novo
+                migratedSchedule[day] = dayData;
+              }
+            });
+            setSchedule({ ...schedule, ...migratedSchedule });
           } catch (e) {
             console.log('Erro ao parsear horários, usando padrão');
           }
@@ -171,11 +188,45 @@ export const StoreProfileForm: React.FC = () => {
   };
 
   const handleScheduleChange = (dayId: string, field: keyof DaySchedule, value: boolean | string) => {
+    if (field === 'isOpen') {
+      setSchedule(prev => ({
+        ...prev,
+        [dayId]: {
+          ...prev[dayId],
+          [field]: value as boolean
+        }
+      }));
+    }
+  };
+
+  const handleTimeChange = (dayId: string, scheduleIndex: number, field: 'openTime' | 'closeTime', value: string) => {
     setSchedule(prev => ({
       ...prev,
       [dayId]: {
         ...prev[dayId],
-        [field]: value
+        schedules: prev[dayId].schedules.map((schedule, index) =>
+          index === scheduleIndex ? { ...schedule, [field]: value } : schedule
+        )
+      }
+    }));
+  };
+
+  const addSchedule = (dayId: string) => {
+    setSchedule(prev => ({
+      ...prev,
+      [dayId]: {
+        ...prev[dayId],
+        schedules: [...prev[dayId].schedules, { openTime: '14:00', closeTime: '18:00' }]
+      }
+    }));
+  };
+
+  const removeSchedule = (dayId: string, scheduleIndex: number) => {
+    setSchedule(prev => ({
+      ...prev,
+      [dayId]: {
+        ...prev[dayId],
+        schedules: prev[dayId].schedules.filter((_, index) => index !== scheduleIndex)
       }
     }));
   };
@@ -435,8 +486,335 @@ export const StoreProfileForm: React.FC = () => {
 
           <div className="space-y-3 sm:space-y-4">
             {weekDays.map(day => (
-              <div key={day.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
-                <div className="w-full sm:w-16">
+              <div key={day.id} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
+                  <div className="w-full sm:w-20 flex-shrink-0">
+                    <span className="text-sm font-medium text-gray-700">
+                      <span className="sm:hidden">{day.name}</span>
+                      <span className="hidden sm:inline">{day.shortName}</span>
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={schedule[day.id].isOpen}
+                        onChange={(e) => handleScheduleChange(day.id, 'isOpen', e.target.checked)}
+                        className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <span className="ml-2 text-xs sm:text-sm text-gray-700">Aberto</span>
+                    </label>
+                  </div>
+
+                  <div className="flex-1">
+                    {schedule[day.id].isOpen ? (
+                      <div className="space-y-2">
+                        {schedule[day.id].schedules.map((timeSlot, index) => (
+                          <div key={index} className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                            <input
+                              type="time"
+                              value={timeSlot.openTime}
+                              onChange={(e) => handleTimeChange(day.id, index, 'openTime', e.target.value)}
+                              className="px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent w-20 sm:w-auto"
+                            />
+                            <span className="text-gray-500 text-xs sm:text-sm">às</span>
+                            <input
+                              type="time"
+                              value={timeSlot.closeTime}
+                              onChange={(e) => handleTimeChange(day.id, index, 'closeTime', e.target.value)}
+                              className="px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent w-20 sm:w-auto"
+                            />
+                            {schedule[day.id].schedules.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeSchedule(day.id, index)}
+                                className="text-red-500 hover:text-red-700 text-xs sm:text-sm px-1 py-1 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+                                aria-label="Remover horário"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        
+                        {schedule[day.id].schedules.length < 3 && (
+                          <button
+                            type="button"
+                            onClick={() => addSchedule(day.id)}
+                            className="text-emerald-600 hover:text-emerald-700 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded px-1 py-1"
+                          >
+                            + Adicionar horário
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs sm:text-sm text-gray-500 italic">Fechado</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Contatos */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6"
+        >
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <Phone className="w-6 h-6 text-emerald-600" />
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Contatos</h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                <Phone className="w-4 h-4 inline mr-1" />
+                Telefone Fixo
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={profile.phone}
+                onChange={handlePhoneChange}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
+                placeholder="(69) 99999-9999"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-2">
+                <MessageCircle className="w-4 h-4 inline mr-1" />
+                WhatsApp *
+              </label>
+              <input
+                type="tel"
+                id="whatsapp"
+                name="whatsapp"
+                value={profile.whatsapp}
+                onChange={handleWhatsAppChange}
+                required
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
+                placeholder="(69) 99999-9999"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 mb-2">
+                <Instagram className="w-4 h-4 inline mr-1" />
+                Instagram
+              </label>
+              <input
+                type="text"
+                id="instagram"
+                name="instagram"
+                value={profile.instagram}
+                onChange={handleChange}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
+                placeholder="@sualojainstagram"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="facebook" className="block text-sm font-medium text-gray-700 mb-2">
+                <Facebook className="w-4 h-4 inline mr-1" />
+                Facebook
+              </label>
+              <input
+                type="text"
+                id="facebook"
+                name="facebook"
+                value={profile.facebook}
+                onChange={handleChange}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
+                placeholder="facebook.com/sualoja"
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Botão Salvar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="flex justify-center sm:justify-end"
+        >
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
+          >
+            {isLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <Save className="w-6 h-6" />
+            )}
+            {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+          </button>
+        </motion.div>
+      </form>
+    </div>
+  );
+};
+              </label>
+              <input
+                type="tel"
+                id="whatsapp"
+                name="whatsapp"
+                value={profile.whatsapp}
+                onChange={handleWhatsAppChange}
+                required
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
+                placeholder="(69) 99999-9999"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 mb-2">
+                <Instagram className="w-4 h-4 inline mr-1" />
+                Instagram
+              </label>
+              <input
+                type="text"
+                id="instagram"
+                name="instagram"
+                value={profile.instagram}
+                onChange={handleChange}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
+                placeholder="@sualojainstagram"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="facebook" className="block text-sm font-medium text-gray-700 mb-2">
+                <Facebook className="w-4 h-4 inline mr-1" />
+                Facebook
+              </label>
+              <input
+                type="text"
+                id="facebook"
+                name="facebook"
+                value={profile.facebook}
+                onChange={handleChange}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
+                placeholder="facebook.com/sualoja"
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Botão Salvar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="flex justify-center sm:justify-end"
+        >
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
+          >
+            {isLoading ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <Save className="w-6 h-6" />
+            )}
+            {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+          </button>
+        </motion.div>
+      </form>
+    </div>
+  );
+};
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={schedule[day.id].isOpen}
+                      onChange={(e) => handleScheduleChange(day.id, 'isOpen', e.target.checked)}
+                      className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span className="ml-2 text-xs sm:text-sm text-gray-700">Aberto</span>
+                  </label>
+                </div>
+
+                {schedule[day.id].isOpen && (
+                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                    <input
+                      type="time"
+                      value={schedule[day.id].openTime}
+                      onChange={(e) => handleScheduleChange(day.id, 'openTime', e.target.value)}
+                      className="px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent w-20 sm:w-auto"
+                    />
+                    <span className="text-gray-500 text-xs sm:text-sm">às</span>
+                    <input
+                      type="time"
+                      value={schedule[day.id].closeTime}
+                      onChange={(e) => handleScheduleChange(day.id, 'closeTime', e.target.value)}
+                      className="px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent w-20 sm:w-auto"
+                    />
+                  </div>
+                )}
+
+                {!schedule[day.id].isOpen && (
+                  <span className="text-xs sm:text-sm text-gray-500 italic">Fechado</span>
+                )}
+              </div>
+                  
+                  <div className="flex-1 mt-2 sm:mt-0">
+                    {schedule[day.id].isOpen ? (
+                      <div className="space-y-2">
+                        {schedule[day.id].schedules.map((timeSlot, index) => (
+                          <div key={index} className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                            <input
+                              type="time"
+                              value={timeSlot.openTime}
+                              onChange={(e) => handleTimeChange(day.id, index, 'openTime', e.target.value)}
+                              className="px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent w-20 sm:w-auto"
+                            />
+                            <span className="text-gray-500 text-xs sm:text-sm">às</span>
+                            <input
+                              type="time"
+                              value={timeSlot.closeTime}
+                              onChange={(e) => handleTimeChange(day.id, index, 'closeTime', e.target.value)}
+                              className="px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md text-xs sm:text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent w-20 sm:w-auto"
+                            />
+                            {schedule[day.id].schedules.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeSchedule(day.id, index)}
+                                className="text-red-500 hover:text-red-700 text-xs sm:text-sm px-1 py-1 rounded focus:outline-none focus:ring-2 focus:ring-red-500 ml-1"
+                                aria-label="Remover horário"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        
+                        {schedule[day.id].schedules.length < 3 && (
+                          <button
+                            type="button"
+                            onClick={() => addSchedule(day.id)}
+                            className="text-emerald-600 hover:text-emerald-700 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded px-1 py-1 mt-1"
+                          >
+                            + Adicionar horário
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs sm:text-sm text-gray-500 italic">Fechado</span>
+                    )}
+                  </div>
+                </div>
+              </div>
                   <span className="text-sm font-medium text-gray-700">
                     <span className="sm:hidden">{day.name}</span>
                     <span className="hidden sm:inline">{day.shortName}</span>

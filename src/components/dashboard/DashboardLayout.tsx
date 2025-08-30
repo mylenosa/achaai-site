@@ -128,9 +128,9 @@ export const DashboardLayout: React.FC = () => {
         {/* Sidebar */}
         <aside className={`
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-30
+          lg:translate-x-0 fixed lg:fixed inset-y-0 left-0 z-30
           w-64 sm:w-72 lg:w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out
-          border-r border-gray-200
+          border-r border-gray-200 lg:top-16
         `}>
           <nav className="mt-6 px-3 sm:px-4">
             <ul className="space-y-2">
@@ -167,7 +167,7 @@ export const DashboardLayout: React.FC = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 xl:p-8 max-w-full overflow-hidden">
+        <main className="flex-1 lg:ml-64 p-3 sm:p-4 lg:p-6 xl:p-8 max-w-full overflow-hidden pt-20 lg:pt-6">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 20 }}
