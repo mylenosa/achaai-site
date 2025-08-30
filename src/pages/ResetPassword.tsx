@@ -177,36 +177,36 @@ export const ResetPassword: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center px-4 py-8">
-      <div className="max-w-md mx-auto w-full">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center px-3 sm:px-4 py-4 sm:py-8">
+      <div className="max-w-sm sm:max-w-md mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white rounded-2xl shadow-lg p-8"
+          className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8"
         >
           {/* Cabeçalho */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 sm:mb-8">
             <div className="bg-emerald-500 rounded-full p-3 w-16 h-16 mx-auto mb-4">
               <Search className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
               Redefinir Senha
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-600 mt-2 text-sm sm:text-base">
               Digite sua nova senha
             </p>
           </div>
 
           {/* Mensagens de erro */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-3 rounded-lg mb-4 sm:mb-6 text-sm sm:text-base">
               {error}
             </div>
           )}
 
           {/* Formulário */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div>
               <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
                 Nova Senha
@@ -222,7 +222,7 @@ export const ResetPassword: React.FC = () => {
                     setNewPassword(e.target.value);
                     setPasswordErrors('');
                   }}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors focus:outline-none ${
+                  className={`w-full pl-10 pr-12 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors focus:outline-none text-sm sm:text-base min-h-[48px] ${
                     passwordErrors ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="Digite sua nova senha"
@@ -259,7 +259,7 @@ export const ResetPassword: React.FC = () => {
                     setConfirmPassword(e.target.value);
                     setConfirmPasswordErrors('');
                   }}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors focus:outline-none ${
+                  className={`w-full pl-10 pr-12 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors focus:outline-none text-sm sm:text-base min-h-[48px] ${
                     confirmPasswordErrors ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="Confirme sua nova senha"
@@ -285,7 +285,7 @@ export const ResetPassword: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-lg transition-colors flex items-center justify-center text-lg focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-colors flex items-center justify-center text-base sm:text-lg focus:outline-none focus:ring-4 focus:ring-emerald-500/20 min-h-[48px]"
               aria-label="Redefinir senha"
             >
               {isLoading ? (
@@ -297,10 +297,10 @@ export const ResetPassword: React.FC = () => {
           </form>
 
           {/* Link para voltar */}
-          <div className="text-center mt-6">
+          <div className="text-center mt-4 sm:mt-6">
             <a
               href="/login"
-              className="text-emerald-600 hover:text-emerald-700 text-sm transition-colors"
+              className="text-emerald-600 hover:text-emerald-700 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded px-2 py-1"
             >
               ← Voltar ao login
             </a>

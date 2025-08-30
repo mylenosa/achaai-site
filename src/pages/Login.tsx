@@ -273,40 +273,40 @@ export const Login: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center px-4 py-8">
-      <div className="max-w-md mx-auto w-full">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center px-3 sm:px-4 py-4 sm:py-8">
+      <div className="max-w-sm sm:max-w-md mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white rounded-2xl shadow-lg p-8"
+          className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8"
         >
           {/* Cabeçalho */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 sm:mb-8">
             <div className="bg-emerald-500 rounded-full p-3 w-16 h-16 mx-auto mb-4">
               <Search className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
               Portal {config.app.name}
             </h1>
-            <p className="text-gray-600 mt-2 text-lg">
+            <p className="text-gray-600 mt-2 text-base sm:text-lg">
               Acesse sua conta de lojista
             </p>
           </div>
 
           {/* Mensagens de erro */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-3 rounded-lg mb-4 sm:mb-6 text-sm sm:text-base">
               {error}
             </div>
           )}
 
           {/* Botão Google (Primário) */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <button
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading}
-              className="w-full flex items-center justify-center px-6 py-4 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-semibold rounded-lg transition-all duration-200 text-lg border border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/20 shadow-sm hover:shadow-md"
+              className="w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-semibold rounded-lg transition-all duration-200 text-base sm:text-lg border border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/20 shadow-sm hover:shadow-md min-h-[48px]"
               aria-label="Entrar com conta do Google"
             >
               {isGoogleLoading ? (
@@ -326,7 +326,7 @@ export const Login: React.FC = () => {
           </div>
 
           {/* Divisor */}
-          <div className="relative mb-6">
+          <div className="relative mb-4 sm:mb-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300" />
             </div>
@@ -336,7 +336,7 @@ export const Login: React.FC = () => {
           </div>
 
           {/* Formulário de Email/Senha */}
-          <form onSubmit={handleEmailLogin} className="space-y-6">
+          <form onSubmit={handleEmailLogin} className="space-y-4 sm:space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 E-mail
@@ -352,7 +352,7 @@ export const Login: React.FC = () => {
                     setEmail(e.target.value);
                     setEmailErrors('');
                   }}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors focus:outline-none ${
+                  className={`w-full pl-10 pr-4 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors focus:outline-none text-sm sm:text-base min-h-[48px] ${
                     emailErrors ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="seu@email.com"
@@ -381,7 +381,7 @@ export const Login: React.FC = () => {
                     setPassword(e.target.value);
                     setPasswordErrors('');
                   }}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors focus:outline-none ${
+                  className={`w-full pl-10 pr-12 py-2 sm:py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors focus:outline-none text-sm sm:text-base min-h-[48px] ${
                     passwordErrors ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
                   placeholder="••••••••"
@@ -419,7 +419,7 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-lg transition-colors flex items-center justify-center text-lg focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-colors flex items-center justify-center text-base sm:text-lg focus:outline-none focus:ring-4 focus:ring-emerald-500/20 min-h-[48px]"
               aria-label="Fazer login com email e senha"
             >
               {isLoading ? (
@@ -434,10 +434,10 @@ export const Login: React.FC = () => {
           </form>
 
           {/* Seção Colapsável "Mais Opções" */}
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <button
               onClick={() => setShowMoreOptions(!showMoreOptions)}
-              className="w-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded"
+              className="w-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded min-h-[44px]"
               aria-expanded={showMoreOptions}
               aria-controls="more-options"
             >
@@ -459,11 +459,11 @@ export const Login: React.FC = () => {
                   className="overflow-hidden"
                   id="more-options"
                 >
-                  <div className="pt-4 border-t border-gray-200 mt-4">
+                  <div className="pt-3 sm:pt-4 border-t border-gray-200 mt-3 sm:mt-4">
                     <button
                       onClick={handleMagicLink}
                       disabled={isMagicLinkLoading}
-                      className="w-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-gray-500/20"
+                      className="w-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-gray-700 font-medium py-3 px-4 sm:px-6 rounded-lg transition-colors flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-gray-500/20 text-sm sm:text-base min-h-[48px]"
                       aria-label="Entrar por link no email sem senha"
                     >
                       {isMagicLinkLoading ? (
@@ -471,7 +471,7 @@ export const Login: React.FC = () => {
                       ) : (
                         <>
                           <Wand2 className="w-5 h-5 mr-2" />
-                          Entrar por link no e-mail (sem senha)
+                          <span className="text-center">Entrar por link no e-mail (sem senha)</span>
                         </>
                       )}
                     </button>
@@ -482,10 +482,10 @@ export const Login: React.FC = () => {
           </div>
 
           {/* Link para voltar */}
-          <div className="text-center mt-6">
+          <div className="text-center mt-4 sm:mt-6">
             <a
               href="/"
-              className="text-emerald-600 hover:text-emerald-700 text-sm transition-colors"
+              className="text-emerald-600 hover:text-emerald-700 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded px-2 py-1"
             >
               ← Voltar ao site
             </a>
