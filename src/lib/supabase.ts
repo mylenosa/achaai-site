@@ -3,8 +3,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Verificar se as variáveis de ambiente existem
-const supabaseUrl = import.meta.env.%VITE_SUPABASE_URL%;
-const supabaseAnonKey = import.meta.env.%VITE_SUPABASE_ANON_KEY%;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Log para debug (remover em produção)
 console.log('Supabase URL:', supabaseUrl ? 'Configurada' : 'Não configurada');
