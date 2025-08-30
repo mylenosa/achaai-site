@@ -1,14 +1,23 @@
 // Single Responsibility: Serviço para operações de loja
 // Dependency Inversion: Usa cliente Supabase injetado
 import { supabase } from '../lib/supabase';
-import { User } from '@supabase/supabase-js';
 
 export interface StoreProfile {
   id: string;
   user_id: string;
   name: string;
-  phone: string;
   description: string;
+  phone: string;
+  whatsapp: string;
+  instagram: string;
+  facebook: string;
+  categories: string[];
+  cep: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  state: string;
   address: string;
   opening_hours: string;
   created_at: string;
@@ -58,7 +67,7 @@ export class StoreService {
     return data;
   }
 
-  async updateProfile(userId: string, updates: Partial<Pick<StoreProfile, 'name' | 'phone' | 'hours' | 'maps_url'>>): Promise<StoreProfile> {
+  async updateProfile(profileId: string, updates: Partial<Omit<StoreProfile, 'id' | 'user_id' | 'created_at' | 'updated_at'>>): Promise<StoreProfile> {
     if (!supabase) {
       throw new Error('Supabase não configurado');
     }
@@ -69,7 +78,7 @@ export class StoreService {
         ...updates,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', userId)
+      .eq('id', profileId)
       .select()
       .single();
 
