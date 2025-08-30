@@ -62,7 +62,7 @@ export const getRedirectUrl = (path: string = '/dashboard'): string => {
     return `https://achai.arikeme.com${path}`;
   }
   
-  // Em desenvolvimento, usar localhost
+  // Em desenvolvimento, usar localhost com porta do Vite
   return `${window.location.origin}${path}`;
 };
 

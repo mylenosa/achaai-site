@@ -6,7 +6,16 @@ import { getSupabaseErrorMessage } from '../lib/supabase';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 
 export const Dashboard: React.FC = () => {
-  const { user, isConfigured } = useAuthContext();
+  const { user, loading, isConfigured } = useAuthContext();
+
+  // Mostrar loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
 
   // Mostrar erro se Supabase não estiver configurado
   if (!isConfigured) {
@@ -52,5 +61,6 @@ export const Dashboard: React.FC = () => {
     );
   }
 
+  // Se não estiver logado, será redirecionado pelo ProtectedRoute
   return <DashboardLayout />;
 };

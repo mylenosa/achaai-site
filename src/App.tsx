@@ -1,18 +1,11 @@
-// Single Responsibility: Componente principal da aplicação
-// Dependency Inversion: Usa configurações injetadas
-import React, { useEffect, useState } from 'react';
-import { Header } from './components/Header';
-import { Hero } from './components/Hero';
-import { HowItWorks } from './components/HowItWorks';
-import { KPIs } from './components/KPIs';
-import { ForStores } from './components/ForStores';
-import { Pricing } from './components/Pricing/Pricing';
-import { Testimonials } from './components/Testimonials';
-import { FAQ } from './components/FAQ';
-import { FinalCTA } from './components/FinalCTA';
-import { Footer } from './components/Footer';
+// Single Responsibility: Componente principal da aplicação com roteamento
+import React, { useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { LandingPage } from './components/LandingPage';
+import { Login } from './pages/Login';
+import { Dashboard } from './pages/Dashboard';
 import { NotFound } from './components/NotFound';
-import { ServerError } from './components/ServerError';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { config } from './lib/config';
 
 // Declaração global para analytics
@@ -24,24 +17,8 @@ declare global {
 }
 
 function App() {
-  const [is404, setIs404] = useState(false);
-  const [isServerError, setIsServerError] = useState(false);
-
   useEffect(() => {
-    // Verificar se é uma rota 404 (qualquer coisa além da raiz)
-    const path = window.location.pathname;
-    if (path !== '/' && path !== '/index.html') {
-      setIs404(true);
-      return;
-    }
-
-    // Simular erro de servidor para teste (remover em produção)
-    // if (path.includes('?error=500')) {
-    //   setIsServerError(true);
-    //   return;
-    // }
-
-    // SEO Meta Tags
+    // SEO Meta Tags globais
     document.title = config.seo.title;
     
     // Meta description
@@ -87,31 +64,27 @@ function App() {
     }
   }, []);
 
-  // Renderizar página de erro de servidor se necessário
-  if (isServerError) {
-    return <ServerError />;
-  }
-
-  // Renderizar página 404 se necessário
-  if (is404) {
-    return <NotFound />;
-  }
-
   return (
-    <div className="min-h-screen">
-      <Header />
-      <main>
-        <Hero />
-        <HowItWorks />
-        <KPIs />
-        <ForStores />
-        <Pricing />
-        <Testimonials />
-        <FAQ />
-        <FinalCTA />
-      </main>
-      <Footer />
-    </div>
+    <Routes>
+      {/* Página principal */}
+      <Route path="/" element={<LandingPage />} />
+      
+      {/* Login */}
+      <Route path="/login" element={<Login />} />
+      
+      {/* Dashboard protegido */}
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Página 404 */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
