@@ -6,6 +6,6 @@ export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.ico'],
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    exclude: ['lucide-react', 'papaparse', 'xlsx'],
   },
 });
