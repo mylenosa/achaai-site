@@ -162,7 +162,13 @@ export const StoreProfileForm: React.FC = () => {
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const phone = e.target.value.replace(/\D/g, '');
     const formatted = phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    setProfile(prev => ({ ...prev, phone: formatted }));
+    setProfile(prev => ({ ...prev, whatsapp: formatted }));
+  };
+
+  const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const phone = e.target.value.replace(/\D/g, '');
+    const formatted = phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    setProfile(prev => ({ ...prev, whatsapp: formatted }));
   };
 
   const handleCategoryToggle = (category: string) => {
