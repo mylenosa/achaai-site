@@ -13,7 +13,7 @@ import {
   Loader2,
   X
 } from 'lucide-react';
-import Papa from 'papaparse';
+import * as Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 
 interface EstoqueItem {
