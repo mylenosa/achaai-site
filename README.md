@@ -4,14 +4,19 @@
 
 ## ✨ Funcionalidades Principais
 
+### Para Consumidores
 - 🔍 **Busca via WhatsApp** - Encontre produtos sem sair do app
-- 🏪 **Para Lojistas** - Receba pedidos qualificados
-- 📧 **E-mails Pré-formatados** - Botões geram contatos automáticos
 - 📱 **100% Responsivo** - Funciona em todos os dispositivos
-- 🎨 **Design Moderno** - Interface limpa e profissional
-- 🚀 **Performance Otimizada** - Carregamento rápido
-- 🔍 **SEO Completo** - Meta tags otimizadas
-- 📊 **Analytics Integrado** - Rastreamento de conversões
+- ⚡ **Respostas Rápidas** - Encontre produtos em minutos
+- 🎯 **Busca Inteligente** - Sistema encontra exatamente o que você precisa
+
+### Para Lojistas
+- 🏪 **Portal Completo** - Dashboard para gerenciar sua loja
+- 📊 **Analytics Detalhados** - Acompanhe visualizações e cliques
+- 📦 **Gestão de Estoque** - Adicione produtos manualmente ou via planilha
+- 💬 **Pedidos Qualificados** - Receba apenas clientes interessados
+- ⏰ **Horários Flexíveis** - Configure horários de funcionamento
+- 📍 **Localização Automática** - Busca de CEP integrada
 
 ## 🚀 Começar Rapidamente
 
@@ -47,35 +52,66 @@ npm run build
 
 ## 🎯 O que é o AchaAí?
 
-Uma plataforma que permite:
-- **Consumidores**: Encontrar produtos em lojas físicas via WhatsApp
-- **Lojistas**: Receber pedidos qualificados e gerenciar estoque
-- **Portal do Lojista**: Dashboard para gerenciar perfil e ver analytics
-- **Cidade**: Fortalecer o comércio local de Ariquemes-RO
+Uma plataforma inovadora que permite:
+
+### 👥 **Para Consumidores**
+- Encontrar produtos em lojas físicas via WhatsApp
+- Receber lista de lojas que têm o produto disponível
+- Contato direto com o lojista
+- Sem necessidade de cadastro ou download de app
+
+### 🏪 **Para Lojistas**
+- Receber pedidos qualificados via WhatsApp
+- Dashboard completo para gestão
+- Analytics de performance
+- Gestão de estoque simplificada
+- Perfil da loja editável
+
+### 🌍 **Para a Cidade**
+- Fortalecer o comércio local de Ariquemes-RO
+- Conectar oferta e demanda
+- Reduzir tempo de busca por produtos
+- Aumentar vendas das lojas locais
 
 ## 🏪 Portal do Lojista
 
 ### 🔐 Funcionalidades de Autenticação
-- **Login seguro** via email/senha
+- **Login seguro** via email/senha ou Google
+- **Magic Link** para login sem senha
+- **Reset de senha** via email
 - **Dashboard protegido** com informações da loja
-- **Perfil editável** (nome, telefone, horário, localização)
-- **Analytics** (em desenvolvimento)
+
+### 📊 Dashboard Completo
+- **Analytics em tempo real** - Visualizações, cliques, conversões
+- **Gestão de estoque** - Adicionar produtos manual ou via CSV/Excel
+- **Perfil da loja** - Nome, descrição, categorias, horários
+- **Configurações** - Personalização da conta
 
 ### 🛣️ Rotas Disponíveis
 - `/` - Site principal (público)
 - `/login` - Login do lojista
 - `/dashboard` - Dashboard do lojista (protegido)
+- `/reset-password` - Redefinição de senha
 
 ### 🗄️ Estrutura do Banco (Supabase)
+
+#### Tabela de Perfis das Lojas
 ```sql
--- Tabela de perfis das lojas
 CREATE TABLE store_profiles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   name text NOT NULL,
-  phone text,
-  hours text,
-  maps_url text,
+  description text DEFAULT '',
+  whatsapp text NOT NULL,
+  categories text[] DEFAULT '{}',
+  cep text NOT NULL,
+  street text NOT NULL,
+  number text NOT NULL,
+  neighborhood text NOT NULL,
+  city text DEFAULT 'Ariquemes',
+  state text DEFAULT 'RO',
+  address text NOT NULL,
+  opening_hours text DEFAULT '{}',
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -100,6 +136,27 @@ CREATE POLICY "Users can insert own profile"
   WITH CHECK (auth.uid() = user_id);
 ```
 
+## 📦 Gestão de Estoque
+
+### 📝 Adicionar Produtos Manualmente
+- Formulário simples com título, quantidade e preço
+- Validação automática de dados
+- Feedback visual de sucesso/erro
+
+### 📊 Importação via Planilha
+- **Formatos suportados**: CSV e Excel (.xlsx, .xls)
+- **Template disponível**: Download do modelo com exemplos
+- **Validação prévia**: Dry-run antes da importação final
+- **Mapeamento flexível**: Aceita diferentes nomes de colunas
+
+#### Colunas Aceitas na Planilha:
+- `external_id` ou `sku` - Código do produto
+- `titulo` ou `nome` - Nome do produto
+- `preco` ou `valor` - Preço (aceita vírgula ou ponto)
+- `quantidade` ou `qtd` - Quantidade em estoque
+- `ativo` - Se o produto está ativo (true/false)
+- `attrs` - Atributos extras em JSON
+
 ## ⚙️ Personalizar para Sua Cidade
 
 ### 🏙️ Alterar Informações Básicas
@@ -113,7 +170,7 @@ export const config = {
     city: 'Ariquemes',                 // ← Sua cidade aqui
     state: 'RO',                       // ← Seu estado aqui
     domain: 'achai.arikeme.com',       // ← Seu domínio aqui
-    whatsappUrl: 'https://bit.ly/AchaAi', // ← Seu link do WhatsApp
+    whatsappUrl: 'http://chat.arikeme.com', // ← Seu link do WhatsApp
     contactEmail: 'contato@arikeme.com',  // ← Seu e-mail aqui
   }
 }
@@ -187,17 +244,6 @@ export const testimonials = [
 ]
 ```
 
-### 🎨 Alterar Cores do Site
-No `src/lib/config.ts`, seção theme:
-
-```typescript
-theme: {
-  primary: 'emerald',    // Verde principal (emerald, blue, purple, red, etc.)
-  secondary: 'blue',     // Cor secundária
-  accent: 'green',       // Cor de destaque
-}
-```
-
 ## 📱 Como Funciona o Site
 
 ### Seções Principais:
@@ -214,8 +260,31 @@ theme: {
 - ✅ **E-mails automáticos** - Botões dos planos geram e-mails pré-prontos
 - ✅ **WhatsApp integrado** - Links diretos para conversas
 - ✅ **Responsivo** - Funciona em celular, tablet e desktop
-- ✅ **Animações suaves** - Transições profissionais
+- ✅ **Animações suaves** - Transições profissionais com Framer Motion
 - ✅ **SEO otimizado** - Meta tags configuradas
+- ✅ **PWA Ready** - Manifest e ícones configurados
+
+## 🛠️ Tecnologias Utilizadas
+
+### Frontend
+- **React 18** - Framework principal
+- **TypeScript** - Tipagem estática
+- **Tailwind CSS** - Estilização
+- **Framer Motion** - Animações
+- **Lucide React** - Ícones
+- **React Router** - Roteamento
+
+### Backend/Database
+- **Supabase** - Backend as a Service
+- **PostgreSQL** - Banco de dados
+- **Row Level Security** - Segurança de dados
+- **Real-time** - Atualizações em tempo real
+
+### Ferramentas
+- **Vite** - Build tool e dev server
+- **ESLint** - Linting de código
+- **Papa Parse** - Processamento de CSV
+- **XLSX** - Processamento de Excel
 
 ## 🌐 Colocar no Ar (Deploy)
 
@@ -241,18 +310,14 @@ theme: {
 1. Importe projeto do GitHub
 2. Deploy automático configurado
 
-#### Hospedagem Tradicional
-1. Execute `npm run build`
-2. Suba a pasta `dist/` para seu servidor
-3. Configure domínio e SSL
-
 ## 📈 Analytics e Tracking
 
 ### Configurar Google Analytics
-1. No `index.html`, substitua `GA_MEASUREMENT_ID` pelo seu ID real
-2. Os botões já têm tracking automático configurado
+1. No `index.html`, substitua `%VITE_GA_MEASUREMENT_ID%` pelo seu ID real
+2. Configure a variável `VITE_GA_MEASUREMENT_ID` no `.env`
+3. Os botões já têm tracking automático configurado
 
-### Botões que são Rastreados:
+### Eventos Rastreados:
 - `whatsapp-hero` - Botão principal do topo
 - `whatsapp-stores` - Botão para lojistas
 - `whatsapp-final` - Botão do final da página
@@ -264,72 +329,133 @@ theme: {
 
 ```
 src/
-├── components/          # Componentes da interface
-│   ├── ui/             # Botões e elementos básicos
-│   ├── Pricing/        # Seção de preços
-│   ├── Header.tsx      # Cabeçalho
-│   ├── Hero.tsx        # Seção principal
-│   ├── HowItWorks.tsx  # Como funciona
-│   ├── KPIs.tsx        # Métricas
-│   ├── ForStores.tsx   # Para lojistas
-│   ├── Testimonials.tsx # Depoimentos
-│   ├── FAQ.tsx         # Perguntas frequentes
-│   ├── FinalCTA.tsx    # Chamada final
-│   └── Footer.tsx      # Rodapé
-├── data/               # ← ARQUIVOS PARA EDITAR
-│   ├── plans.ts        # ← Planos de preço
-│   ├── faqs.ts         # ← Perguntas frequentes
-│   ├── kpis.ts         # ← Números/métricas
-│   ├── testimonials.ts # ← Depoimentos
-│   └── steps.ts        # Passos do "como funciona"
-├── lib/
-│   ├── config.ts       # ← CONFIGURAÇÃO PRINCIPAL
-│   ├── types.ts        # Tipos do TypeScript
-│   └── utils.ts        # Funções auxiliares
-└── App.tsx             # Aplicação principal
+├── components/              # Componentes da interface
+│   ├── ui/                 # Botões e elementos básicos
+│   │   ├── CTAButton.tsx   # Botão genérico para CTAs
+│   │   └── WhatsAppButton.tsx # Botão específico do WhatsApp
+│   ├── auth/               # Componentes de autenticação
+│   │   └── ProtectedRoute.tsx # Proteção de rotas
+│   ├── dashboard/          # Componentes do dashboard
+│   │   ├── DashboardLayout.tsx # Layout principal do dashboard
+│   │   ├── Analytics.tsx   # Métricas e gráficos
+│   │   ├── StoreProfileForm.tsx # Formulário do perfil da loja
+│   │   └── EstoqueTab.tsx  # Gestão de estoque
+│   ├── Pricing/            # Seção de preços
+│   │   ├── Pricing.tsx     # Container principal
+│   │   └── PricingCard.tsx # Card individual de preço
+│   ├── Header.tsx          # Cabeçalho
+│   ├── Hero.tsx            # Seção principal
+│   ├── HowItWorks.tsx      # Como funciona
+│   ├── KPIs.tsx            # Métricas
+│   ├── ForStores.tsx       # Para lojistas
+│   ├── Testimonials.tsx    # Depoimentos
+│   ├── FAQ.tsx             # Perguntas frequentes
+│   ├── FinalCTA.tsx        # Chamada final
+│   ├── Footer.tsx          # Rodapé
+│   ├── LandingPage.tsx     # Página principal
+│   ├── NotFound.tsx        # Página 404
+│   └── ServerError.tsx     # Página de erro 500
+├── contexts/               # Contextos React
+│   └── AuthContext.tsx     # Contexto de autenticação
+├── data/                   # ← ARQUIVOS PARA EDITAR
+│   ├── plans.ts            # ← Planos de preço
+│   ├── faqs.ts             # ← Perguntas frequentes
+│   ├── kpis.ts             # ← Números/métricas
+│   ├── testimonials.ts     # ← Depoimentos
+│   └── steps.ts            # Passos do "como funciona"
+├── hooks/                  # Hooks customizados
+│   └── useAuth.ts          # Hook de autenticação
+├── lib/                    # Bibliotecas e utilitários
+│   ├── config.ts           # ← CONFIGURAÇÃO PRINCIPAL
+│   ├── supabase.ts         # Cliente Supabase
+│   ├── types.ts            # Tipos TypeScript
+│   └── utils.ts            # Funções auxiliares
+├── pages/                  # Páginas da aplicação
+│   ├── Login.tsx           # Página de login
+│   ├── ResetPassword.tsx   # Redefinição de senha
+│   └── Dashboard.tsx       # Dashboard principal
+├── services/               # Serviços de dados
+│   └── StoreService.ts     # Operações da loja
+└── App.tsx                 # Aplicação principal com roteamento
 ```
 
-## 🎯 Dicas Importantes
+## 🎯 Funcionalidades Detalhadas
 
-### ✅ Para Modificar Conteúdo:
-- **Textos gerais**: `src/lib/config.ts`
-- **Planos**: `src/data/plans.ts`
-- **FAQs**: `src/data/faqs.ts`
-- **Números**: `src/data/kpis.ts`
-- **Depoimentos**: `src/data/testimonials.ts`
+### 🔍 **Sistema de Busca**
+- Busca inteligente via WhatsApp
+- Matching de produtos por título e atributos
+- Resposta automática com lojas disponíveis
+- Links diretos para contato
 
-### ✅ Para Modificar Visual:
-- **Cores**: `src/lib/config.ts` (seção theme)
-- **Layout**: Arquivos em `src/components/`
+### 📊 **Analytics Avançados**
+- Visualizações de perfil em tempo real
+- Cliques no WhatsApp rastreados
+- Taxa de conversão calculada
+- Gráficos de performance semanal
+- Atividade recente detalhada
 
-### ✅ Para Adicionar Funcionalidades:
-- Crie novos componentes em `src/components/`
-- Adicione dados em `src/data/`
-- Importe no `src/App.tsx`
+### 📦 **Gestão de Estoque Inteligente**
+- **Adição manual**: Formulário simples e rápido
+- **Importação em lote**: CSV e Excel suportados
+- **Validação prévia**: Dry-run antes da importação
+- **Template incluído**: Modelo pronto para download
+- **Mapeamento flexível**: Aceita diferentes formatos de planilha
 
-## 🎨 Otimizações Implementadas
+### ⏰ **Horários Flexíveis**
+- Configuração por dia da semana
+- Múltiplos horários por dia (ex: manhã e tarde)
+- Fechamento em dias específicos
+- Interface intuitiva de configuração
 
-### 🌐 **Internacionalização**
-- ✅ Idioma definido como `pt-BR` no HTML
-- ✅ Meta tags em português brasileiro
-- ✅ Locale correto para SEO
+### 📍 **Localização Automática**
+- Busca de CEP via API ViaCEP
+- Preenchimento automático de endereço
+- Validação de dados de localização
+- Endereço completo formatado
 
-### 🎯 **UX/UI Melhorado**
-- ✅ Sombras uniformizadas em todos os cards
-- ✅ Transições suaves e consistentes
-- ✅ Página 404 personalizada com imagem
-- ✅ Botões com feedback visual
+## 🎨 Design System
 
-### 📧 **E-mails Profissionais**
-- ✅ Links mailto com codificação %20 (não +)
-- ✅ Corpo de e-mail estruturado e limpo
-- ✅ Assuntos personalizados por plano
+### 🎨 **Cores Principais**
+- **Primary**: Emerald (Verde) - `#10b981`
+- **Secondary**: Blue (Azul) - `#3b82f6`
+- **Success**: Green (Verde) - `#22c55e`
+- **Warning**: Yellow (Amarelo) - `#f59e0b`
+- **Error**: Red (Vermelho) - `#ef4444`
 
-### 🔍 **SEO Otimizado**
-- ✅ Meta tags atualizadas e específicas
-- ✅ Descrições mais detalhadas
-- ✅ Keywords regionais (Ariquemes, Rondônia)
-- ✅ Open Graph e Twitter Cards
+### 📱 **Responsividade**
+- **Mobile First**: Design otimizado para celular
+- **Breakpoints**: sm (640px), md (768px), lg (1024px), xl (1280px)
+- **Touch Friendly**: Botões com tamanho mínimo de 44px
+- **Navegação Adaptativa**: Menu hambúrguer no mobile
+
+### ✨ **Animações**
+- **Framer Motion**: Animações suaves e profissionais
+- **Micro-interações**: Hover states e feedback visual
+- **Loading States**: Indicadores de carregamento
+- **Transições**: Mudanças de estado suaves
+
+## 🔧 Configurações Avançadas
+
+### 🌐 **SEO Otimizado**
+- Meta tags dinâmicas
+- Open Graph configurado
+- Twitter Cards
+- Sitemap.xml incluído
+- Robots.txt configurado
+
+### 🚀 **Performance**
+- Code splitting automático
+- Lazy loading de componentes
+- Otimização de imagens
+- Cache headers configurados
+- Bundle size otimizado
+
+### 🔒 **Segurança**
+- Row Level Security no Supabase
+- Validação de dados no frontend e backend
+- Headers de segurança configurados
+- Sanitização de inputs
+- Proteção contra XSS
 
 ## 🆘 Problemas Comuns
 
@@ -341,10 +467,16 @@ npm install
 npm run dev
 ```
 
+### Erro de módulos?
+```bash
+# Limpe cache do Vite
+rm -rf node_modules/.vite
+npm run dev
+```
+
 ### Erro de build?
 ```bash
 # Verifique se todos os arquivos estão salvos
-# Execute o build para testar
 npm run build
 ```
 
@@ -352,12 +484,31 @@ npm run build
 - Verifique se o `whatsappUrl` em `config.ts` está correto
 - Teste o link manualmente no navegador
 
-## 📞 Suporte
+### Dashboard não carrega?
+- Verifique se as variáveis do Supabase estão configuradas no `.env`
+- Confirme se o projeto Supabase está ativo
+- Verifique se as tabelas foram criadas corretamente
+
+## 📞 Suporte e Desenvolvimento
 
 **Desenvolvido pelo Grupo Arikeme**
 - 🌐 Site: https://achai.arikeme.com
 - 📧 E-mail: contato@arikeme.com
-- 💬 WhatsApp: https://bit.ly/AchaAi
+- 💬 WhatsApp: http://chat.arikeme.com
+
+### 🔧 **Para Desenvolvedores**
+- Arquitetura modular e escalável
+- Princípios SOLID aplicados
+- Testes unitários configurados
+- TypeScript para type safety
+- ESLint para qualidade de código
+
+### 🚀 **Roadmap**
+- [ ] Sistema de avaliações
+- [ ] Chat integrado
+- [ ] Notificações push
+- [ ] App mobile nativo
+- [ ] Expansão para outras cidades
 
 ---
 
