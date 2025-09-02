@@ -3,14 +3,9 @@ import { motion } from 'framer-motion';
 import { 
   Save, 
   Store, 
-  Phone, 
   Clock, 
   MapPin, 
-  Tag,
-  Instagram,
-  Facebook,
   MessageCircle,
-  Search,
   Loader2
 } from 'lucide-react';
 import { storeService, StoreProfile } from '../../services/StoreService';
@@ -38,10 +33,7 @@ export const StoreProfileForm: React.FC = () => {
     id: '',
     name: '',
     description: '',
-    phone: '',
     whatsapp: '',
-    instagram: '',
-    facebook: '',
     categories: [],
     cep: '',
     street: '',
@@ -171,12 +163,6 @@ export const StoreProfileForm: React.FC = () => {
     const phone = e.target.value.replace(/\D/g, '');
     const formatted = phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
     setProfile(prev => ({ ...prev, phone: formatted }));
-  };
-
-  const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const whatsapp = e.target.value.replace(/\D/g, '');
-    const formatted = whatsapp.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    setProfile(prev => ({ ...prev, whatsapp: formatted }));
   };
 
   const handleCategoryToggle = (category: string) => {
@@ -566,27 +552,11 @@ export const StoreProfileForm: React.FC = () => {
           className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6"
         >
           <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-            <Phone className="w-6 h-6 text-emerald-600" />
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Contatos</h2>
+            <MessageCircle className="w-6 h-6 text-emerald-600" />
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Contato</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                <Phone className="w-4 h-4 inline mr-1" />
-                Telefone Fixo
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={profile.phone}
-                onChange={handlePhoneChange}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
-                placeholder="(69) 99999-9999"
-              />
-            </div>
-
+          <div className="max-w-md">
             <div>
               <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-2">
                 <MessageCircle className="w-4 h-4 inline mr-1" />
@@ -602,38 +572,9 @@ export const StoreProfileForm: React.FC = () => {
                 className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="(69) 99999-9999"
               />
-            </div>
-
-            <div>
-              <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 mb-2">
-                <Instagram className="w-4 h-4 inline mr-1" />
-                Instagram
-              </label>
-              <input
-                type="text"
-                id="instagram"
-                name="instagram"
-                value={profile.instagram}
-                onChange={handleChange}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
-                placeholder="@sualojainstagram"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="facebook" className="block text-sm font-medium text-gray-700 mb-2">
-                <Facebook className="w-4 h-4 inline mr-1" />
-                Facebook
-              </label>
-              <input
-                type="text"
-                id="facebook"
-                name="facebook"
-                value={profile.facebook}
-                onChange={handleChange}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
-                placeholder="facebook.com/sualoja"
-              />
+              <p className="text-xs text-gray-500 mt-1">
+                Este será o número usado pelos clientes para entrar em contato
+              </p>
             </div>
           </div>
         </motion.div>

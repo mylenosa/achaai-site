@@ -7,10 +7,7 @@ export interface StoreProfile {
   user_id: string;
   name: string;
   description: string;
-  phone: string;
   whatsapp: string;
-  instagram: string;
-  facebook: string;
   categories: string[];
   cep: string;
   street: string;

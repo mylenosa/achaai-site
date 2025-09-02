@@ -9,18 +9,23 @@ import {
   X,
   Search,
   ChevronDown,
-  User
+  User,
+  Package
 } from 'lucide-react';
 import { useAuthContext } from '../../hooks/useAuth';
 import { Analytics } from './Analytics';
 import { StoreProfileForm } from './StoreProfileForm';
+import { EstoqueTab } from './EstoqueTab';
 import { config } from '../../lib/config';
 
 export const DashboardLayout: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('analytics'); // Padrão: Analytics
+  const [activeTab, setActiveTab] = useState('geral'); // Padrão: Geral
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { user, signOut } = useAuthContext();
+  const { user, signOut, isConfigured } = useAuthContext();
+  
+  // TODO: Buscar loja_id real do usuário via Supabase
+  const lojaId = user?.id || 'temp-loja-id';
 
   const handleSignOut = async () => {
     try {
@@ -32,7 +37,8 @@ export const DashboardLayout: React.FC = () => {
   };
 
   const menuItems = [
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'geral', label: 'Geral', icon: BarChart3 },
+    { id: 'estoque', label: 'Estoque', icon: Package },
     { id: 'profile', label: 'Perfil da Loja', icon: Store },
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
@@ -174,7 +180,8 @@ export const DashboardLayout: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {activeTab === 'analytics' && <Analytics />}
+            {activeTab === 'geral' && <Analytics />}
+            {activeTab === 'estoque' && <EstoqueTab lojaId={lojaId} />}
             {activeTab === 'profile' && <StoreProfileForm />}
             {activeTab === 'settings' && (
               <div className="space-y-6">

@@ -1,0 +1,5 @@
+external_id,titulo,preco,quantidade,ativo,attrs
+SKU001,Tinta Spray Vermelha,15.90,10,true,"{""cor"":""vermelho"",""marca"":""Colorgin""}"
+SKU002,WD-40 300ml,25.50,5,true,"{""volume"":""300ml"",""tipo"":""lubrificante""}"
+SKU003,Parafuso Phillips 3x20,0.50,100,true,"{""tamanho"":""3x20"",""material"":""aço""}"
+SKU004,Martelo 500g,35.00,3,false,"{""peso"":""500g"",""cabo"":""madeira""}"
