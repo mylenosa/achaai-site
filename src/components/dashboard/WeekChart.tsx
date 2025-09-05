@@ -26,14 +26,6 @@ export const WeekChart: React.FC<WeekChartProps> = ({ data }) => {
           <div className="absolute top-full right-4 border-4 border-transparent border-t-gray-900" />
         </div>
       </div>
-        </h3>
-        
-        {/* Tooltip */}
-        <div className="absolute -top-2 right-0 transform -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-          Soma das impressões por dia da semana (últimas 4 semanas).
-          <div className="absolute top-full right-4 border-4 border-transparent border-t-gray-900" />
-        </div>
-      </div>
       
       <div className="flex items-end justify-between h-48 gap-2">
         {data.map((value, index) => {

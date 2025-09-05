@@ -16,44 +16,6 @@ interface TopItemsProps {
   qtd: number;
 }
 
-type SortField = 'nome' | 'exibicoes' | 'conversas' | 'ctr' | 'meuPreco' | 'mediana';
-type SortDirection = 'asc' | 'desc';
-
-export const TopItems: React.FC<TopItemsProps> = ({ 
-  meus, 
-  geral, 
-  onAddPrice, 
-  onViewInStock, 
-  onAddItem 
-}) => {
-  const [activeTab, setActiveTab] = useState<'meus' | 'geral'>('meus');
-  const [sortField, setSortField] = useState<SortField>('conversas');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-    }
-  };
-
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return null;
-    return sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />;
-  };
-
-  const sortedMeus = [...meus].sort((a, b) => {
-    let aVal: any, bVal: any;
-    
-    switch (sortField) {
-      case 'nome':
-        aVal = a.nome.toLowerCase();
-        bVal = b.nome.toLowerCase();
-        break;
-      case 'exibicoes':
-        aVal = a.exibicoes;
         bVal = b.exibicoes;
         break;
       case 'conversas':

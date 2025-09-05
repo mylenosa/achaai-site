@@ -3,7 +3,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, MapPin, Eye, TrendingUp } from 'lucide-react';
-import { MessageCircle, MapPin, Eye, TrendingUp } from 'lucide-react';
 import { formatNumber, formatPct, getDeltaColor, getDeltaIcon } from '../../utils/formatters';
 
 const iconMap = {
