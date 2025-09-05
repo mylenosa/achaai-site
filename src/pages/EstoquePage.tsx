@@ -131,6 +131,7 @@ export const EstoquePage: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [lastDeleted, setLastDeleted] = useState<Item | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
   const [importModal, setImportModal] = useState<ImportModalState>({
     isOpen: false,
     file: null,
@@ -216,24 +217,34 @@ export const EstoquePage: React.FC = () => {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
 
-    if (window.confirm(`Excluir "${item.title}"?`)) {
-      setLastDeleted(item);
-      setItems(prev => prev.filter(i => i.id !== itemId));
-      
-      addToast({
-        type: 'info',
-        message: 'Item excluído',
-        action: {
-          label: 'Desfazer',
-          onClick: () => {
-            if (lastDeleted) {
-              setItems(prev => [...prev, lastDeleted]);
-              setLastDeleted(null);
-            }
+    setItemToDelete(item);
+  };
+
+  const confirmDelete = () => {
+    if (!itemToDelete) return;
+
+    setLastDeleted(itemToDelete);
+    setItems(prev => prev.filter(i => i.id !== itemToDelete.id));
+    
+    addToast({
+      type: 'info',
+      message: 'Item excluído',
+      action: {
+        label: 'Desfazer',
+        onClick: () => {
+          if (lastDeleted) {
+            setItems(prev => [...prev, lastDeleted]);
+            setLastDeleted(null);
           }
         }
-      });
-    }
+      }
+    });
+
+    setItemToDelete(null);
+  };
+
+  const cancelDelete = () => {
+    setItemToDelete(null);
   };
 
   const saveItem = (item: Partial<Item>) => {
@@ -345,7 +356,24 @@ export const EstoquePage: React.FC = () => {
   };
 
   const downloadTemplate = () => {
-    excelService.generateTemplate();
+    const data = [
+      ['Item', 'Preço (opcional)'],
+      ['Tinta Spray Vermelha 400ml', '15,90'],
+      ['WD-40 300ml', '25.50'],
+      ['Parafuso Phillips 3x20', '']
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Estoque');
+    
+    // Set column widths
+    ws['!cols'] = [
+      { width: 30 }, // Item column
+      { width: 15 }  // Price column
+    ];
+    
+    XLSX.writeFile(wb, 'modelo_estoque.xlsx');
   };
 
   const resetMockData = () => {
@@ -451,7 +479,7 @@ export const EstoquePage: React.FC = () => {
               onClick={openImportModal}
               className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
             >
-              <Upload className="w-4 h-4" />
+              ⬆️
               Importar
             </button>
           </div>
@@ -544,7 +572,6 @@ export const EstoquePage: React.FC = () => {
                     onClick={downloadTemplate}
                     className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium text-sm"
                   >
-                    <FileText className="w-4 h-4" />
                     📄 Baixar modelo (.xlsx)
                   </button>
                 </div>
@@ -590,6 +617,43 @@ export const EstoquePage: React.FC = () => {
                   onClick={closeImportModal}
                   disabled={importModal.isImporting}
                   className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {itemToDelete && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Confirmar Exclusão
+              </h3>
+              
+              <p className="text-gray-600 mb-6">
+                Tem certeza que deseja excluir <strong>"{itemToDelete.title}"</strong>?
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-colors font-medium"
+                >
+                  Sim, excluir
+                </button>
+                <button
+                  onClick={cancelDelete}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancelar
                 </button>
