@@ -59,10 +59,10 @@ export const Dashboard: React.FC = () => {
 
   // KPIs configuration
   const kpiConfigs = [
-    { key: 'whatsapp', title: 'WhatsApp', icon: MessageCircle },
-    { key: 'mapa', title: 'Mapa', icon: MapPin },
-    { key: 'impressoes', title: 'Impressões', icon: Eye },
-    { key: 'ctr', title: 'CTR', icon: TrendingUp }
+    { key: 'whatsapp', title: 'WhatsApp' },
+    { key: 'mapa', title: 'Mapa' },
+    { key: 'impressoes', title: 'Impressões' },
+    { key: 'ctr', title: 'CTR' }
   ];
 
   return (
@@ -73,9 +73,6 @@ export const Dashboard: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-1 text-sm sm:text-base">
             Acompanhe o desempenho da sua loja
-            <span className="ml-2 text-xs text-gray-500">
-              (Últimos {periodo === '7d' ? '7 dias' : '30 dias'})
-            </span>
           </p>
         </div>
         
@@ -106,24 +103,31 @@ export const Dashboard: React.FC = () => {
 
       {/* KPIs */}
       {kpis && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-4">
           {kpiConfigs.map((config, index) => (
             <KPICard
               key={config.key}
               title={config.title}
               value={kpis[config.key as keyof KPIData] as number}
               delta={kpis.deltaKpis[config.key as keyof typeof kpis.deltaKpis]}
-              icon={config.icon}
               index={index}
             />
           ))}
         </div>
       )}
 
-      {/* Week Chart */}
-      <WeekChart data={weekData} />
+      {/* Row 2: Chart + Activity */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
+        <div className="xl:col-span-8">
+          <WeekChart data={weekData} />
+        </div>
+        <div className="xl:col-span-4 space-y-4">
+          <RecentActivity activities={activities} />
+          <NoResultTips tips={tips} onAddItem={handleAddItem} />
+        </div>
+      </div>
 
-      {/* Top Items */}
+      {/* Row 3: Top Items (full width) */}
       <TopItems
         meus={topMeus}
         geral={topGeral}
@@ -131,19 +135,6 @@ export const Dashboard: React.FC = () => {
         onViewInStock={handleViewInStock}
         onAddItem={handleAddItem}
       />
-
-      {/* Bottom Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-        {/* Recent Activity */}
-        <div className="xl:col-span-2">
-          <RecentActivity activities={activities} />
-        </div>
-
-        {/* No Result Tips */}
-        <div>
-          <NoResultTips tips={tips} onAddItem={handleAddItem} />
-        </div>
-      </div>
     </div>
   );
 };

@@ -12,13 +12,13 @@ interface RecentActivityProps {
 export const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => {
   const getActivityIcon = (tipo: AtividadeRecente['tipo']) => {
     switch (tipo) {
-      case 'CLIQUE_WHATSAPP':
+      case 'WPP':
         return <MessageCircle className="w-4 h-4 text-green-500" />;
-      case 'CLIQUE_MAPA':
+      case 'MAPA':
         return <MapPin className="w-4 h-4 text-blue-500" />;
-      case 'BUSCA_EXECUTADA':
+      case 'BUSCA':
         return <Search className="w-4 h-4 text-purple-500" />;
-      case 'RESULTADO_MOSTRADO':
+      case 'MOSTRADO':
         return <Eye className="w-4 h-4 text-orange-500" />;
       default:
         return <div className="w-4 h-4 bg-gray-400 rounded-full" />;
@@ -26,12 +26,12 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) =>
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 max-h-96 flex flex-col">
       <h3 className="text-lg font-semibold text-gray-900 mb-6">
         Atividade Recente
       </h3>
       
-      <div className="space-y-4 max-h-96 overflow-y-auto">
+      <div className="space-y-4 overflow-y-auto flex-1">
         {activities.map((activity, index) => (
           <motion.div
             key={activity.id}
@@ -48,7 +48,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) =>
                 {activity.texto}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                {formatRelTime(activity.tempo)}
+                há {formatRelTime(activity.ts)}
               </p>
             </div>
           </motion.div>

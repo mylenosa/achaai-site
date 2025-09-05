@@ -41,10 +41,10 @@ export const formatRelTime = (date: Date): string => {
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffMinutes < 1) return 'agora';
-  if (diffMinutes < 60) return `${diffMinutes} min atrás`;
-  if (diffHours < 24) return `${diffHours}h atrás`;
-  if (diffDays < 7) return `${diffDays}d atrás`;
+  if (diffMinutes < 1) return '1 min';
+  if (diffMinutes < 60) return `${diffMinutes} min`;
+  if (diffHours < 24) return `${diffHours}h`;
+  if (diffDays < 7) return `${diffDays}d`;
   
   return date.toLocaleDateString('pt-BR', { 
     day: '2-digit', 

@@ -1,242 +1,278 @@
-// Single Responsibility: Serviço dedicado para dados do dashboard
-// Open/Closed: Extensível para diferentes fontes de dados
-export interface KPIData {
-  whatsapp: number;
-  mapa: number;
-  impressoes: number;
-  ctr: number;
-  deltaKpis: {
-    whatsapp: number;
-    mapa: number;
-    impressoes: number;
-    ctr: number;
-  };
-}
-
-export interface TopItemMeu {
-  nome: string;
-  exibicoes: number;
-  conversas: number;
-  diffPct: number | null;
-  meuPreco?: number | null;
-  mediana: number | null;
-}
-
-export interface TopItemGeral {
-  nome: string;
-  mediana?: number | null;
-  n: number;
-  hasMine: boolean;
-}
-
-export interface AtividadeRecente {
-  id: string;
-  tipo: 'BUSCA' | 'MOSTRADO' | 'WPP' | 'MAPA';
-  texto: string;
-  ts: Date;
-  termo?: string;
-}
-
-export interface TipSemResultado {
-  termo: string;
-  qtd: number;
-}
-
-// Interface Segregation: Interface específica para cada tipo de dado
-export interface DashboardDataProvider {
-  getKPIs(periodo: '7d' | '30d'): KPIData;
-  getBarrasSemana(): number[];
-  getTopItensMeus(periodo: '7d' | '30d'): TopItemMeu[];
-  getTopItensGeral(periodo: '7d' | '30d'): TopItemGeral[];
-  getAtividadeRecente(periodo: '7d' | '30d'): AtividadeRecente[];
-  getTipsSemResultado(periodo: '7d' | '30d'): TipSemResultado[];
-}
-
-// Liskov Substitution: Implementação mock que pode ser substituída por implementação real
-export class MockDashboardProvider implements DashboardDataProvider {
-  private random(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  private randomFloat(min: number, max: number): number {
-    return Math.random() * (max - min) + min;
-  }
-
-  getKPIs(periodo: '7d' | '30d'): KPIData {
-    const multiplier = periodo === '30d' ? 4 : 1;
-    
-    const whatsapp = this.random(20, 80) * multiplier;
-    const mapa = this.random(30, 120) * multiplier;
-    const impressoes = this.random(800, 2000) * multiplier;
-    const ctr = ((whatsapp + mapa) / Math.max(impressoes, 1)) * 100;
-
-    // Deltas simulados
-    const deltaKpis = {
-      whatsapp: this.randomFloat(-20, 25),
-      mapa: this.randomFloat(-15, 30),
-      impressoes: this.randomFloat(-10, 20),
-      ctr: this.randomFloat(-5, 15)
-    };
-
-    return { whatsapp, mapa, impressoes, ctr, deltaKpis };
-  }
-
-  getBarrasSemana(): number[] {
-    return Array.from({ length: 7 }, () => this.random(80, 300));
-  }
-
-  getTopItensMeus(periodo: '7d' | '30d'): TopItemMeu[] {
-    const items = [
-      'Tinta Spray Vermelha 400ml',
-      'WD-40 300ml',
-      'Parafuso Phillips 3x20',
-      'Martelo 500g',
-      'Furadeira Bosch',
-      'Chave de Fenda',
-      'Fita Isolante',
-      'Cola Branca',
-      'Prego 2x10',
-      'Lixa d\'água'
-    ];
-
-    const multiplier = periodo === '30d' ? 4 : 1;
-
-    return items.slice(0, 10).map(nome => {
-      const exibicoes = this.random(10, 100) * multiplier;
-      const conversas = this.random(1, Math.floor(exibicoes * 0.3));
-      const meuPreco = Math.random() > 0.3 ? this.randomFloat(5, 200) : null;
-      const mediana = Math.random() > 0.2 ? this.randomFloat(8, 180) : null;
-      
-      let diffPct = null;
-      if (meuPreco && mediana) {
-        diffPct = ((meuPreco - mediana) / mediana) * 100;
-      }
-
-      return { nome, exibicoes, conversas, diffPct, meuPreco, mediana };
-    }).sort((a, b) => b.conversas - a.conversas);
-  }
-
-  getTopItensGeral(periodo: '7d' | '30d'): TopItemGeral[] {
-    const items = [
-      'Tinta Spray Azul 400ml',
-      'Parafuso Fenda 4x30',
-      'Martelo 300g',
-      'Chave Inglesa 10"',
-      'Fita Dupla Face',
-      'Cola Epóxi',
-      'Prego 3x15',
-      'Lixa Ferro 120',
-      'Broca 6mm',
-      'Abraçadeira Plástica'
-    ];
-
-    return items.slice(0, 10).map(nome => {
-      const n = this.random(3, 15);
-      const mediana = n >= 5 ? this.randomFloat(10, 150) : null;
-      const hasMine = Math.random() > 0.6;
-
-      return { nome, mediana, n, hasMine };
-    });
-  }
-
-  getAtividadeRecente(periodo: '7d' | '30d'): AtividadeRecente[] {
-    const tipos: AtividadeRecente['tipo'][] = ['BUSCA', 'MOSTRADO', 'WPP', 'MAPA'];
-
-    const termos = [
-      'tinta spray',
-      'parafuso',
-      'martelo',
-      'wd-40',
-      'furadeira',
-      'chave de fenda'
-    ];
-
-    const atividades: AtividadeRecente[] = [];
-    const maxItems = periodo === '30d' ? 20 : 15;
-
-    for (let i = 0; i < maxItems; i++) {
-      const tipo = tipos[this.random(0, tipos.length - 1)];
-      const ts = new Date(Date.now() - this.random(1, periodo === '30d' ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000));
-      
-      let texto = '';
-      let termo: string | undefined;
-
-      switch (tipo) {
-        case 'WPP':
-          texto = 'Cliente abriu conversa no WhatsApp';
-          break;
-        case 'MAPA':
-          texto = 'Cliente abriu rota no mapa';
-          break;
-        case 'BUSCA':
-          termo = termos[this.random(0, termos.length - 1)];
-          texto = `Busca por "${termo}"`;
-          break;
-        case 'MOSTRADO':
-          termo = termos[this.random(0, termos.length - 1)];
-          texto = `Sua loja apareceu para "${termo}"`;
-          break;
-      }
-
-      atividades.push({
-        id: `${i}`,
-        tipo,
-        texto,
-        ts,
-        termo
-      });
-    }
-
-    return atividades.sort((a, b) => b.ts.getTime() - a.ts.getTime());
-  }
-
-  getTipsSemResultado(periodo: '7d' | '30d'): TipSemResultado[] {
-    const termos = [
-      'tinta fosforescente',
-      'parafuso titanio',
-      'martelo pneumático',
-      'furadeira laser',
-      'chave inglesa 50mm'
-    ];
-
-    const maxItems = Math.min(5, this.random(2, 5));
+// Single Responsibility: Componente específico para tabela de top itens
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
     return termos.slice(0, maxItems).map(termo => ({ 
       termo, 
       qtd: this.random(2, 8) 
     }));
-  }
+  tipo: 'BUSCA' | 'MOSTRADO' | 'WPP' | 'MAPA';
+import { TopItemMeu, TopItemGeral } from '../../services/DashboardService';
+  ts: Date;
+interface TopItemsProps {
+  geral: TopItemGeral[];
+  mediana?: number | null;
+  onViewInStock: (itemName: string) => void;
+  onAddItem: (itemName: string) => void;
+  qtd: number;
 }
 
-// Dependency Inversion: Serviço que depende de abstração
-export class DashboardService {
-  constructor(private provider: DashboardDataProvider) {}
+type SortField = 'nome' | 'exibicoes' | 'conversas' | 'ctr' | 'meuPreco' | 'mediana';
+type SortDirection = 'asc' | 'desc';
 
-  getKPIs(periodo: '7d' | '30d'): KPIData {
-    return this.provider.getKPIs(periodo);
-  }
+export const TopItems: React.FC<TopItemsProps> = ({ 
+  meus, 
+  geral, 
+  onAddPrice, 
+  onViewInStock, 
+  onAddItem 
+}) => {
+  const [activeTab, setActiveTab] = useState<'meus' | 'geral'>('meus');
+  const [sortField, setSortField] = useState<SortField>('conversas');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-  getBarrasSemana(): number[] {
-    return this.provider.getBarrasSemana();
-  }
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
 
-  getTopItensMeus(periodo: '7d' | '30d'): TopItemMeu[] {
-    return this.provider.getTopItensMeus(periodo);
-  }
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return null;
+    return sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />;
+  };
 
-  getTopItensGeral(periodo: '7d' | '30d'): TopItemGeral[] {
-    return this.provider.getTopItensGeral(periodo);
-  }
+  const sortedMeus = [...meus].sort((a, b) => {
+    let aVal: any, bVal: any;
+    
+    switch (sortField) {
+      case 'nome':
+        aVal = a.nome.toLowerCase();
+        bVal = b.nome.toLowerCase();
+        break;
+      case 'exibicoes':
+        aVal = a.exibicoes;
+        bVal = b.exibicoes;
+        break;
+      case 'conversas':
+        aVal = a.conversas;
+        bVal = b.conversas;
+        break;
+      case 'ctr':
+        aVal = a.ctr;
+        bVal = b.ctr;
+        break;
+      case 'meuPreco':
+        aVal = a.meuPreco ?? -1;
+        bVal = b.meuPreco ?? -1;
+        break;
+      case 'mediana':
+        aVal = a.mediana ?? -1;
+        bVal = b.mediana ?? -1;
+        break;
+      default:
+        return 0;
+    }
+    
+    if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
 
-  getAtividadeRecente(periodo: '7d' | '30d'): AtividadeRecente[] {
-    return this.provider.getAtividadeRecente(periodo);
-  }
+  const getDiffBadge = (diffPct: number | null) => {
+    if (diffPct === null) return null;
+    
+    const isPositive = diffPct > 0;
+    const color = isPositive ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50';
+    const icon = isPositive ? '↑' : '↓';
+    
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${color}`}>
+        {icon} {formatPct(Math.abs(diffPct), false)}
+      </span>
+    );
+  };
 
-  getTipsSemResultado(periodo: '7d' | '30d'): TipSemResultado[] {
-    return this.provider.getTipsSemResultado(periodo);
-  }
-}
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-gray-900">Top Itens</h3>
+        
+        {/* Segmented Control */}
+        <div className="bg-gray-100 rounded-xl p-1 flex">
+          <button
+            onClick={() => setActiveTab('meus')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === 'meus' 
+                ? 'bg-white text-gray-900 shadow-sm' 
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Meus
+          </button>
+          <button
+            onClick={() => setActiveTab('geral')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === 'geral' 
+                ? 'bg-white text-gray-900 shadow-sm' 
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Geral
+          </button>
+        </div>
+      </div>
 
-// Factory para criar instância configurada
-export const createDashboardService = (): DashboardService => {
-  return new DashboardService(new MockDashboardProvider());
+      {activeTab === 'meus' ? (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th 
+                  className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('nome')}
+                >
+                  <div className="flex items-center gap-1">
+                    Item
+                    {getSortIcon('nome')}
+                  </div>
+                </th>
+                <th 
+                  className="text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('exibicoes')}
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    Exibições
+                    {getSortIcon('exibicoes')}
+                  </div>
+                </th>
+                <th 
+                  className="text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('conversas')}
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    Conversas
+                    {getSortIcon('conversas')}
+                  </div>
+                </th>
+                <th 
+                  className="text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('ctr')}
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    CTR
+                    {getSortIcon('ctr')}
+                  </div>
+                </th>
+                <th 
+                  className="text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('meuPreco')}
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    Seu preço
+                    {getSortIcon('meuPreco')}
+                  </div>
+                </th>
+                <th 
+                  className="text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('mediana')}
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    Mediana (cidade)
+                    {getSortIcon('mediana')}
+                  </div>
+                </th>
+                <th className="text-center py-3 px-4 font-medium text-gray-700">Dif.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedMeus.map((item, index) => (
+                <motion.tr
+                  key={item.nome}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
+                  <td className="py-3 px-4 font-medium text-gray-900">{item.nome}</td>
+                  <td className="py-3 px-4 text-center text-gray-700">{formatNumber(item.exibicoes)}</td>
+                  <td className="py-3 px-4 text-center text-gray-700">{formatNumber(item.conversas)}</td>
+                  <td className="py-3 px-4 text-center text-gray-700">{formatPct(item.ctr, false)}</td>
+                  <td className="py-3 px-4 text-center">
+                    {item.meuPreco ? (
+                      <span className="text-gray-900">{formatBRL(item.meuPreco)}</span>
+                    ) : (
+                      <button
+                        onClick={() => onAddPrice(item.nome)}
+                        className="text-emerald-600 hover:text-emerald-700 text-sm underline"
+                      >
+                        adicionar preço
+                      </button>
+                    )}
+                  </td>
+                  <td className="py-3 px-4 text-center text-gray-700">{formatBRL(item.mediana)}</td>
+                  <td className="py-3 px-4 text-center">{getDiffBadge(item.diffPct)}</td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+          
+          {sortedMeus.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+    const tipos: AtividadeRecente['tipo'][] = ['BUSCA', 'MOSTRADO', 'WPP', 'MAPA'];
+              Nenhum item encontrado
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="text-left py-3 px-4 font-medium text-gray-700">Item</th>
+                <th className="text-center py-3 px-4 font-medium text-gray-700">Mediana (cidade)</th>
+                <th className="text-center py-3 px-4 font-medium text-gray-700">Lojas (n)</th>
+                <th className="text-center py-3 px-4 font-medium text-gray-700">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {geral.map((item, index) => (
+                <motion.tr
+                  key={item.nome}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+      const ts = new Date(Date.now() - this.random(1, periodo === '30d' ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000));
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <td className="py-3 px-4 font-medium text-gray-900">{item.nome}</td>
+        case 'WPP':
+                  <td className="py-3 px-4 text-center text-gray-700">
+          texto = 'Cliente abriu conversa no WhatsApp';
+        case 'MAPA':
+                  <td className="py-3 px-4 text-center">
+          texto = 'Cliente abriu rota no mapa';
+                        onClick={() => onViewInStock(item.nome)}
+        case 'BUSCA':
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+          texto = `Busca por "${termo}"`;
+                        <Eye className="w-4 h-4" />
+        case 'MOSTRADO':
+          texto = `Sua loja apareceu para "${termo}"`;
+                      </button>
+                        className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 text-sm"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Adicionar item
+        ts,
+                      </button>
+        termo
+              ))}
+            </tbody>
+          </table>
+    return atividades.sort((a, b) => b.ts.getTime() - a.ts.getTime());
+          
+            <div className="text-center py-8 text-gray-500">
+              Nenhum item encontrado
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
