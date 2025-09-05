@@ -15,8 +15,12 @@ import {
   RotateCcw,
   ChevronUp,
   ChevronDown,
-  DollarSign
+  X,
+  HelpCircle,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
+import { useAuthContext } from '../hooks/useAuth';
 import { Item, parseCurrency, formatCurrency, ageInDays, toTitleKey, generateInventoryTemplate, parseInventoryExcel } from '../lib/utils';
 
 // Business thresholds
@@ -89,6 +93,8 @@ const generateMockItems = (): Item[] => [
 ];
 
 export const EstoquePage: React.FC = () => {
+  const { dev } = useAuthContext();
+  
   const [items, setItems] = useState<Item[]>(() => {
     const saved = localStorage.getItem('inventory_items');
     return saved ? JSON.parse(saved) : generateMockItems();
@@ -108,6 +114,10 @@ export const EstoquePage: React.FC = () => {
   const [markAsAvailable, setMarkAsAvailable] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [showHelp, setShowHelp] = useState(() => {
+    return !localStorage.getItem('estoqueHelpDismissed');
+  });
+  const [showImportDetails, setShowImportDetails] = useState(false);
   
   const itemsPerPage = 50;
 
@@ -184,11 +194,28 @@ export const EstoquePage: React.FC = () => {
 
   // Filter chips configuration
   const filterChips = [
-    { id: 'all', label: 'Todos', count: items.length },
-    { id: 'available', label: 'Disponíveis', count: stats.available },
-    { id: 'unavailable', label: 'Indisponíveis', count: items.length - stats.available },
-    { id: 'outdated', label: 'A revisar (≥60d)', count: stats.outdated },
-    { id: 'no-price', label: 'Sem preço', count: items.filter(item => item.price === null).length }
+    { 
+      id: 'all', 
+      label: 'Todos', 
+      count: items.length 
+    },
+    { 
+      id: 'available', 
+      label: 'Disponíveis', 
+      count: stats.available 
+    },
+    { 
+      id: 'outdated', 
+      label: 'A revisar', 
+      count: stats.outdated,
+      tooltip: 'Itens sem confirmação recente (ex.: 60+ dias)'
+    },
+    { 
+      id: 'no-price', 
+      label: 'Sem preço', 
+      count: items.filter(item => item.price === null).length,
+      tooltip: 'Preço é opcional (apenas para analytics)'
+    }
   ];
 
   // Check if bulk confirm should be enabled
@@ -210,6 +237,11 @@ export const EstoquePage: React.FC = () => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
 
+  const dismissHelp = () => {
+    setShowHelp(false);
+    localStorage.setItem('estoqueHelpDismissed', 'true');
+  };
+
   // Sorting
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -223,6 +255,15 @@ export const EstoquePage: React.FC = () => {
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return null;
     return sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />;
+  };
+
+  // Format relative time
+  const formatRelativeTime = (days: number) => {
+    if (days === 0) return 'hoje';
+    if (days === 1) return 'há 1 dia';
+    if (days < 30) return `há ${days} dias`;
+    if (days < 60) return `há ${Math.floor(days / 30)} mês${Math.floor(days / 30) > 1 ? 'es' : ''}`;
+    return `há ${Math.floor(days / 30)} meses`;
   };
 
   // Get verification status color
@@ -457,7 +498,11 @@ export const EstoquePage: React.FC = () => {
       
       addToast({ 
         type: 'success', 
-        message: `Importados ${result.imported} • Atualizados ${result.updated} • Ignorados ${result.ignored}` 
+        message: `Importados ${result.imported} • Atualizados ${result.updated} • Ignorados ${result.ignored}`,
+        action: result.errors.length > 0 ? {
+          label: 'Ver detalhes',
+          onClick: () => setShowImportDetails(true)
+        } : undefined
       });
       
     } catch (error) {
@@ -533,9 +578,55 @@ export const EstoquePage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Estoque</h1>
+      <div className="relative">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Estoque</h1>
+          <div className="relative">
+            <button
+              onClick={() => setShowHelp(!showHelp)}
+              className="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+              title="Ajuda"
+            >
+              <HelpCircle className="w-5 h-5" />
+            </button>
+            
+            {/* Help Popover */}
+            <AnimatePresence>
+              {showHelp && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                  className="absolute top-8 left-0 w-80 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50"
+                >
+                  <div className="text-sm text-gray-700 leading-relaxed mb-3">
+                    Disponível liga/desliga. 'Última confirmação' fica OK por um período; depois vira 'A revisar'. 
+                    Importar ou editar confirma automaticamente. Use 'Confirmar disponibilidade' para resolver em lote.
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={dismissHelp}
+                      className="text-xs text-gray-500 hover:text-gray-700 underline"
+                    >
+                      Não mostrar novamente
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
         <p className="text-gray-600 mt-1 text-sm sm:text-base">Gerencie os produtos da sua loja</p>
+        
+        {/* DEV Reset Link */}
+        {dev && (
+          <button
+            onClick={resetMockData}
+            className="absolute top-0 right-0 text-xs text-gray-400 hover:text-gray-600 underline"
+          >
+            Reset mock
+          </button>
+        )}
       </div>
 
       {/* Toasts */}
@@ -596,17 +687,29 @@ export const EstoquePage: React.FC = () => {
         {/* Filter Chips */}
         <div className="flex flex-wrap gap-2 mb-4">
           {filterChips.map(chip => (
-            <button
+            <div
               key={chip.id}
-              onClick={() => setActiveFilter(chip.id as FilterType)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                activeFilter === chip.id
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className="relative group"
             >
-              {chip.label} ({chip.count})
-            </button>
+              <button
+                onClick={() => setActiveFilter(chip.id as FilterType)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  activeFilter === chip.id
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {chip.label}
+              </button>
+              
+              {/* Tooltip */}
+              {chip.tooltip && (
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                  {chip.tooltip}
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
@@ -620,37 +723,22 @@ export const EstoquePage: React.FC = () => {
             Novo item
           </button>
           
-          <button
-            onClick={confirmAllItems}
-            disabled={!canBulkConfirm}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors font-medium"
-          >
-            <CheckCircle className="w-4 h-4" />
-            Confirmar disponibilidade
-          </button>
+          {canBulkConfirm && (
+            <button
+              onClick={confirmAllItems}
+              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+            >
+              <CheckCircle className="w-4 h-4" />
+              Confirmar disponibilidade
+            </button>
+          )}
           
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+            className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+            title="Importar .xlsx"
           >
-            <Upload className="w-4 h-4" />
-            Importar .xlsx
-          </button>
-          
-          <button
-            onClick={generateInventoryTemplate}
-            className="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
-          >
-            <Download className="w-4 h-4" />
-            Baixar modelo
-          </button>
-          
-          <button
-            onClick={resetMockData}
-            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Reset mock
+            <Upload className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -671,6 +759,15 @@ export const EstoquePage: React.FC = () => {
               
               {!importResult ? (
                 <div className="space-y-4">
+                  <div className="text-center">
+                    <button
+                      onClick={generateInventoryTemplate}
+                      className="text-blue-600 hover:text-blue-700 text-sm underline"
+                    >
+                      Baixar modelo (.xlsx)
+                    </button>
+                  </div>
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Selecionar arquivo
@@ -728,7 +825,7 @@ export const EstoquePage: React.FC = () => {
                     </div>
                   </div>
                   
-                  {importResult.errors.length > 0 && (
+                  {importResult.errors.length > 0 && showImportDetails && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                       <h4 className="font-medium text-red-800 mb-2">Erros encontrados:</h4>
                       <div className="text-sm text-red-700 space-y-1 max-h-32 overflow-y-auto">
@@ -942,10 +1039,21 @@ export const EstoquePage: React.FC = () => {
                       <td className="py-3 px-4 text-center">
                         {daysOld !== null ? (
                           <div className="flex items-center justify-center gap-2">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${verificationStatus.color} ${verificationStatus.bg}`}>
-                              {verificationStatus.label}
-                            </span>
-                            <span className="text-xs text-gray-500">{daysOld}d</span>
+                            <div className="text-center">
+                              <div className="relative group">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${verificationStatus.color} ${verificationStatus.bg}`}>
+                                  {verificationStatus.label}
+                                </span>
+                                {/* Tooltip */}
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                                  {verificationStatus.label === 'OK' ? 'Confirmado recentemente' :
+                                   verificationStatus.label === 'A revisar' ? 'Sem confirmação recente (ex.: 60+ dias)' :
+                                   'Precisa de atenção (ex.: 120+ dias)'}
+                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                </div>
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">{formatRelativeTime(daysOld)}</div>
+                            </div>
                           </div>
                         ) : (
                           <span className="text-gray-400">-</span>
@@ -953,15 +1061,6 @@ export const EstoquePage: React.FC = () => {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1">
-                          {daysOld && daysOld > VERIFY_DAYS && (
-                            <button
-                              onClick={() => confirmItem(item.id)}
-                              className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded transition-colors"
-                              title="Confirmar agora"
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                            </button>
-                          )}
                           <button
                             onClick={() => setEditingItem(item)}
                             className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
@@ -1037,10 +1136,12 @@ export const EstoquePage: React.FC = () => {
                       <Clock className="w-4 h-4 text-gray-400" />
                       {daysOld !== null ? (
                         <div className="flex items-center gap-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${verificationStatus.color} ${verificationStatus.bg}`}>
-                            {verificationStatus.label}
-                          </span>
-                          <span className="text-xs text-gray-500">{daysOld}d</span>
+                          <div className="text-center">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${verificationStatus.color} ${verificationStatus.bg}`}>
+                              {verificationStatus.label}
+                            </span>
+                            <div className="text-xs text-gray-500 mt-1">{formatRelativeTime(daysOld)}</div>
+                          </div>
                         </div>
                       ) : (
                         <span className="text-gray-400">Não confirmado</span>
@@ -1048,14 +1149,6 @@ export const EstoquePage: React.FC = () => {
                     </div>
                     
                     <div className="flex items-center gap-1">
-                      {daysOld && daysOld > VERIFY_DAYS && (
-                        <button
-                          onClick={() => confirmItem(item.id)}
-                          className="p-1 text-green-600 hover:text-green-700 hover:bg-green-100 rounded transition-colors"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                        </button>
-                      )}
                       <button
                         onClick={() => setEditingItem(item)}
                         className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors"
@@ -1082,7 +1175,7 @@ export const EstoquePage: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-sm text-gray-600">
-              {stats.total} itens • {stats.available} disponíveis • {stats.outdated} a revisar
+              {stats.total} itens • {stats.available} disponíveis • {stats.outdated} desatualizados
             </div>
             
             {totalPages > 1 && (
