@@ -1,3 +1,4 @@
+// src/components/dashboard/KPICard.tsx
 // Single Responsibility: Componente específico para card de KPI
 // Interface Segregation: Props específicas e enxutas
 import React from 'react';
@@ -5,33 +6,32 @@ import { motion } from 'framer-motion';
 import { MessageCircle, MapPin, Eye, TrendingUp } from 'lucide-react';
 import { formatNumber, formatPct, getDeltaColor, getDeltaIcon } from '../../utils/formatters';
 
-const iconMap = {
-  'WhatsApp': MessageCircle,
-  'Mapa': MapPin,
-  'Impressões': Eye,
-  'CTR': TrendingUp
+type Title = 'WhatsApp' | 'Mapa' | 'Impressões' | 'CTR';
+
+const iconMap: Record<Title, React.ComponentType<{ className?: string }>> = {
+  WhatsApp: MessageCircle,
+  Mapa: MapPin,
+  Impressões: Eye,
+  CTR: TrendingUp,
 };
 
-const tooltipMap = {
-  'WhatsApp': 'Conversas iniciadas no período.',
-  'Mapa': 'Rotas abertas no período.',
-  'Impressões': 'Vezes que sua loja ou itens apareceram.',
-  'CTR': '(WhatsApp + Mapa) / Impressões.'
+const tooltipMap: Record<Title, string> = {
+  WhatsApp: 'Conversas iniciadas no período.',
+  Mapa: 'Rotas abertas no período.',
+  Impressões: 'Vezes que sua loja ou itens apareceram.',
+  CTR: '(WhatsApp + Mapa) / Impressões.',
 };
 
 interface KPICardProps {
-  title: string;
+  title: Title;
   value: number;
-  delta: number;
+  delta?: number;
+  index?: number;
 }
 
-export const KPICard: React.FC<KPICardProps> = ({ title, value, delta, index }) => {
-}
-export const KPICard: React.FC<KPICardProps> = ({ title, value, delta, index }) => {
-  const Icon = iconMap[title as keyof typeof iconMap];
-  const tooltip = tooltipMap[title as keyof typeof tooltipMap];
-
-  const tooltip = tooltipMap[title as keyof typeof tooltipMap];
+export const KPICard: React.FC<KPICardProps> = ({ title, value, delta = 0, index = 0 }) => {
+  const Icon = iconMap[title];
+  const tooltip = tooltipMap[title];
 
   return (
     <motion.div
@@ -41,15 +41,9 @@ export const KPICard: React.FC<KPICardProps> = ({ title, value, delta, index }) 
       className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 hover:shadow-md transition-shadow relative group"
     >
       {/* Tooltip */}
-      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+      <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
         {tooltip}
-        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-      </div>
-
-      {/* Tooltip */}
-      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-        {tooltip}
-        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
       </div>
 
       <div className="flex items-center justify-between mb-4">
@@ -61,7 +55,7 @@ export const KPICard: React.FC<KPICardProps> = ({ title, value, delta, index }) 
           <span>{formatPct(Math.abs(delta), false)}</span>
         </div>
       </div>
-      
+
       <div className="space-y-1">
         <h3 className="text-3xl font-bold text-gray-900">
           {title === 'CTR' ? formatPct(value, false) : formatNumber(value)}
@@ -71,5 +65,3 @@ export const KPICard: React.FC<KPICardProps> = ({ title, value, delta, index }) 
     </motion.div>
   );
 };
-
-export { KPICard }
