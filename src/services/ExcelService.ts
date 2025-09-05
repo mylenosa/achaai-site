@@ -143,13 +143,16 @@ export class ImportValidator {
 export class ExcelImportService {
   constructor(private processor: ExcelProcessor) {}
 
-  async importFile(file: File, existingItems: any[]): Promise<ImportResult> {
+  async importFile(file: File, existingItems: any[]): Promise<ImportResult & { updatedItems: any[] }> {
     const result: ImportResult = {
       imported: 0,
       updated: 0,
       ignored: 0,
       errors: []
     };
+
+    // Create a copy to avoid mutating the original array
+    const items = [...existingItems];
 
     try {
       const excelData = await this.processor.parseFile(file);
@@ -161,7 +164,7 @@ export class ExcelImportService {
 
         try {
           // Extract data from row (flexible column mapping)
-          const titleValue = row['Item'] || row['item'] || row['Produto'] || row['produto'] || '';
+          const titleValue = row['Item'] || row['item'] || row['titulo'] || row['Titulo'] || row['Produto'] || row['produto'] || '';
           const priceValue = row['Preço (opcional)'] || row['Preço'] || row['preco'] || row['Valor'] || row['valor'] || '';
 
           // Skip empty rows
@@ -197,14 +200,14 @@ export class ExcelImportService {
           }
 
           // Check if item exists (case-insensitive)
-          const existingIndex = existingItems.findIndex(item => 
+          const existingIndex = items.findIndex(item => 
             item.title.toLowerCase().trim() === titleKey
           );
 
           if (existingIndex >= 0) {
             // Update existing item
-            existingItems[existingIndex] = {
-              ...existingItems[existingIndex],
+            items[existingIndex] = {
+              ...items[existingIndex],
               price,
               updatedAt: new Date().toISOString()
             };
@@ -217,7 +220,7 @@ export class ExcelImportService {
               price,
               updatedAt: new Date().toISOString()
             };
-            existingItems.unshift(newItem);
+            items.unshift(newItem);
             result.imported++;
           }
         } catch (error) {
@@ -229,7 +232,7 @@ export class ExcelImportService {
       throw new Error(error instanceof Error ? error.message : 'Erro ao importar arquivo');
     }
 
-    return result;
+    return { ...result, updatedItems: items };
   }
 
   generateTemplate(): void {

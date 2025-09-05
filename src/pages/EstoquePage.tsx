@@ -328,10 +328,10 @@ export const EstoquePage: React.FC = () => {
     setImportModal(prev => ({ ...prev, isImporting: true }));
 
     try {
-      const result = await excelService.importFile(importModal.file, items);
+      const result = await excelService.importFile(importModal.file, [...items]);
       
       // Update items state
-      setItems([...items]);
+      setItems(result.updatedItems || [...items]);
       
       // Show success toast with details link
       const total = result.imported + result.updated + result.ignored;
@@ -479,7 +479,7 @@ export const EstoquePage: React.FC = () => {
               onClick={openImportModal}
               className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
             >
-              ⬆️
+              <Upload className="w-4 h-4" />
               Importar
             </button>
           </div>
@@ -572,7 +572,8 @@ export const EstoquePage: React.FC = () => {
                     onClick={downloadTemplate}
                     className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium text-sm"
                   >
-                    📄 Baixar modelo (.xlsx)
+                    <FileText className="w-4 h-4" />
+                    Baixar modelo (.xlsx)
                   </button>
                 </div>
                 
