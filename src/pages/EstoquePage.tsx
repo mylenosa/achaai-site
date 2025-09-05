@@ -15,10 +15,7 @@ import {
   RotateCcw,
   ChevronUp,
   ChevronDown,
-  X,
   HelpCircle,
-  ChevronUp,
-  ChevronDown
 } from 'lucide-react';
 import { useAuthContext } from '../hooks/useAuth';
 import { Item, parseCurrency, formatCurrency, ageInDays, toTitleKey, generateInventoryTemplate, parseInventoryExcel } from '../lib/utils';
