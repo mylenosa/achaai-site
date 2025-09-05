@@ -17,30 +17,29 @@ export interface TopItemMeu {
   nome: string;
   exibicoes: number;
   conversas: number;
-  ctr: number;
-  meuPreco: number | null;
-  mediana: number | null;
   diffPct: number | null;
+  meuPreco?: number | null;
+  mediana: number | null;
 }
 
 export interface TopItemGeral {
   nome: string;
-  mediana: number | null;
+  mediana?: number | null;
   n: number;
   hasMine: boolean;
 }
 
 export interface AtividadeRecente {
   id: string;
-  tipo: 'CLIQUE_WHATSAPP' | 'CLIQUE_MAPA' | 'BUSCA_EXECUTADA' | 'RESULTADO_MOSTRADO';
+  tipo: 'BUSCA' | 'MOSTRADO' | 'WPP' | 'MAPA';
   texto: string;
-  tempo: Date;
+  ts: Date;
   termo?: string;
-  posicao?: number;
 }
 
 export interface TipSemResultado {
   termo: string;
+  qtd: number;
 }
 
 // Interface Segregation: Interface específica para cada tipo de dado
@@ -105,7 +104,6 @@ export class MockDashboardProvider implements DashboardDataProvider {
     return items.slice(0, 10).map(nome => {
       const exibicoes = this.random(10, 100) * multiplier;
       const conversas = this.random(1, Math.floor(exibicoes * 0.3));
-      const ctr = (conversas / Math.max(exibicoes, 1)) * 100;
       const meuPreco = Math.random() > 0.3 ? this.randomFloat(5, 200) : null;
       const mediana = Math.random() > 0.2 ? this.randomFloat(8, 180) : null;
       
@@ -114,7 +112,7 @@ export class MockDashboardProvider implements DashboardDataProvider {
         diffPct = ((meuPreco - mediana) / mediana) * 100;
       }
 
-      return { nome, exibicoes, conversas, ctr, meuPreco, mediana, diffPct };
+      return { nome, exibicoes, conversas, diffPct, meuPreco, mediana };
     }).sort((a, b) => b.conversas - a.conversas);
   }
 
@@ -142,12 +140,7 @@ export class MockDashboardProvider implements DashboardDataProvider {
   }
 
   getAtividadeRecente(periodo: '7d' | '30d'): AtividadeRecente[] {
-    const tipos: AtividadeRecente['tipo'][] = [
-      'CLIQUE_WHATSAPP',
-      'CLIQUE_MAPA', 
-      'BUSCA_EXECUTADA',
-      'RESULTADO_MOSTRADO'
-    ];
+    const tipos: AtividadeRecente['tipo'][] = ['BUSCA', 'MOSTRADO', 'WPP', 'MAPA'];
 
     const termos = [
       'tinta spray',
@@ -163,27 +156,25 @@ export class MockDashboardProvider implements DashboardDataProvider {
 
     for (let i = 0; i < maxItems; i++) {
       const tipo = tipos[this.random(0, tipos.length - 1)];
-      const tempo = new Date(Date.now() - this.random(1, periodo === '30d' ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000));
+      const ts = new Date(Date.now() - this.random(1, periodo === '30d' ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000));
       
       let texto = '';
       let termo: string | undefined;
-      let posicao: number | undefined;
 
       switch (tipo) {
-        case 'CLIQUE_WHATSAPP':
-          texto = 'Cliente abriu WhatsApp';
+        case 'WPP':
+          texto = 'Cliente abriu conversa no WhatsApp';
           break;
-        case 'CLIQUE_MAPA':
-          texto = 'Cliente abriu mapa';
+        case 'MAPA':
+          texto = 'Cliente abriu rota no mapa';
           break;
-        case 'BUSCA_EXECUTADA':
+        case 'BUSCA':
           termo = termos[this.random(0, termos.length - 1)];
-          texto = `Busca por '${termo}'`;
+          texto = `Busca por "${termo}"`;
           break;
-        case 'RESULTADO_MOSTRADO':
+        case 'MOSTRADO':
           termo = termos[this.random(0, termos.length - 1)];
-          posicao = this.random(1, 3);
-          texto = `Você apareceu para '${termo}' (pos. ${posicao})`;
+          texto = `Sua loja apareceu para "${termo}"`;
           break;
       }
 
@@ -191,13 +182,12 @@ export class MockDashboardProvider implements DashboardDataProvider {
         id: `${i}`,
         tipo,
         texto,
-        tempo,
-        termo,
-        posicao
+        ts,
+        termo
       });
     }
 
-    return atividades.sort((a, b) => b.tempo.getTime() - a.tempo.getTime());
+    return atividades.sort((a, b) => b.ts.getTime() - a.ts.getTime());
   }
 
   getTipsSemResultado(periodo: '7d' | '30d'): TipSemResultado[] {
@@ -210,7 +200,10 @@ export class MockDashboardProvider implements DashboardDataProvider {
     ];
 
     const maxItems = Math.min(5, this.random(2, 5));
-    return termos.slice(0, maxItems).map(termo => ({ termo }));
+    return termos.slice(0, maxItems).map(termo => ({ 
+      termo, 
+      qtd: this.random(2, 8) 
+    }));
   }
 }
 

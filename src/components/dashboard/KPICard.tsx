@@ -2,24 +2,47 @@
 // Interface Segregation: Props específicas e enxutas
 import React from 'react';
 import { motion } from 'framer-motion';
+import { MessageCircle, MapPin, Eye, TrendingUp } from 'lucide-react';
 import { formatNumber, formatPct, getDeltaColor, getDeltaIcon } from '../../utils/formatters';
+
+const iconMap = {
+  'WhatsApp': MessageCircle,
+  'Mapa': MapPin,
+  'Impressões': Eye,
+  'CTR': TrendingUp
+};
+
+const tooltipMap = {
+  'WhatsApp': 'Conversas iniciadas no período.',
+  'Mapa': 'Rotas abertas no período.',
+  'Impressões': 'Vezes que sua loja ou itens apareceram.',
+  'CTR': '(WhatsApp + Mapa) / Impressões.'
+};
 
 interface KPICardProps {
   title: string;
   value: number;
   delta: number;
-  icon: React.ComponentType<{ className?: string }>;
   index: number;
 }
 
-export const KPICard: React.FC<KPICardProps> = ({ title, value, delta, icon: Icon, index }) => {
+export const KPICard: React.FC<KPICardProps> = ({ title, value, delta, index }) => {
+  const Icon = iconMap[title as keyof typeof iconMap];
+  const tooltip = tooltipMap[title as keyof typeof tooltipMap];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 hover:shadow-md transition-shadow relative group"
     >
+      {/* Tooltip */}
+      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+        {tooltip}
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+      </div>
+
       <div className="flex items-center justify-between mb-4">
         <div className="bg-emerald-50 rounded-xl p-3">
           <Icon className="w-6 h-6 text-emerald-600" />

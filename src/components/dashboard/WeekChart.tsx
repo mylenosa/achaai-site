@@ -14,10 +14,18 @@ export const WeekChart: React.FC<WeekChartProps> = ({ data }) => {
   const maxValue = Math.max(...data);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">
-        Impressões por dia da semana (últimas 4 semanas)
-      </h3>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 relative group">
+      <div className="relative">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">
+          Impressões por dia da semana (últimas 4 semanas)
+        </h3>
+        
+        {/* Tooltip */}
+        <div className="absolute -top-2 right-0 transform -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+          Soma das impressões por dia da semana (últimas 4 semanas).
+          <div className="absolute top-full right-4 border-4 border-transparent border-t-gray-900" />
+        </div>
+      </div>
       
       <div className="flex items-end justify-between h-48 gap-2">
         {data.map((value, index) => {
