@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
+  MessageCircle, 
+  MapPin, 
   Eye, 
-  Phone, 
-  Star, 
-  TrendingUp, 
-  Users, 
-  MessageCircle,
-  Calendar,
-  ShoppingBag
+  TrendingUp,
+  Clock,
+  Search,
+  AlertTriangle
 } from 'lucide-react';
 
 interface MetricCardProps {
@@ -21,78 +20,154 @@ interface MetricCardProps {
 
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, change, changeType, icon: Icon }) => {
   const changeColors = {
-    positive: 'text-green-600 bg-green-50',
-    negative: 'text-red-600 bg-red-50',
-    neutral: 'text-gray-600 bg-gray-50'
+    positive: 'text-green-600',
+    negative: 'text-red-600',
+    neutral: 'text-gray-600'
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
     >
       <div className="flex items-center justify-between mb-4">
-        <div className="bg-emerald-50 rounded-lg p-3">
+        <div className="bg-emerald-50 rounded-xl p-3">
           <Icon className="w-6 h-6 text-emerald-600" />
         </div>
-        <span className={`text-xs font-medium px-2 py-1 rounded-full ${changeColors[changeType]}`}>
-          {change}
-        </span>
       </div>
       
-      <h3 className="text-2xl font-bold text-gray-900 mb-1">{value}</h3>
-      <p className="text-sm text-gray-600">{title}</p>
+      <div className="space-y-1">
+        <h3 className="text-3xl font-bold text-gray-900">{value}</h3>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-600">{title}</p>
+          <span className={`text-sm font-medium ${changeColors[changeType]}`}>
+            {change}
+          </span>
+        </div>
+        <p className="text-xs text-gray-500">Atualizado agora</p>
+      </div>
     </motion.div>
   );
 };
 
 export const Analytics: React.FC = () => {
-  const metrics = [
-    {
-      title: 'Visualizações de Perfil',
-      value: '1,247',
-      change: '+12% esta semana',
-      changeType: 'positive' as const,
-      icon: Eye
-    },
-    {
-      title: 'Cliques no Contato',
-      value: '89',
-      change: '+5% esta semana',
-      changeType: 'positive' as const,
-      icon: Phone
-    },
-    {
-      title: 'Novas Avaliações',
-      value: '23',
-      change: '+3 esta semana',
-      changeType: 'positive' as const,
-      icon: Star
-    },
-    {
-      title: 'Taxa de Conversão',
-      value: '7.1%',
-      change: '-2% esta semana',
-      changeType: 'negative' as const,
-      icon: TrendingUp
+  const [period, setPeriod] = useState<'7d' | '30d'>('7d');
+
+  // Mock data que muda baseado no período
+  const getMetrics = (period: '7d' | '30d') => {
+    if (period === '7d') {
+      return [
+        {
+          title: 'Contatos (WhatsApp)',
+          value: '47',
+          change: '+12%',
+          changeType: 'positive' as const,
+          icon: MessageCircle
+        },
+        {
+          title: 'Cliques no Mapa',
+          value: '89',
+          change: '+8%',
+          changeType: 'positive' as const,
+          icon: MapPin
+        },
+        {
+          title: 'Impressões',
+          value: '1.2k',
+          change: '+15%',
+          changeType: 'positive' as const,
+          icon: Eye
+        },
+        {
+          title: 'CTR (%)',
+          value: '3.9%',
+          change: '-2%',
+          changeType: 'negative' as const,
+          icon: TrendingUp
+        }
+      ];
+    } else {
+      return [
+        {
+          title: 'Contatos (WhatsApp)',
+          value: '203',
+          change: '+18%',
+          changeType: 'positive' as const,
+          icon: MessageCircle
+        },
+        {
+          title: 'Cliques no Mapa',
+          value: '387',
+          change: '+22%',
+          changeType: 'positive' as const,
+          icon: MapPin
+        },
+        {
+          title: 'Impressões',
+          value: '5.1k',
+          change: '+25%',
+          changeType: 'positive' as const,
+          icon: Eye
+        },
+        {
+          title: 'CTR (%)',
+          value: '4.2%',
+          change: '+5%',
+          changeType: 'positive' as const,
+          icon: TrendingUp
+        }
+      ];
     }
+  };
+
+  const metrics = getMetrics(period);
+
+  const topSearchTerms = [
+    { term: 'tinta spray', count: 45, percentage: 100 },
+    { term: 'parafuso', count: 38, percentage: 84 },
+    { term: 'wd-40', count: 32, percentage: 71 },
+    { term: 'martelo', count: 28, percentage: 62 },
+    { term: 'furadeira', count: 24, percentage: 53 },
+    { term: 'chave de fenda', count: 21, percentage: 47 },
+    { term: 'fita isolante', count: 18, percentage: 40 },
+    { term: 'cola', count: 15, percentage: 33 },
+    { term: 'prego', count: 12, percentage: 27 },
+    { term: 'lixa', count: 9, percentage: 20 }
+  ];
+
+  const noResultTerms = [
+    'tinta fosforescente',
+    'parafuso titanio',
+    'martelo pneumático',
+    'furadeira laser',
+    'chave inglesa 50mm',
+    'fita dupla face industrial',
+    'cola epóxi transparente',
+    'prego galvanizado 10cm',
+    'lixa d\'água 2000',
+    'verniz marítimo'
   ];
 
   const recentActivity = [
-    { id: 1, action: 'Novo cliente visualizou seu perfil', time: '2 min atrás', type: 'view' },
-    { id: 2, action: 'Cliente clicou no WhatsApp', time: '15 min atrás', type: 'contact' },
-    { id: 3, action: 'Nova avaliação recebida (5 estrelas)', time: '1 hora atrás', type: 'review' },
-    { id: 4, action: 'Perfil apareceu em busca por "ferramentas"', time: '2 horas atrás', type: 'search' }
+    { id: 1, action: 'Cliente clicou no WhatsApp', time: '2 min atrás', type: 'contact' },
+    { id: 2, action: 'Busca por "tinta spray vermelha"', time: '5 min atrás', type: 'search' },
+    { id: 3, action: 'Cliente visualizou no mapa', time: '8 min atrás', type: 'view' },
+    { id: 4, action: 'Busca por "parafuso phillips"', time: '12 min atrás', type: 'search' },
+    { id: 5, action: 'Cliente clicou no WhatsApp', time: '15 min atrás', type: 'contact' },
+    { id: 6, action: 'Busca por "wd-40 300ml"', time: '18 min atrás', type: 'search' },
+    { id: 7, action: 'Cliente visualizou no mapa', time: '22 min atrás', type: 'view' },
+    { id: 8, action: 'Busca por "martelo 500g"', time: '25 min atrás', type: 'search' },
+    { id: 9, action: 'Cliente clicou no WhatsApp', time: '28 min atrás', type: 'contact' },
+    { id: 10, action: 'Busca por "furadeira bosch"', time: '32 min atrás', type: 'search' }
   ];
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'view': return <Eye className="w-4 h-4 text-blue-500" />;
       case 'contact': return <MessageCircle className="w-4 h-4 text-green-500" />;
-      case 'review': return <Star className="w-4 h-4 text-yellow-500" />;
-      case 'search': return <TrendingUp className="w-4 h-4 text-purple-500" />;
-      default: return <Calendar className="w-4 h-4 text-gray-500" />;
+      case 'search': return <Search className="w-4 h-4 text-blue-500" />;
+      case 'view': return <Eye className="w-4 h-4 text-purple-500" />;
+      default: return <Clock className="w-4 h-4 text-gray-500" />;
     }
   };
 
@@ -104,8 +179,29 @@ export const Analytics: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-1 text-sm sm:text-base">Acompanhe o desempenho da sua loja</p>
         </div>
-        <div className="bg-emerald-50 text-emerald-700 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium self-start sm:self-auto">
-          Última atualização: agora
+        
+        {/* Period Toggle */}
+        <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto">
+          <button
+            onClick={() => setPeriod('7d')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              period === '7d' 
+                ? 'bg-white text-gray-900 shadow-sm' 
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            7 dias
+          </button>
+          <button
+            onClick={() => setPeriod('30d')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              period === '30d' 
+                ? 'bg-white text-gray-900 shadow-sm' 
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            30 dias
+          </button>
         </div>
       </div>
 
@@ -123,47 +219,76 @@ export const Analytics: React.FC = () => {
         ))}
       </div>
 
-      {/* Gráfico Simples e Atividade Recente */}
+      {/* Seções de Dados */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
-        {/* Gráfico de Visualizações */}
+        {/* Termos mais buscados */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6"
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Visualizações dos Últimos 7 Dias</h3>
-            <div className="flex items-center text-xs sm:text-sm text-gray-600">
-              <TrendingUp className="w-4 h-4 mr-1" />
-              +12% vs semana anterior
-            </div>
-          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Termos mais buscados</h3>
           
-          {/* Gráfico Simples com Barras */}
-          <div className="space-y-3">
-            {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((day, index) => {
-              const values = [45, 52, 38, 67, 89, 34, 28];
-              const maxValue = Math.max(...values);
-              const percentage = (values[index] / maxValue) * 100;
-              
-              return (
-                <div key={day} className="flex items-center space-x-2 sm:space-x-3">
-                  <span className="text-xs sm:text-sm font-medium text-gray-600 w-6 sm:w-8">{day}</span>
-                  <div className="flex-1 bg-gray-100 rounded-full h-2 sm:h-3 relative overflow-hidden">
+          <div className="space-y-3 sm:space-y-4">
+            {topSearchTerms.map((item, index) => (
+              <motion.div
+                key={item.term}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.5 + index * 0.05 }}
+                className="flex items-center space-x-3"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-gray-900">{item.term}</span>
+                    <span className="text-xs text-gray-500">{item.count}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${percentage}%` }}
-                      transition={{ duration: 1, delay: index * 0.1 }}
-                      className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full"
+                      animate={{ width: `${item.percentage}%` }}
+                      transition={{ duration: 1, delay: 0.6 + index * 0.05 }}
+                      className="h-2 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full"
                     />
                   </div>
-                  <span className="text-xs sm:text-sm font-semibold text-gray-900 w-6 sm:w-8 text-right">
-                    {values[index]}
-                  </span>
                 </div>
-              );
-            })}
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Sem resultado */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6"
+        >
+          <div className="flex items-center gap-2 mb-4 sm:mb-6">
+            <AlertTriangle className="w-5 h-5 text-orange-500" />
+            <h3 className="text-lg font-semibold text-gray-900">Sem resultado</h3>
+          </div>
+          
+          <div className="space-y-2 sm:space-y-3">
+            {noResultTerms.map((term, index) => (
+              <motion.div
+                key={term}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.6 + index * 0.05 }}
+                className="flex items-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="w-2 h-2 bg-orange-400 rounded-full mr-3 flex-shrink-0" />
+                <span className="text-sm text-gray-700 leading-relaxed">{term}</span>
+              </motion.div>
+            ))}
+          </div>
+          
+          <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-100">
+            <p className="text-xs text-orange-700">
+              <strong>Dica:</strong> Considere adicionar estes produtos ao seu estoque para capturar mais vendas.
+            </p>
           </div>
         </motion.div>
 
@@ -171,28 +296,28 @@ export const Analytics: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6"
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6"
         >
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Atividade Recente</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Atividade recente</h3>
           
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-3 sm:space-y-4 max-h-96 overflow-y-auto">
             {recentActivity.map((activity, index) => (
               <motion.div
                 key={activity.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
-                className="flex items-start space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                transition={{ duration: 0.4, delay: 0.7 + index * 0.05 }}
+                className="flex items-start space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex-shrink-0 mt-1">
                   {getActivityIcon(activity.type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs sm:text-sm text-gray-900 leading-relaxed">
+                  <p className="text-sm text-gray-900 leading-relaxed">
                     {activity.action}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5 sm:mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     {activity.time}
                   </p>
                 </div>
@@ -201,53 +326,6 @@ export const Analytics: React.FC = () => {
           </div>
         </motion.div>
       </div>
-
-      {/* Cards de Ação Rápida */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.6 }}
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"
-      >
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 sm:p-6 text-white">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-base sm:text-lg font-semibold">Produtos em Destaque</h3>
-            <ShoppingBag className="w-6 h-6 opacity-80" />
-          </div>
-          <p className="text-emerald-100 text-xs sm:text-sm mb-3 sm:mb-4">
-            Promova seus produtos mais vendidos
-          </p>
-          <button className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors">
-            Gerenciar
-          </button>
-        </div>
-
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 sm:p-6 text-white">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-base sm:text-lg font-semibold">Horários Especiais</h3>
-            <Calendar className="w-6 h-6 opacity-80" />
-          </div>
-          <p className="text-blue-100 text-xs sm:text-sm mb-3 sm:mb-4">
-            Configure feriados e horários especiais
-          </p>
-          <button className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors">
-            Configurar
-          </button>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white md:col-span-2 xl:col-span-1">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h3 className="text-base sm:text-lg font-semibold">Suporte</h3>
-            <Users className="w-6 h-6 opacity-80" />
-          </div>
-          <p className="text-purple-100 text-xs sm:text-sm mb-3 sm:mb-4">
-            Precisa de ajuda? Fale conosco
-          </p>
-          <button className="bg-white/20 hover:bg-white/30 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors">
-            Contatar
-          </button>
-        </div>
-      </motion.div>
     </div>
   );
 };
