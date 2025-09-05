@@ -1,9 +1,28 @@
+// src/components/dashboard/TopItems.tsx
 // Single Responsibility: Componente específico para tabela de top itens
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronUp, ChevronDown, Plus, Eye, Info } from 'lucide-react';
-import { TopItemMeu, TopItemGeral } from '../../services/DashboardService';
 import { formatNumber, formatPct, formatBRL } from '../../utils/formatters';
+
+/** Tipos locais (evita acoplamento com services) */
+export interface TopItemMeu {
+  nome: string;
+  exibicoes: number;
+  conversas: number;
+  ctr: number;               // 0..1
+  meuPreco?: number | null;  // opcional
+  mediana?: number | null;   // opcional (pode não existir)
+  diffPct?: number | null;   // (meu - mediana)/mediana
+}
+
+export interface TopItemGeral {
+  nome: string;
+  mediana?: number | null;
+  lojas: number;             // número de lojas (n)
+  hasMine: boolean;          // se eu tenho esse item no meu estoque
+}
 
 interface TopItemsProps {
   meus: TopItemMeu[];
@@ -16,12 +35,12 @@ interface TopItemsProps {
 type SortField = 'nome' | 'exibicoes' | 'conversas' | 'diffPct';
 type SortDirection = 'asc' | 'desc';
 
-export const TopItems: React.FC<TopItemsProps> = ({ 
-  meus, 
-  geral, 
-  onAddPrice, 
-  onViewInStock, 
-  onAddItem 
+const TopItems: React.FC<TopItemsProps> = ({
+  meus,
+  geral,
+  onAddPrice,
+  onViewInStock,
+  onAddItem,
 }) => {
   const [activeTab, setActiveTab] = useState<'meus' | 'geral'>('meus');
   const [sortField, setSortField] = useState<SortField>('conversas');
@@ -31,7 +50,7 @@ export const TopItems: React.FC<TopItemsProps> = ({
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortField(field);
       setSortDirection('desc');
@@ -45,7 +64,7 @@ export const TopItems: React.FC<TopItemsProps> = ({
 
   const sortedMeus = [...meus].sort((a, b) => {
     let aVal: any, bVal: any;
-    
+
     switch (sortField) {
       case 'nome':
         aVal = a.nome.toLowerCase();
@@ -66,7 +85,7 @@ export const TopItems: React.FC<TopItemsProps> = ({
       default:
         return 0;
     }
-    
+
     if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
     if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
     return 0;
@@ -75,13 +94,11 @@ export const TopItems: React.FC<TopItemsProps> = ({
   const displayedMeus = showAll ? sortedMeus : sortedMeus.slice(0, 5);
   const displayedGeral = showAll ? geral : geral.slice(0, 5);
 
-  const getDiffBadge = (diffPct: number | null) => {
-    if (diffPct === null) return null;
-    
-    const isPositive = diffPct > 0;
-    const color = isPositive ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50';
-    const icon = isPositive ? '↑' : '↓';
-    
+  const DiffBadge = ({ diffPct }: { diffPct?: number | null }) => {
+    if (diffPct == null) return <span className="text-gray-400">—</span>;
+    const up = diffPct > 0;
+    const color = up ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50';
+    const icon = up ? '↑' : '↓';
     return (
       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${color}`}>
         {icon} {formatPct(Math.abs(diffPct), false)}
@@ -92,16 +109,21 @@ export const TopItems: React.FC<TopItemsProps> = ({
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Top Itens</h3>
-        
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Top Itens</h3>
+          <p className="text-sm text-gray-500 mt-1">
+            {activeTab === 'meus'
+              ? 'Itens da sua loja com exibições e conversas no período. Dif.% compara seu preço à mediana (anônimo).'
+              : 'Panorama da cidade: mediana de preço (n≥5) e nº de lojas. Use as ações para completar seu catálogo.'}
+          </p>
+        </div>
+
         {/* Segmented Control */}
         <div className="bg-gray-100 rounded-xl p-1 flex">
           <button
             onClick={() => setActiveTab('meus')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'meus' 
-                ? 'bg-white text-gray-900 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-900'
+              activeTab === 'meus' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             Meus
@@ -109,9 +131,7 @@ export const TopItems: React.FC<TopItemsProps> = ({
           <button
             onClick={() => setActiveTab('geral')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'geral' 
-                ? 'bg-white text-gray-900 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-900'
+              activeTab === 'geral' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             Geral
@@ -124,7 +144,7 @@ export const TopItems: React.FC<TopItemsProps> = ({
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th 
+                <th
                   className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('nome')}
                 >
@@ -133,50 +153,54 @@ export const TopItems: React.FC<TopItemsProps> = ({
                     {getSortIcon('nome')}
                   </div>
                 </th>
-                <th 
-                  className="text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+
+                <th
+                  className="relative group text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('exibicoes')}
                 >
                   <div className="flex items-center justify-center gap-1">
                     Exibições
                     {getSortIcon('exibicoes')}
                   </div>
-                   {/* Tooltip */}
-                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                     Cada vez que seu item apareceu para um cliente.
-                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-                   </div>
+                  {/* Tooltip */}
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    Cada vez que seu item apareceu para um cliente.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                  </div>
                 </th>
-                <th 
-                  className="text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+
+                <th
+                  className="relative group text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('conversas')}
                 >
                   <div className="flex items-center justify-center gap-1">
                     Conversas
                     {getSortIcon('conversas')}
                   </div>
-                   {/* Tooltip */}
-                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                     Aberturas de WhatsApp ou Mapa.
-                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-                   </div>
+                  {/* Tooltip */}
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    Aberturas de WhatsApp ou Mapa.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                  </div>
                 </th>
-                <th 
-                  className="text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors relative group"
+
+                <th
+                  className="relative group text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('diffPct')}
                 >
                   <div className="flex items-center justify-center gap-1">
                     Dif.%
                     {getSortIcon('diffPct')}
                   </div>
-                   {/* Tooltip */}
-                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                     Diferença entre seu preço e a mediana da cidade (anônimo).
-                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-                   </div>
+                  {/* Tooltip */}
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    Diferença entre seu preço e a mediana da cidade (anônimo).
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                  </div>
                 </th>
               </tr>
             </thead>
+
             <tbody>
               {displayedMeus.map((item, index) => (
                 <motion.tr
@@ -191,37 +215,41 @@ export const TopItems: React.FC<TopItemsProps> = ({
                   <td className="py-3 px-4 font-medium text-gray-900 relative">
                     <div className="flex items-center gap-2">
                       {item.nome}
-                      <button className="text-gray-400 hover:text-gray-600">
+                      <button className="text-gray-400 hover:text-gray-600" aria-label="Detalhes de preço">
                         <Info className="w-4 h-4" />
                       </button>
                     </div>
-                    
-                    {/* Popover com detalhes */}
+
+                    {/* Popover (detalhes) */}
                     {hoveredRow === item.nome && (
                       <div className="absolute left-full ml-2 top-0 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap z-20">
-                        <div><strong>Seu preço:</strong> {item.meuPreco ? formatBRL(item.meuPreco) : '—'}</div>
-                        <div><strong>Mediana (cidade):</strong> {item.mediana ? formatBRL(item.mediana) : '—'}</div>
-                        <div className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                        <div>
+                          <strong>Seu preço:</strong>{' '}
+                          {item.meuPreco != null ? formatBRL(item.meuPreco) : '—'}
+                        </div>
+                        <div>
+                          <strong>Mediana (cidade):</strong>{' '}
+                          {item.mediana != null ? formatBRL(item.mediana) : '—'}
+                        </div>
+                        <div className="absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
                       </div>
                     )}
                   </td>
+
                   <td className="py-3 px-4 text-center text-gray-700">{formatNumber(item.exibicoes)}</td>
                   <td className="py-3 px-4 text-center text-gray-700">{formatNumber(item.conversas)}</td>
                   <td className="py-3 px-4 text-center">
-                    {item.diffPct !== null ? getDiffBadge(item.diffPct) : <span className="text-gray-400">—</span>}
+                    <DiffBadge diffPct={item.diffPct} />
                   </td>
                 </motion.tr>
               ))}
             </tbody>
           </table>
-          
+
           {displayedMeus.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              Nenhum item encontrado
-            </div>
+            <div className="text-center py-8 text-gray-500">Nenhum item encontrado</div>
           )}
-          
-          {/* Ver todos link */}
+
           {sortedMeus.length > 5 && (
             <div className="text-center mt-4">
               <button
@@ -239,12 +267,12 @@ export const TopItems: React.FC<TopItemsProps> = ({
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">Item</th>
-                <th className="text-center py-3 px-4 font-medium text-gray-700 relative group">
+                <th className="relative group text-center py-3 px-4 font-medium text-gray-700">
                   Mediana (cidade)
                   {/* Tooltip */}
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                    Dados insuficientes na cidade.
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    Mostra quando há base suficiente (n≥5) e dados recentes.
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
                   </div>
                 </th>
                 <th className="text-center py-3 px-4 font-medium text-gray-700">Lojas (n)</th>
@@ -262,9 +290,9 @@ export const TopItems: React.FC<TopItemsProps> = ({
                 >
                   <td className="py-3 px-4 font-medium text-gray-900">{item.nome}</td>
                   <td className="py-3 px-4 text-center text-gray-700">
-                    {item.n >= 5 ? formatBRL(item.mediana) : '—'}
+                    {item.lojas >= 5 && item.mediana != null ? formatBRL(item.mediana) : '—'}
                   </td>
-                  <td className="py-3 px-4 text-center text-gray-700">{item.n}</td>
+                  <td className="py-3 px-4 text-center text-gray-700">{item.lojas}</td>
                   <td className="py-3 px-4 text-center">
                     {item.hasMine ? (
                       <button
@@ -288,14 +316,11 @@ export const TopItems: React.FC<TopItemsProps> = ({
               ))}
             </tbody>
           </table>
-          
+
           {displayedGeral.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              Nenhum item encontrado
-            </div>
+            <div className="text-center py-8 text-gray-500">Nenhum item encontrado</div>
           )}
-          
-          {/* Ver todos link */}
+
           {geral.length > 5 && (
             <div className="text-center mt-4">
               <button
@@ -311,3 +336,5 @@ export const TopItems: React.FC<TopItemsProps> = ({
     </div>
   );
 };
+
+export default TopItems;
