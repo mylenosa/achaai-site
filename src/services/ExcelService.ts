@@ -2,16 +2,16 @@
 // Open/Closed: Extensível para outros formatos de arquivo
 import * as XLSX from 'xlsx';
 
-export interface ExcelRow {
+interface ExcelRow {
   [key: string]: any;
 }
 
-export interface ExcelData {
+interface ExcelData {
   headers: string[];
   rows: ExcelRow[];
 }
 
-export interface ExcelProcessor {
+interface ExcelProcessor {
   parseFile(file: File): Promise<ExcelData>;
   generateTemplate(): void;
 }
@@ -48,7 +48,7 @@ const canon = (h: string) => {
 };
 
 // Liskov Substitution: Implementação específica para XLSX
-export class XLSXProcessor implements ExcelProcessor {
+class XLSXProcessor implements ExcelProcessor {
   async parseFile(file: File): Promise<ExcelData> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -133,13 +133,13 @@ export interface ImportResult {
   errors: ImportError[];
 }
 
-export interface ImportError {
+interface ImportError {
   line: number;
   reason: string;
 }
 
 // Single Responsibility: Validação de dados de importação
-export class ImportValidator {
+class ImportValidator {
   static validateTitle(title: string): string | null {
     const trimmed = title?.toString().trim();
     if (!trimmed || trimmed.length < 2) {

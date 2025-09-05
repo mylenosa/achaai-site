@@ -7,12 +7,12 @@ export interface AddressData {
   state: string;
 }
 
-export interface AddressProvider {
+interface AddressProvider {
   searchByCep(cep: string): Promise<AddressData | null>;
 }
 
 // Liskov Substitution: Implementação específica do ViaCEP
-export class ViaCepProvider implements AddressProvider {
+class ViaCepProvider implements AddressProvider {
   private readonly baseUrl = 'https://viacep.com.br/ws';
 
   async searchByCep(cep: string): Promise<AddressData | null> {
