@@ -41,6 +41,7 @@ interface KPICardProps {
 }
 
 export const KPICard: React.FC<KPICardProps> = ({ title, value, delta, index }) => {
+}
 export const KPICard: React.FC<KPICardProps> = ({ title, value, delta, index }) => {
   const Icon = iconMap[title as keyof typeof iconMap];
   const tooltip = tooltipMap[title as keyof typeof tooltipMap];
