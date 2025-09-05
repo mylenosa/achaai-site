@@ -35,7 +35,7 @@ interface TopItemsProps {
 type SortField = 'nome' | 'exibicoes' | 'conversas' | 'diffPct';
 type SortDirection = 'asc' | 'desc';
 
-const TopItems: React.FC<TopItemsProps> = ({
+export const TopItems: React.FC<TopItemsProps> = ({
   meus,
   geral,
   onAddPrice,
