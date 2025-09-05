@@ -95,7 +95,20 @@ export const TopItems: React.FC<TopItemsProps> = ({
   const displayedGeral = showAll ? geral : geral.slice(0, 5);
 
   const DiffBadge = ({ diffPct }: { diffPct?: number | null }) => {
+    if (meuPreco == null || mediana == null) {
+      return (
+        <div className="relative group">
+          <span className="text-gray-400">—</span>
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+            Adicione preço para comparar
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+          </div>
+        </div>
+      );
+    }
+    
     if (diffPct == null) return <span className="text-gray-400">—</span>;
+    
     const up = diffPct > 0;
     const color = up ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50';
     const icon = up ? '↑' : '↓';
@@ -113,8 +126,8 @@ export const TopItems: React.FC<TopItemsProps> = ({
           <h3 className="text-lg font-semibold text-gray-900">Top Itens</h3>
           <p className="text-sm text-gray-500 mt-1">
             {activeTab === 'meus'
-              ? 'Itens da sua loja com exibições e conversas no período. Dif.% compara seu preço à mediana (anônimo).'
-              : 'Panorama da cidade: mediana de preço (n≥5) e nº de lojas. Use as ações para completar seu catálogo.'}
+              ? 'Exibições e conversas; Dif.% = seu preço vs mediana (anônimo).'
+              : 'Panorama da cidade: mediana (n≥5) e nº de lojas.'}
           </p>
         </div>
 
@@ -147,6 +160,7 @@ export const TopItems: React.FC<TopItemsProps> = ({
                 <th
                   className="text-left py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('nome')}
+                  aria-sort={sortField === 'nome' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                 >
                   <div className="flex items-center gap-1">
                     Item
@@ -157,6 +171,7 @@ export const TopItems: React.FC<TopItemsProps> = ({
                 <th
                   className="relative group text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('exibicoes')}
+                  aria-sort={sortField === 'exibicoes' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                 >
                   <div className="flex items-center justify-center gap-1">
                     Exibições
@@ -172,6 +187,7 @@ export const TopItems: React.FC<TopItemsProps> = ({
                 <th
                   className="relative group text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('conversas')}
+                  aria-sort={sortField === 'conversas' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                 >
                   <div className="flex items-center justify-center gap-1">
                     Conversas
@@ -187,6 +203,7 @@ export const TopItems: React.FC<TopItemsProps> = ({
                 <th
                   className="relative group text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('diffPct')}
+                  aria-sort={sortField === 'diffPct' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                 >
                   <div className="flex items-center justify-center gap-1">
                     Dif.%
@@ -239,7 +256,7 @@ export const TopItems: React.FC<TopItemsProps> = ({
                   <td className="py-3 px-4 text-center text-gray-700">{formatNumber(item.exibicoes)}</td>
                   <td className="py-3 px-4 text-center text-gray-700">{formatNumber(item.conversas)}</td>
                   <td className="py-3 px-4 text-center">
-                    <DiffBadge diffPct={item.diffPct} />
+                    <DiffBadge diffPct={item.diffPct} meuPreco={item.meuPreco} mediana={item.mediana} />
                   </td>
                 </motion.tr>
               ))}

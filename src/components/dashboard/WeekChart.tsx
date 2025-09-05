@@ -12,9 +12,14 @@ export const WeekChart: React.FC<WeekChartProps> = ({ data }) => {
   
   const days = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   const maxValue = Math.max(...data);
+  const isEmpty = data.every(v => v === 0);
+
+  const handleRefresh = () => {
+    window.location.reload();
+  };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 relative group">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 relative group h-80">
       <div className="relative">
         <h3 className="text-lg font-semibold text-gray-900 mb-6">
           Impressões por dia da semana (últimas 4 semanas)
@@ -27,7 +32,18 @@ export const WeekChart: React.FC<WeekChartProps> = ({ data }) => {
         </div>
       </div>
       
-      <div className="flex items-end justify-between h-48 gap-2">
+      {isEmpty ? (
+        <div className="flex flex-col items-center justify-center h-48 text-gray-500">
+          <h4 className="text-lg font-medium mb-2">Sem dados no período</h4>
+          <button
+            onClick={handleRefresh}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            Atualizar
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-end justify-between h-48 gap-2">
         {data.map((value, index) => {
           const height = (value / maxValue) * 100;
           const isHovered = hoveredIndex === index;
@@ -65,7 +81,8 @@ export const WeekChart: React.FC<WeekChartProps> = ({ data }) => {
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

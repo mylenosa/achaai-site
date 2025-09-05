@@ -18,9 +18,10 @@ export interface KPIData {
 }
 
 export interface AtividadeRecente {
-  tipo: 'BUSCA' | 'MOSTRADO' | 'WPP' | 'MAPA';
+  tipo: 'BUSCA' | 'MOSTRADO' | 'WPP' | 'MAPA' | 'BUSCA_ZERO';
   ts: Date;             // quando ocorrer backend real, pode virar string ISO
   termo?: string;
+  count?: number;       // para BUSCA_ZERO
 }
 
 export interface TipSemResultado {
@@ -42,6 +43,7 @@ export interface TopItemGeral {
   nome: string;
   mediana: number;
   lojas: number;
+  hasMine: boolean;          // se eu tenho esse item no meu estoque
 }
 
 // ==== Helpers (mock) ====

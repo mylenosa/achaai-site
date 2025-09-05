@@ -7,9 +7,15 @@ import { formatRelTime } from '../../utils/formatters';
 
 interface RecentActivityProps {
   activities: AtividadeRecente[];
+  maxItems?: number;
+  showSeeAll?: boolean;
 }
 
-export const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => {
+export const RecentActivity: React.FC<RecentActivityProps> = ({ 
+  activities, 
+  maxItems = 5, 
+  showSeeAll = true 
+}) => {
   const getActivityIcon = (tipo: AtividadeRecente['tipo']) => {
     switch (tipo) {
       case 'WPP':
@@ -25,16 +31,36 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) =>
     }
   };
 
+  const getActivityText = (activity: AtividadeRecente) => {
+    switch (activity.tipo) {
+      case 'MAPA':
+        return 'Cliente abriu Mapa';
+      case 'WPP':
+        return 'Cliente abriu WhatsApp';
+      case 'MOSTRADO':
+        return `Você apareceu para '${activity.termo}'`;
+      case 'BUSCA_ZERO':
+        return `Sem resultado para '${activity.termo}' (${activity.count || 1})`;
+      case 'BUSCA':
+        return `Busca por '${activity.termo}'`;
+      default:
+        return 'Atividade desconhecida';
+    }
+  };
+
+  const displayedActivities = activities.slice(0, maxItems);
+  const hasMore = activities.length > maxItems;
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 max-h-96 flex flex-col">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 flex flex-col">
       <h3 className="text-lg font-semibold text-gray-900 mb-6">
         Atividade Recente
       </h3>
       
-      <div className="space-y-4 overflow-y-auto flex-1">
-        {activities.map((activity, index) => (
+      <div className="space-y-4 flex-1">
+        {displayedActivities.map((activity, index) => (
           <motion.div
-            key={activity.id}
+            key={`${activity.tipo}-${activity.ts.getTime()}-${index}`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: index * 0.05 }}
@@ -45,7 +71,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) =>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-gray-900 leading-relaxed">
-                {activity.texto}
+                {getActivityText(activity)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 há {formatRelTime(activity.ts)}
@@ -55,9 +81,17 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) =>
         ))}
       </div>
       
-      {activities.length === 0 && (
+      {displayedActivities.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           Nenhuma atividade recente
+        </div>
+      )}
+      
+      {showSeeAll && hasMore && (
+        <div className="text-center mt-4 pt-4 border-t border-gray-100">
+          <button className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+            Ver tudo
+          </button>
         </div>
       )}
     </div>
