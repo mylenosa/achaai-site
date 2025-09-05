@@ -19,20 +19,6 @@ const tooltipMap = {
   'CTR': '(WhatsApp + Mapa) / Impressões.'
 };
 
-const iconMap = {
-  'WhatsApp': MessageCircle,
-  'Mapa': MapPin,
-  'Impressões': Eye,
-  'CTR': TrendingUp
-};
-
-const tooltipMap = {
-  'WhatsApp': 'Conversas iniciadas no período.',
-  'Mapa': 'Rotas abertas no período.',
-  'Impressões': 'Vezes que sua loja ou itens apareceram.',
-  'CTR': '(WhatsApp + Mapa) / Impressões.'
-};
-
 interface KPICardProps {
   title: string;
   value: number;
@@ -85,3 +71,5 @@ export const KPICard: React.FC<KPICardProps> = ({ title, value, delta, index }) 
     </motion.div>
   );
 };
+
+export { KPICard }
