@@ -39,8 +39,6 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
         return 'Cliente abriu WhatsApp';
       case 'MOSTRADO':
         return `Você apareceu para '${activity.termo}'`;
-      case 'BUSCA_ZERO':
-        return `Sem resultado para '${activity.termo}' (${activity.count || 1})`;
       case 'BUSCA':
         return `Busca por '${activity.termo}'`;
       default:
