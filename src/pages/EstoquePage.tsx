@@ -193,24 +193,20 @@ export const EstoquePage: React.FC = () => {
   const filterChips = [
     { 
       id: 'all', 
-      label: 'Todos', 
-      count: items.length 
+      label: 'Todos'
     },
     { 
       id: 'available', 
-      label: 'Disponíveis', 
-      count: stats.available 
+      label: 'Disponíveis'
     },
     { 
       id: 'outdated', 
-      label: 'A revisar', 
-      count: stats.outdated,
+      label: 'A revisar',
       tooltip: 'Itens sem confirmação recente (ex.: 60+ dias)'
     },
     { 
       id: 'no-price', 
-      label: 'Sem preço', 
-      count: items.filter(item => item.price === null).length,
+      label: 'Sem preço',
       tooltip: 'Preço é opcional (apenas para analytics)'
     }
   ];
@@ -1014,7 +1010,6 @@ export const EstoquePage: React.FC = () => {
                             onClick={() => startEditingPrice(item)}
                             className="text-gray-400 hover:text-emerald-600 text-sm flex items-center gap-1 transition-colors"
                           >
-                            <DollarSign className="w-4 h-4" />
                             + Preço
                           </button>
                         )}
@@ -1108,7 +1103,6 @@ export const EstoquePage: React.FC = () => {
                             onClick={() => startEditingPrice(item)}
                             className="text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors"
                           >
-                            <DollarSign className="w-4 h-4" />
                             + Preço
                           </button>
                         )}
