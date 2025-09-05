@@ -356,20 +356,6 @@ export const EstoquePage: React.FC = () => {
     }
   };
 
-  const downloadTemplate = () => {
-    // Create a simple CSV template
-    const csvContent = 'titulo,preco\nTinta Spray Vermelha,15.90\nWD-40 300ml,25.50\nParafuso Phillips,\n';
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'modelo_estoque.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   // Empty state
   const showEmptyState = filteredAndSortedItems.length === 0;
 
