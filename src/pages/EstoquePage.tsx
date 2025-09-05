@@ -19,6 +19,10 @@ import {
 } from 'lucide-react';
 import { Item, parseCurrency, formatCurrency, ageInDays, toTitleKey, generateInventoryTemplate, parseInventoryExcel } from '../lib/utils';
 
+// Business thresholds
+const VERIFY_DAYS = 60;
+const OLD_DAYS = 120;
+
 type FilterType = 'all' | 'available' | 'unavailable' | 'outdated' | 'no-price';
 type SortField = 'title' | 'price' | 'verifiedAt';
 type SortDirection = 'asc' | 'desc';
@@ -47,40 +51,40 @@ const generateMockItems = (): Item[] => [
     title: 'Tinta Spray Vermelha 400ml',
     price: 15.90,
     available: true,
-    verifiedAt: '2025-01-25T10:00:00Z',
-    updatedAt: '2025-01-25T10:00:00Z'
+    verifiedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
+    updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
   },
   {
     id: '2',
     title: 'WD-40 300ml',
     price: 25.50,
     available: true,
-    verifiedAt: '2024-12-20T15:30:00Z',
-    updatedAt: '2024-12-20T15:30:00Z'
+    verifiedAt: new Date(Date.now() - 80 * 24 * 60 * 60 * 1000).toISOString(), // 80 days ago
+    updatedAt: new Date(Date.now() - 80 * 24 * 60 * 60 * 1000).toISOString()
   },
   {
     id: '3',
     title: 'Parafuso Phillips 3x20',
     price: null,
     available: false,
-    verifiedAt: '2025-01-20T08:00:00Z',
-    updatedAt: '2025-01-20T08:00:00Z'
+    verifiedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
+    updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   },
   {
     id: '4',
     title: 'Martelo 500g',
     price: 35.00,
     available: true,
-    verifiedAt: '2024-11-15T12:00:00Z',
-    updatedAt: '2024-11-15T12:00:00Z'
+    verifiedAt: new Date(Date.now() - 140 * 24 * 60 * 60 * 1000).toISOString(), // 140 days ago
+    updatedAt: new Date(Date.now() - 140 * 24 * 60 * 60 * 1000).toISOString()
   },
   {
     id: '5',
     title: 'Furadeira Bosch',
     price: 189.90,
     available: false,
-    verifiedAt: '2025-01-10T14:00:00Z',
-    updatedAt: '2025-01-10T14:00:00Z'
+    verifiedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days ago
+    updatedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
   }
 ];
 
@@ -127,7 +131,7 @@ export const EstoquePage: React.FC = () => {
         case 'unavailable':
           return !item.available;
         case 'outdated':
-          return item.verifiedAt && ageInDays(item.verifiedAt) > 30;
+          return item.verifiedAt && ageInDays(item.verifiedAt) > VERIFY_DAYS;
         case 'no-price':
           return item.price === null;
         default:
@@ -175,7 +179,7 @@ export const EstoquePage: React.FC = () => {
   const stats = {
     total: items.length,
     available: items.filter(item => item.available).length,
-    outdated: items.filter(item => item.verifiedAt && ageInDays(item.verifiedAt) > 30).length
+    outdated: items.filter(item => item.verifiedAt && ageInDays(item.verifiedAt) > VERIFY_DAYS).length
   };
 
   // Filter chips configuration
@@ -183,13 +187,13 @@ export const EstoquePage: React.FC = () => {
     { id: 'all', label: 'Todos', count: items.length },
     { id: 'available', label: 'Disponíveis', count: stats.available },
     { id: 'unavailable', label: 'Indisponíveis', count: items.length - stats.available },
-    { id: 'outdated', label: 'Desatualizados', count: stats.outdated },
+    { id: 'outdated', label: 'A revisar (≥60d)', count: stats.outdated },
     { id: 'no-price', label: 'Sem preço', count: items.filter(item => item.price === null).length }
   ];
 
   // Check if bulk confirm should be enabled
   const canBulkConfirm = items.some(item => 
-    !item.available || (item.verifiedAt && ageInDays(item.verifiedAt) > 30)
+    !item.available || (item.verifiedAt && ageInDays(item.verifiedAt) > VERIFY_DAYS)
   );
 
   // Toast management
@@ -222,12 +226,12 @@ export const EstoquePage: React.FC = () => {
   };
 
   // Get verification status color
-  const getVerificationColor = (item: Item) => {
+  const getVerificationStatus = (item: Item) => {
     if (!item.verifiedAt) return 'text-gray-400';
     const days = ageInDays(item.verifiedAt);
-    if (days < 7) return 'text-green-600';
-    if (days <= 30) return 'text-yellow-600';
-    return 'text-red-600';
+    if (days <= VERIFY_DAYS) return { color: 'text-green-600', bg: 'bg-green-100', label: 'OK' };
+    if (days <= OLD_DAYS) return { color: 'text-yellow-600', bg: 'bg-yellow-100', label: 'A revisar' };
+    return { color: 'text-red-600', bg: 'bg-red-100', label: 'Desatualizado' };
   };
 
   // Item actions
@@ -261,17 +265,20 @@ export const EstoquePage: React.FC = () => {
   const confirmAllItems = () => {
     const now = new Date().toISOString();
     const toUpdate = items.filter(item => 
-      !item.available || (item.verifiedAt && ageInDays(item.verifiedAt) > 30)
+      !item.available || (item.verifiedAt && ageInDays(item.verifiedAt) > VERIFY_DAYS)
     );
     
-    setItems(prev => prev.map(item => ({ 
-      ...item, 
-      verifiedAt: now,
-      available: true,
-      updatedAt: now
-    })));
+    setItems(prev => prev.map(item => {
+      const needsUpdate = !item.available || (item.verifiedAt && ageInDays(item.verifiedAt) > VERIFY_DAYS);
+      return needsUpdate ? {
+        ...item,
+        verifiedAt: now,
+        available: true,
+        updatedAt: now
+      } : item;
+    }));
     
-    addToast({ type: 'success', message: `${toUpdate.length} itens confirmados!` });
+    addToast({ type: 'success', message: `Disponibilidade confirmada para ${toUpdate.length} itens` });
   };
 
   const deleteItem = (itemId: string) => {
@@ -341,7 +348,15 @@ export const EstoquePage: React.FC = () => {
       // Update existing item
       setItems(prev => prev.map(existingItem => 
         existingItem.id === item.id 
-          ? { ...existingItem, ...item, updatedAt: now }
+          ? { 
+              ...existingItem, 
+              ...item, 
+              updatedAt: now,
+              // Auto-confirm if available and editing title/price
+              verifiedAt: (existingItem.available && (item.title !== existingItem.title || item.price !== existingItem.price)) 
+                ? now 
+                : existingItem.verifiedAt
+            }
           : existingItem
       ));
       addToast({ type: 'success', message: 'Item atualizado!' });
@@ -461,7 +476,52 @@ export const EstoquePage: React.FC = () => {
 
   const resetMockData = () => {
     if (window.confirm('Resetar todos os dados? Esta ação não pode ser desfeita.')) {
-      const mockItems = generateMockItems();
+      // Generate items with distributed verification dates (0-150 days)
+      const mockItems = Array.from({ length: 30 }, (_, i) => {
+        const daysAgo = Math.floor(Math.random() * 150);
+        const verifiedAt = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString();
+        
+        return {
+          id: `mock-${i + 1}`,
+          title: [
+            'Tinta Spray Vermelha 400ml',
+            'WD-40 300ml',
+            'Parafuso Phillips 3x20',
+            'Martelo 500g',
+            'Furadeira Bosch',
+            'Chave de Fenda',
+            'Alicate Universal',
+            'Fita Isolante',
+            'Cola Branca',
+            'Lixa d\'Água',
+            'Prego 2x12',
+            'Parafuso Fenda 4x30',
+            'Tinta Látex Branca',
+            'Pincel 2 polegadas',
+            'Rolo de Pintura',
+            'Massa Corrida',
+            'Verniz Incolor',
+            'Thinner',
+            'Aguarrás',
+            'Selador Acrílico',
+            'Broca 6mm',
+            'Broca 8mm',
+            'Broca 10mm',
+            'Parafusadeira',
+            'Nível de Bolha',
+            'Trena 5m',
+            'Esquadro',
+            'Régua 30cm',
+            'Estilete',
+            'Fita Dupla Face'
+          ][i] || `Produto ${i + 1}`,
+          price: Math.random() > 0.3 ? Math.round((Math.random() * 200 + 5) * 100) / 100 : null,
+          available: Math.random() > 0.2,
+          verifiedAt,
+          updatedAt: verifiedAt
+        };
+      });
+      
       setItems(mockItems);
       addToast({ type: 'success', message: 'Dados resetados!' });
     }
@@ -827,7 +887,7 @@ export const EstoquePage: React.FC = () => {
                     onClick={() => handleSort('verifiedAt')}
                   >
                     <div className="flex items-center justify-center gap-1">
-                      Confirmado há
+                      Última confirmação
                       {getSortIcon('verifiedAt')}
                     </div>
                   </th>
@@ -837,7 +897,7 @@ export const EstoquePage: React.FC = () => {
               <tbody>
                 {paginatedItems.map((item, index) => {
                   const daysOld = item.verifiedAt ? ageInDays(item.verifiedAt) : null;
-                  const verificationColor = getVerificationColor(item);
+                  const verificationStatus = getVerificationStatus(item);
                   
                   return (
                     <motion.tr
@@ -881,16 +941,19 @@ export const EstoquePage: React.FC = () => {
                       </td>
                       <td className="py-3 px-4 text-center">
                         {daysOld !== null ? (
-                          <span className={`font-medium ${verificationColor}`}>
-                            {daysOld > 30 ? 'Verificar' : `${daysOld}d`}
-                          </span>
+                          <div className="flex items-center justify-center gap-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${verificationStatus.color} ${verificationStatus.bg}`}>
+                              {verificationStatus.label}
+                            </span>
+                            <span className="text-xs text-gray-500">{daysOld}d</span>
+                          </div>
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1">
-                          {daysOld && daysOld > 30 && (
+                          {daysOld && daysOld > VERIFY_DAYS && (
                             <button
                               onClick={() => confirmItem(item.id)}
                               className="p-1 text-green-600 hover:text-green-700 hover:bg-green-50 rounded transition-colors"
@@ -926,7 +989,7 @@ export const EstoquePage: React.FC = () => {
           <div className="lg:hidden p-4 space-y-4">
             {paginatedItems.map((item, index) => {
               const daysOld = item.verifiedAt ? ageInDays(item.verifiedAt) : null;
-              const verificationColor = getVerificationColor(item);
+              const verificationStatus = getVerificationStatus(item);
               
               return (
                 <motion.div
@@ -973,16 +1036,19 @@ export const EstoquePage: React.FC = () => {
                     <div className="flex items-center gap-1 text-sm">
                       <Clock className="w-4 h-4 text-gray-400" />
                       {daysOld !== null ? (
-                        <span className={verificationColor}>
-                          {daysOld > 30 ? 'Verificar' : `Confirmado há ${daysOld}d`}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${verificationStatus.color} ${verificationStatus.bg}`}>
+                            {verificationStatus.label}
+                          </span>
+                          <span className="text-xs text-gray-500">{daysOld}d</span>
+                        </div>
                       ) : (
                         <span className="text-gray-400">Não confirmado</span>
                       )}
                     </div>
                     
                     <div className="flex items-center gap-1">
-                      {daysOld && daysOld > 30 && (
+                      {daysOld && daysOld > VERIFY_DAYS && (
                         <button
                           onClick={() => confirmItem(item.id)}
                           className="p-1 text-green-600 hover:text-green-700 hover:bg-green-100 rounded transition-colors"
@@ -1016,7 +1082,7 @@ export const EstoquePage: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-sm text-gray-600">
-              {stats.total} itens • {stats.available} disponíveis • {stats.outdated} desatualizados
+              {stats.total} itens • {stats.available} disponíveis • {stats.outdated} a revisar
             </div>
             
             {totalPages > 1 && (
