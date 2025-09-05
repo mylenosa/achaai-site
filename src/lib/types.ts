@@ -52,7 +52,7 @@ export interface CTAButtonProps {
 }
 
 // Dependency Inversion: Interface para provedor de links
-interface LinkProvider {
+export interface LinkProvider {
   getWhatsAppUrl(): string;
   getContactUrl(): string;
 }

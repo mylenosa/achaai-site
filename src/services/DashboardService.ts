@@ -318,3 +318,4 @@ const TopItems: React.FC<TopItemsProps> = ({
   );
 };
 
+export default TopItems;

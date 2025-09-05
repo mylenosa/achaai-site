@@ -3,7 +3,7 @@ import { config } from './config';
 import * as XLSX from 'xlsx';
 
 // Inventory Item Type
-type Item = {
+export type Item = {
   id: string;
   title: string;
   price: number | null;
@@ -13,7 +13,7 @@ type Item = {
 };
 
 // Currency parsing and formatting utilities
-function parseCurrency(str: string): number | null {
+export function parseCurrency(str: string): number | null {
   if (!str || str.trim() === '') return null;
   
   // Remove currency symbols and spaces
@@ -35,7 +35,7 @@ function parseCurrency(str: string): number | null {
   return isNaN(parsed) ? null : Math.max(0, parsed);
 }
 
-function formatCurrency(value: number | null): string {
+export function formatCurrency(value: number | null): string {
   if (value === null || value === undefined) return '';
   
   return new Intl.NumberFormat('pt-BR', {
@@ -46,14 +46,14 @@ function formatCurrency(value: number | null): string {
   }).format(value);
 }
 
-function ageInDays(dateString: string): number {
+export function ageInDays(dateString: string): number {
   const date = new Date(dateString);
   const now = new Date();
   const diffTime = Math.abs(now.getTime() - date.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
-function cn(...inputs: (string | undefined)[]): string {
+export function cn(...inputs: (string | undefined)[]): string {
   return inputs.filter(Boolean).join(' ');
 }
 
@@ -93,12 +93,12 @@ export function createPlanMailtoLink(plan: PricingPlan): string {
 }
 
 // Helper for case-insensitive title comparison
-function toTitleKey(title: string): string {
+export function toTitleKey(title: string): string {
   return title.toLowerCase().trim();
 }
 
 // Generate Excel template for inventory
-function generateInventoryTemplate(): void {
+export function generateInventoryTemplate(): void {
   const data = [
     ['Item', 'Preço (opcional)'],
     ['Tinta Spray Vermelha 400ml', '15,90'],
@@ -120,7 +120,7 @@ function generateInventoryTemplate(): void {
 }
 
 // Parse Excel file for inventory import
-function parseInventoryExcel(file: File): Promise<{ title: string; price: number | null }[]> {
+export function parseInventoryExcel(file: File): Promise<{ title: string; price: number | null }[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {

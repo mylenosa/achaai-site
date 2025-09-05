@@ -26,4 +26,4 @@ export const config = {
   }
 } as const;
 
-type Config = typeof config;
+export type Config = typeof config;
