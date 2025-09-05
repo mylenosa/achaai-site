@@ -71,13 +71,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (event === 'SIGNED_IN' && session?.user) {
           // Usuário fez login com sucesso
           const currentPath = window.location.pathname;
-          if (currentPath === '/login') {
-            window.location.href = '/dashboard';
+          if (currentPath === '/login' || currentPath === '/dashboard') {
+            window.location.href = '/portal/dashboard';
           }
         } else if (event === 'SIGNED_OUT') {
           // Usuário fez logout
           const currentPath = window.location.pathname;
-          if (currentPath === '/dashboard') {
+          if (currentPath.startsWith('/portal')) {
             window.location.href = '/login';
           }
         }

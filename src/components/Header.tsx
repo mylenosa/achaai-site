@@ -35,7 +35,7 @@ export const Header: React.FC = () => {
           {/* Botão Acesso do Lojista */}
           <div className="flex items-center justify-end flex-1 md:flex-initial">
             <a 
-              href="/acesso" 
+              href="/portal" 
               className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg transition-colors font-medium text-sm md:text-base"
             >
               <span className="hidden sm:inline">Acesso do Lojista</span>

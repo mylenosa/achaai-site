@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { Outlet, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BarChart3, 
   Store, 
-  Settings, 
   LogOut, 
   Menu, 
   X,
@@ -12,21 +12,15 @@ import {
   User,
   Package
 } from 'lucide-react';
-import { useAuthContext } from '../../hooks/useAuth';
-import { Analytics } from './Analytics';
-import { StoreProfileForm } from './StoreProfileForm';
-import { EstoqueTab } from './EstoqueTab';
-import { config } from '../../lib/config';
+import { useAuthContext } from '../hooks/useAuth';
+import { config } from '../lib/config';
 
-export const DashboardLayout: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('geral'); // Padrão: Geral
+export const PortalLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, signOut, isConfigured } = useAuthContext();
+  const location = useLocation();
   
-  // TODO: Buscar loja_id real do usuário via Supabase
-  const lojaId = user?.id || 'temp-loja-id';
-
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -37,14 +31,18 @@ export const DashboardLayout: React.FC = () => {
   };
 
   const menuItems = [
-    { id: 'geral', label: 'Geral', icon: BarChart3 },
-    { id: 'estoque', label: 'Estoque', icon: Package },
-    { id: 'profile', label: 'Perfil da Loja', icon: Store },
-    { id: 'settings', label: 'Configurações', icon: Settings },
+    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, path: '/portal/dashboard' },
+    { id: 'estoque', label: 'Estoque', icon: Package, path: '/portal/estoque' },
+    { id: 'perfil', label: 'Perfil da Loja', icon: Store, path: '/portal/perfil' },
   ];
 
   // Simular nome da loja (em produção viria do perfil)
   const storeName = 'Minha Loja'; // TODO: Buscar do perfil real
+
+  // Se não estiver configurado, mostrar erro
+  if (!isConfigured) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -104,16 +102,14 @@ export const DashboardLayout: React.FC = () => {
                       <div className="text-xs text-gray-500 truncate">{user?.email}</div>
                     </div>
                     
-                    <button
-                      onClick={() => {
-                        setActiveTab('profile');
-                        setUserMenuOpen(false);
-                      }}
+                    <a
+                      href="/portal/perfil"
+                      onClick={() => setUserMenuOpen(false)}
                       className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
                     >
                       <User className="w-4 h-4 mr-3" />
                       Minha Conta
-                    </button>
+                    </a>
                     
                     <button
                       onClick={handleSignOut}
@@ -140,26 +136,27 @@ export const DashboardLayout: React.FC = () => {
         `}>
           <nav className="mt-4 sm:mt-6 px-3 sm:px-4 h-full overflow-y-auto">
             <ul className="space-y-2">
-              {menuItems.map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      setSidebarOpen(false);
-                    }}
-                    className={`
-                      w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200
-                      ${activeTab === item.id
-                        ? 'bg-emerald-50 text-emerald-700 shadow-sm font-medium'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      }
-                    `}
-                  >
-                    <item.icon className="w-5 h-5 mr-3" />
-                    <span className="text-sm sm:text-base">{item.label}</span>
-                  </button>
-                </li>
-              ))}
+              {menuItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <li key={item.id}>
+                    <a
+                      href={item.path}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`
+                        w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200
+                        ${isActive
+                          ? 'bg-emerald-50 text-emerald-700 shadow-sm font-medium'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        }
+                      `}
+                    >
+                      <item.icon className="w-5 h-5 mr-3" />
+                      <span className="text-sm sm:text-base">{item.label}</span>
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
         </aside>
@@ -174,30 +171,7 @@ export const DashboardLayout: React.FC = () => {
 
         {/* Main Content */}
         <main className="flex-1 lg:ml-64 p-3 sm:p-4 lg:p-6 xl:p-8 max-w-full overflow-hidden pt-20 lg:pt-6">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {activeTab === 'geral' && <Analytics />}
-            {activeTab === 'estoque' && <EstoqueTab lojaId={lojaId} />}
-            {activeTab === 'profile' && <StoreProfileForm />}
-            {activeTab === 'settings' && (
-              <div className="space-y-6">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
-                  <p className="text-gray-600 mt-1">Gerencie as configurações da sua conta</p>
-                </div>
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Configurações da Conta</h3>
-                  <p className="text-gray-600">
-                    Funcionalidades avançadas de configuração em desenvolvimento.
-                  </p>
-                </div>
-              </div>
-            )}
-          </motion.div>
+          <Outlet />
         </main>
       </div>
 

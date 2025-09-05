@@ -56,7 +56,7 @@ export const getSupabaseErrorMessage = (): string => {
 };
 
 // Helper para obter URL de redirecionamento baseada no ambiente atual
-export const getRedirectUrl = (path: string = '/dashboard'): string => {
+export const getRedirectUrl = (path: string = '/portal/dashboard'): string => {
   return `${window.location.origin}${path}`;
 };
 
