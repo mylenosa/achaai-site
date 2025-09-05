@@ -9,9 +9,12 @@ import {
   Save,
   ChevronUp,
   ChevronDown,
-  FileText
+  FileText,
+  Upload
 } from 'lucide-react';
+import { createExcelImportService, ImportResult } from '../services/ExcelService';
 import { useAuthContext } from '../hooks/useAuth';
+import * as XLSX from 'xlsx';
 
 // Types
 type Item = {
@@ -32,6 +35,17 @@ interface ToastMessage {
     label: string;
     onClick: () => void;
   };
+}
+
+interface ImportModalState {
+  isOpen: boolean;
+  file: File | null;
+  isImporting: boolean;
+}
+
+interface ImportDetailsModal {
+  isOpen: boolean;
+  result: ImportResult | null;
 }
 
 // Utils
@@ -117,6 +131,17 @@ export const EstoquePage: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [lastDeleted, setLastDeleted] = useState<Item | null>(null);
+  const [importModal, setImportModal] = useState<ImportModalState>({
+    isOpen: false,
+    file: null,
+    isImporting: false
+  });
+  const [detailsModal, setDetailsModal] = useState<ImportDetailsModal>({
+    isOpen: false,
+    result: null
+  });
+
+  const excelService = createExcelImportService();
 
   // Save to localStorage whenever items change
   useEffect(() => {
@@ -273,6 +298,56 @@ export const EstoquePage: React.FC = () => {
     setIsCreating(false);
   };
 
+  const openImportModal = () => {
+    setImportModal({ isOpen: true, file: null, isImporting: false });
+  };
+
+  const closeImportModal = () => {
+    setImportModal({ isOpen: false, file: null, isImporting: false });
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setImportModal(prev => ({ ...prev, file }));
+  };
+
+  const handleImport = async () => {
+    if (!importModal.file) return;
+
+    setImportModal(prev => ({ ...prev, isImporting: true }));
+
+    try {
+      const result = await excelService.importFile(importModal.file, items);
+      
+      // Update items state
+      setItems([...items]);
+      
+      // Show success toast with details link
+      const total = result.imported + result.updated + result.ignored;
+      addToast({
+        type: 'success',
+        message: `Importados ${result.imported} • Atualizados ${result.updated} • Ignorados ${result.ignored}`,
+        action: total > 0 && result.errors.length > 0 ? {
+          label: 'ver detalhes',
+          onClick: () => setDetailsModal({ isOpen: true, result })
+        } : undefined
+      });
+      
+      closeImportModal();
+    } catch (error) {
+      addToast({ 
+        type: 'error', 
+        message: error instanceof Error ? error.message : 'Erro ao importar arquivo' 
+      });
+    } finally {
+      setImportModal(prev => ({ ...prev, isImporting: false }));
+    }
+  };
+
+  const downloadTemplate = () => {
+    excelService.generateTemplate();
+  };
+
   const resetMockData = () => {
     if (window.confirm('Resetar todos os dados? Esta ação não pode ser desfeita.')) {
       const mockItems = generateMockItems();
@@ -387,11 +462,11 @@ export const EstoquePage: React.FC = () => {
             </button>
             
             <button
-              onClick={downloadTemplate}
-              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium"
+              onClick={openImportModal}
+              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors font-medium"
             >
-              <FileText className="w-4 h-4" />
-              Baixar modelo (.xlsx)
+              <Upload className="w-4 h-4" />
+              Importar
             </button>
           </div>
         </div>
@@ -455,6 +530,148 @@ export const EstoquePage: React.FC = () => {
                   className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Import Modal */}
+      <AnimatePresence>
+        {importModal.isOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Importar Estoque (.xlsx)
+              </h3>
+              
+              <div className="space-y-4">
+                {/* Download Template Button */}
+                <div className="flex justify-center">
+                  <button
+                    onClick={downloadTemplate}
+                    className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors font-medium text-sm"
+                  >
+                    <FileText className="w-4 h-4" />
+                    📄 Baixar modelo (.xlsx)
+                  </button>
+                </div>
+                
+                {/* File Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Selecionar arquivo
+                  </label>
+                  <input
+                    type="file"
+                    accept=".xlsx"
+                    onChange={handleFileSelect}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                
+                {/* Help Text */}
+                <p className="text-xs text-gray-500">
+                  Use colunas: Item e Preço (opcional).
+                </p>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleImport}
+                  disabled={!importModal.file || importModal.isImporting}
+                  className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  {importModal.isImporting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                      Importando...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4" />
+                      Importar
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={closeImportModal}
+                  disabled={importModal.isImporting}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Import Details Modal */}
+      <AnimatePresence>
+        {detailsModal.isOpen && detailsModal.result && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-40">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 max-h-96 overflow-y-auto"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Detalhes da Importação
+              </h3>
+              
+              <div className="space-y-4">
+                {/* Summary */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="text-lg font-semibold text-green-600">{detailsModal.result.imported}</div>
+                      <div className="text-xs text-gray-600">Importados</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold text-blue-600">{detailsModal.result.updated}</div>
+                      <div className="text-xs text-gray-600">Atualizados</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold text-orange-600">{detailsModal.result.ignored}</div>
+                      <div className="text-xs text-gray-600">Ignorados</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Errors */}
+                {detailsModal.result.errors.length > 0 && (
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">
+                      Erros/Avisos ({Math.min(detailsModal.result.errors.length, 10)} de {detailsModal.result.errors.length})
+                    </h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {detailsModal.result.errors.slice(0, 10).map((error, index) => (
+                        <div key={index} className="bg-red-50 border border-red-200 rounded p-2">
+                          <div className="text-sm">
+                            <span className="font-medium text-red-800">Linha {error.line}:</span>
+                            <span className="text-red-700 ml-1">{error.reason}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={() => setDetailsModal({ isOpen: false, result: null })}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                  Fechar
                 </button>
               </div>
             </motion.div>
