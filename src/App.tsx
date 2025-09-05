@@ -5,15 +5,11 @@ import { LandingPage } from './components/LandingPage';
 import { Login } from './pages/Login';
 import { ResetPassword } from './pages/ResetPassword';
 import { PortalLayout } from './pages/PortalLayout';
-import { PortalLayout } from './pages/PortalLayout';
 import { Dashboard } from './pages/Dashboard';
-import { EstoquePage } from './pages/EstoquePage';
-import { PerfilPage } from './pages/PerfilPage';
 import { EstoquePage } from './pages/EstoquePage';
 import { PerfilPage } from './pages/PerfilPage';
 import { NotFound } from './components/NotFound';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { RequireLoja } from './components/auth/RequireLoja';
 import { RequireLoja } from './components/auth/RequireLoja';
 import { config } from './lib/config';
 
@@ -96,35 +92,6 @@ function App() {
           </ProtectedRoute>
         } 
       >
-        {/* Redirecionar /portal para /portal/dashboard */}
-        <Route index element={<Navigate to="/portal/dashboard" replace />} />
-        
-        {/* Dashboard - requer loja */}
-        <Route 
-          path="dashboard" 
-          element={
-            <RequireLoja>
-              <Dashboard />
-            </RequireLoja>
-          } 
-        />
-        
-        {/* Estoque - requer loja */}
-        <Route 
-          path="estoque" 
-          element={
-            <RequireLoja>
-              <EstoquePage />
-            </RequireLoja>
-          } 
-        />
-        
-        {/* Perfil da Loja - sempre acessível */}
-        <Route path="perfil" element={<PerfilPage />} />
-      </Route>
-      
-      {/* Redirect antigo /dashboard para /portal/dashboard */}
-      <Route path="/dashboard" element={<Navigate to="/portal/dashboard" replace />} />
         {/* Redirecionar /portal para /portal/dashboard */}
         <Route index element={<Navigate to="/portal/dashboard" replace />} />
         
