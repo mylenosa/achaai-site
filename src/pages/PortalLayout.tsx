@@ -10,7 +10,8 @@ import {
   Search,
   ChevronDown,
   User,
-  Package
+  Package,
+  Code
 } from 'lucide-react';
 import { useAuthContext } from '../hooks/useAuth';
 import { config } from '../lib/config';
@@ -18,13 +19,13 @@ import { config } from '../lib/config';
 export const PortalLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { user, signOut, isConfigured } = useAuthContext();
+  const { user, signOut, isConfigured, dev, setDev } = useAuthContext();
   const location = useLocation();
   
   const handleSignOut = async () => {
     try {
       await signOut();
-      window.location.href = '/login';
+      window.location.href = '/acesso';
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
     }
@@ -70,6 +71,11 @@ export const PortalLayout: React.FC = () => {
             </div>
 
             {/* Menu do Usuário */}
+              {dev && (
+                <span className="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded-full">
+                  DEV
+                </span>
+              )}
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -123,9 +129,25 @@ export const PortalLayout: React.FC = () => {
               </AnimatePresence>
             </div>
           </div>
+          </div>
         </div>
-      </header>
+          {/* DEV Toggle + Menu do Usuário */}
+          <div className="flex items-center space-x-2">
+            {/* Botão DEV Toggle */}
+            <button
+              onClick={() => setDev(!dev)}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                dev 
+                  ? 'bg-red-500 text-white hover:bg-red-600' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              title={dev ? 'Desativar modo DEV' : 'Ativar modo DEV'}
+            >
+              <Code className="w-4 h-4" />
+            </button>
 
+            {/* Menu do Usuário */}
+            <div className="relative">
       <div className="flex">
         {/* Sidebar */}
         <aside className={`

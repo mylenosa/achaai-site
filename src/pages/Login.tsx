@@ -32,9 +32,11 @@ export const Login: React.FC = () => {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [emailErrors, setEmailErrors] = useState('');
   const [passwordErrors, setPasswordErrors] = useState('');
+  const [redirectPath, setRedirectPath] = useState('/portal/dashboard');
   
   const { 
     user, 
+    setIsAuth,
     signIn, 
     signInWithMagicLink,
     signInWithGoogle,
@@ -42,9 +44,18 @@ export const Login: React.FC = () => {
     isConfigured 
   } = useAuthContext();
 
+  useEffect(() => {
+    // Verificar se há redirect na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirect = urlParams.get('redirect');
+    if (redirect) {
+      setRedirectPath(redirect);
+    }
+  }, []);
+
   // Redirecionar se já estiver logado
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={redirectPath} replace />;
   }
 
   // Mostrar erro se Supabase não estiver configurado
@@ -147,7 +158,13 @@ export const Login: React.FC = () => {
     setError('');
 
     try {
-      await signIn(email, password);
+      if (isConfigured) {
+        await signIn(email, password);
+      } else {
+        // Modo DEV - apenas simular login
+        setIsAuth(true);
+        window.location.href = redirectPath;
+      }
       // Redirecionamento será automático via onAuthStateChange
     } catch (err: any) {
       setError(err.message || 'E-mail ou senha incorretos');
@@ -427,7 +444,7 @@ export const Login: React.FC = () => {
               ) : (
                 <>
                   <LogIn className="w-6 h-6 mr-3" />
-                  Entrar
+                  {isConfigured ? 'Entrar' : 'Entrar (DEV)'}
                 </>
               )}
             </button>

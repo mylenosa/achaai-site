@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../../hooks/useAuth';
 
 interface ProtectedRouteProps {
@@ -7,7 +7,8 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading, isConfigured } = useAuthContext();
+  const { loading, isAuth, dev } = useAuthContext();
+  const location = useLocation();
 
   // Mostrar loading enquanto verifica autenticação
   if (loading) {
@@ -18,15 +19,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Se Supabase não estiver configurado, permitir acesso (para desenvolvimento)
-  if (!isConfigured) {
+  // Se modo DEV ativo ou autenticado, permitir acesso
+  if (dev || isAuth) {
     return <>{children}</>;
   }
 
-  // Se não estiver logado, redirecionar para login
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
+  // Se não estiver logado, redirecionar para login com redirect
+  const redirectUrl = `/acesso?redirect=${encodeURIComponent(location.pathname)}`;
+  return <Navigate to={redirectUrl} replace />;
 };

@@ -61,7 +61,7 @@ export const StoreProfileForm: React.FC = () => {
   const [isCepLoading, setIsCepLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
-  const { user, isConfigured } = useAuthContext();
+  const { user, isConfigured, setHasLoja } = useAuthContext();
 
   const weekDays: WeekDay[] = [
     { id: 'monday', name: 'Segunda-feira', shortName: 'Seg' },
@@ -226,11 +226,6 @@ export const StoreProfileForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user || !isConfigured || !isSupabaseConfigured()) {
-      setMessage({ type: 'error', text: 'Supabase não configurado' });
-      return;
-    }
-    
     setIsLoading(true);
     setMessage(null);
 
@@ -242,16 +237,25 @@ export const StoreProfileForm: React.FC = () => {
         categories: selectedCategories,
         address: fullAddress,
         opening_hours: JSON.stringify(schedule),
-        user_id: user.id
+        user_id: user?.id || 'dev-user'
       };
 
-      if (profile.id) {
-        await storeService.updateProfile(profile.id, profileData);
+      if (isConfigured && user && isSupabaseConfigured()) {
+        // Salvar no Supabase
+        if (profile.id) {
+          await storeService.updateProfile(profile.id, profileData);
+        } else {
+          const newProfile = await storeService.createProfile(profileData);
+          setProfile(newProfile);
+        }
       } else {
-        const newProfile = await storeService.createProfile(profileData);
-        setProfile(newProfile);
+        // Modo DEV - salvar no localStorage
+        localStorage.setItem('lojaPerfil', JSON.stringify(profileData));
       }
 
+      // Marcar que tem loja
+      setHasLoja(true);
+      
       setMessage({ type: 'success', text: 'Perfil salvo com sucesso!' });
       
       // Scroll para o topo para mostrar a mensagem

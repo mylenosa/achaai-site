@@ -1,13 +1,19 @@
-// Single Responsibility: Contexto de autenticação
-// Dependency Inversion: Usa cliente Supabase injetado
-import React, { createContext, useContext, useEffect, useState } from 'react';
+// Single Responsibility: Contexto de autenticação com localStorage
+import React, { createContext, useContext, useEffect } from 'react';
 import { User, AuthError } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured, getRedirectUrl } from '../lib/supabase';
+import { usePersisted } from '../hooks/usePersisted';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   isConfigured: boolean;
+  isAuth: boolean;
+  hasLoja: boolean;
+  dev: boolean;
+  setIsAuth: (value: boolean) => void;
+  setHasLoja: (value: boolean) => void;
+  setDev: (value: boolean) => void;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithMagicLink: (email: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -32,9 +38,22 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = React.useState<User | null>(null);
+  const [loading, setLoading] = React.useState(true);
   const configured = isSupabaseConfigured();
+
+  // Estados persistidos no localStorage
+  const [isAuth, setIsAuth] = usePersisted<boolean>('isAuth', false);
+  const [hasLoja, setHasLoja] = usePersisted<boolean>('hasLoja', false);
+  const [dev, setDev] = usePersisted<boolean>('dev', false);
+
+  useEffect(() => {
+    // Verificar se URL tem ?dev=1 para ativar modo DEV
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('dev') === '1') {
+      setDev(true);
+    }
+  }, [setDev]);
 
   useEffect(() => {
     if (!configured || !supabase) {
@@ -50,6 +69,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.error('Erro ao obter sessão:', error);
         }
         setUser(session?.user ?? null);
+        if (session?.user) {
+          setIsAuth(true);
+        }
       } catch (error) {
         console.error('Erro ao verificar sessão:', error);
       } finally {
@@ -67,25 +89,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Redirecionamentos automáticos baseados no evento
         if (event === 'SIGNED_IN' && session?.user) {
+          setIsAuth(true);
           // Usuário fez login com sucesso
           const currentPath = window.location.pathname;
-          if (currentPath === '/login' || currentPath === '/dashboard') {
+          if (currentPath === '/login' || currentPath === '/acesso') {
             window.location.href = '/portal/dashboard';
           }
         } else if (event === 'SIGNED_OUT') {
+          setIsAuth(false);
+          setHasLoja(false);
           // Usuário fez logout
           const currentPath = window.location.pathname;
           if (currentPath.startsWith('/portal')) {
-            window.location.href = '/login';
+            window.location.href = '/acesso';
           }
         }
       }
     );
 
     return () => subscription.unsubscribe();
-  }, [configured]);
+  }, [configured, setIsAuth, setHasLoja]);
 
   // Login com email e senha
   const signIn = async (email: string, password: string) => {
@@ -112,7 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: getRedirectUrl('/login'),
+        emailRedirectTo: getRedirectUrl('/acesso'),
       },
     });
 
@@ -130,7 +154,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: getRedirectUrl('/login'),
+        redirectTo: getRedirectUrl('/acesso'),
       },
     });
 
@@ -149,7 +173,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       email,
       password,
       options: {
-        emailRedirectTo: getRedirectUrl('/dashboard'),
+        emailRedirectTo: getRedirectUrl('/portal/dashboard'),
       },
     });
 
@@ -204,6 +228,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     loading,
     isConfigured: configured,
+    isAuth,
+    hasLoja,
+    dev,
+    setIsAuth,
+    setHasLoja,
+    setDev,
     signIn,
     signInWithMagicLink,
     signInWithGoogle,

@@ -1,37 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthContext } from '../../hooks/useAuth';
-import { storeService } from '../../services/StoreService';
 
 interface RequireLojaProps {
   children: React.ReactNode;
 }
 
 export const RequireLoja: React.FC<RequireLojaProps> = ({ children }) => {
-  const { user, isConfigured } = useAuthContext();
-  const [hasStore, setHasStore] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkStore = async () => {
-      if (!user || !isConfigured) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const profile = await storeService.getProfile(user.id);
-        setHasStore(!!profile);
-      } catch (error) {
-        console.error('Erro ao verificar loja:', error);
-        setHasStore(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkStore();
-  }, [user, isConfigured]);
+  const { loading, hasLoja, dev } = useAuthContext();
 
   // Mostrar loading enquanto verifica
   if (loading) {
@@ -42,10 +18,11 @@ export const RequireLoja: React.FC<RequireLojaProps> = ({ children }) => {
     );
   }
 
-  // Se não tem loja, redirecionar para perfil
-  if (!hasStore) {
-    return <Navigate to="/portal/perfil" replace />;
+  // Se modo DEV ativo ou tem loja, permitir acesso
+  if (dev || hasLoja) {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  // Se não tem loja, redirecionar para perfil
+  return <Navigate to="/portal/perfil" replace />;
 };

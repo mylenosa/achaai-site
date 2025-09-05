@@ -75,13 +75,13 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       
       {/* Login */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/acesso" element={<Login />} />
       
       {/* Reset Password */}
       <Route path="/reset-password" element={<ResetPassword />} />
       
-      {/* Alias /acesso → /login */}
-      <Route path="/acesso" element={<Navigate to="/login" replace />} />
+      {/* Alias /login → /acesso */}
+      <Route path="/login" element={<Navigate to="/acesso" replace />} />
       
       {/* Portal protegido */}
       <Route 
