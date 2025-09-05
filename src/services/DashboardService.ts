@@ -1,21 +1,93 @@
 // Single Responsibility: Componente específico para tabela de top itens
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-    return termos.slice(0, maxItems).map(termo => ({ 
-      termo, 
-      qtd: this.random(2, 8) 
-    }));
+import { Eye, Plus } from 'lucide-react';
+
+interface AtividadeRecente {
   tipo: 'BUSCA' | 'MOSTRADO' | 'WPP' | 'MAPA';
-import { TopItemMeu, TopItemGeral } from '../../services/DashboardService';
   ts: Date;
+  termo: string;
+}
+
+interface TopItemMeu {
+  nome: string;
+  exibicoes: number;
+  conversas: number;
+  ctr: number;
+  meuPreco?: number | null;
+  mediana: number;
+  diffPct?: number | null;
+}
+
+interface TopItemGeral {
+  nome: string;
+  mediana: number;
+  lojas: number;
+}
+
 interface TopItemsProps {
+  meus: TopItemMeu[];
   geral: TopItemGeral[];
   mediana?: number | null;
   onViewInStock: (itemName: string) => void;
   onAddItem: (itemName: string) => void;
-  qtd: number;
+  onAddPrice: (itemName: string) => void;
 }
 
+type SortField = 'nome' | 'exibicoes' | 'conversas' | 'ctr' | 'meuPreco' | 'mediana';
+type SortDirection = 'asc' | 'desc';
+
+const TopItems: React.FC<TopItemsProps> = ({ 
+  meus, 
+  geral, 
+  onViewInStock, 
+  onAddItem, 
+  onAddPrice 
+}) => {
+  const [activeTab, setActiveTab] = useState<'meus' | 'geral'>('meus');
+  const [sortField, setSortField] = useState<SortField>('exibicoes');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  const formatNumber = (num: number): string => {
+    return new Intl.NumberFormat('pt-BR').format(num);
+  };
+
+  const formatBRL = (value: number): string => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  const formatPct = (value: number, showSign: boolean = true): string => {
+    const formatted = (value * 100).toFixed(1) + '%';
+    return showSign && value > 0 ? '+' + formatted : formatted;
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) return '↕️';
+    return sortDirection === 'asc' ? '↑' : '↓';
+  };
+
+  const sortedMeus = [...meus].sort((a, b) => {
+    let aVal: number, bVal: number;
+    
+    switch (sortField) {
+      case 'nome':
+        return sortDirection === 'asc' 
+          ? a.nome.localeCompare(b.nome)
+          : b.nome.localeCompare(a.nome);
+      case 'exibicoes':
+        aVal = a.exibicoes;
         bVal = b.exibicoes;
         break;
       case 'conversas':
@@ -183,8 +255,13 @@ interface TopItemsProps {
           
           {sortedMeus.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-    const tipos: AtividadeRecente['tipo'][] = ['BUSCA', 'MOSTRADO', 'WPP', 'MAPA'];
               Nenhum item encontrado
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left py-3 px-4 font-medium text-gray-700">Item</th>
@@ -199,36 +276,38 @@ interface TopItemsProps {
                   key={item.nome}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-      const ts = new Date(Date.now() - this.random(1, periodo === '30d' ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000));
                   transition={{ delay: index * 0.05 }}
+                  className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                 >
                   <td className="py-3 px-4 font-medium text-gray-900">{item.nome}</td>
-        case 'WPP':
                   <td className="py-3 px-4 text-center text-gray-700">
-          texto = 'Cliente abriu conversa no WhatsApp';
-        case 'MAPA':
+                    {formatBRL(item.mediana)}
+                  </td>
+                  <td className="py-3 px-4 text-center text-gray-700">{item.lojas}</td>
                   <td className="py-3 px-4 text-center">
-          texto = 'Cliente abriu rota no mapa';
+                    <div className="flex items-center justify-center gap-2">
+                      <button
                         onClick={() => onViewInStock(item.nome)}
-        case 'BUSCA':
                         className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
-          texto = `Busca por "${termo}"`;
+                      >
                         <Eye className="w-4 h-4" />
-        case 'MOSTRADO':
-          texto = `Sua loja apareceu para "${termo}"`;
+                        Ver em estoque
                       </button>
+                      <button
+                        onClick={() => onAddItem(item.nome)}
                         className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 text-sm"
                       >
                         <Plus className="w-4 h-4" />
                         Adicionar item
-        ts,
                       </button>
-        termo
+                    </div>
+                  </td>
+                </motion.tr>
               ))}
             </tbody>
           </table>
-    return atividades.sort((a, b) => b.ts.getTime() - a.ts.getTime());
           
+          {geral.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               Nenhum item encontrado
             </div>
@@ -238,3 +317,5 @@ interface TopItemsProps {
     </div>
   );
 };
+
+export default TopItems;
