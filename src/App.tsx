@@ -9,7 +9,7 @@ import { Dashboard } from './pages/Dashboard';
 import { EstoquePage } from './pages/EstoquePage';
 import { PerfilPage } from './pages/PerfilPage';
 import { NotFound } from './components/NotFound';
-import ProtectedRoute from './routes/ProtectedRoute';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { RequireLoja } from './components/auth/RequireLoja';
 import { config } from './lib/config';
 
@@ -92,8 +92,8 @@ function App() {
           </ProtectedRoute>
         } 
       >
-        {/* Redirecionar /portal para /portal/dashboard (usar rota relativa) */}
-        <Route index element={<Navigate to="dashboard" replace />} />
+        {/* Redirecionar /portal para /portal/dashboard */}
+        <Route index element={<Navigate to="/portal/dashboard" replace />} />
         
         {/* Dashboard - requer loja */}
         <Route 

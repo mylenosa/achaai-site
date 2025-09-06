@@ -23,13 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 .env
-
-# extras
-.vite/
-.bolt/
-dist/
-node_modules/
-*.mp4
-*.zip
-coverage/
-

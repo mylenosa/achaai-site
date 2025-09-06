@@ -4,47 +4,50 @@ import { motion } from 'framer-motion';
 import { formatNumber } from '../../utils/formatters';
 
 interface WeekChartProps {
-  data: number[];
+  period: '7d' | '30d';
+  labels: string[];
+  values: number[];
 }
 
-export const WeekChart: React.FC<WeekChartProps> = ({ data }) => {
+export const WeekChart: React.FC<WeekChartProps> = ({ period, labels, values }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   
-  const days = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-  const maxValue = Math.max(...data);
-  const isEmpty = data.every(v => v === 0);
+  const maxValue = Math.max(...values);
+  const isEmpty = values.every(v => v === 0);
+  
+  const title = period === '7d'
+    ? 'Impressões por dia (últimos 7 dias)'
+    : 'Impressões por semana (últimas 4 semanas)';
 
   const handleRefresh = () => {
     window.location.reload();
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 relative group h-80">
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 relative group">
       <div className="relative">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">
-          Impressões por dia da semana (últimas 4 semanas)
-        </h3>
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">{title}</h3>
         
         {/* Tooltip */}
         <div className="absolute -top-2 right-0 transform -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-          Soma das impressões por dia da semana (últimas 4 semanas).
+          {period === '7d' ? 'Impressões diárias dos últimos 7 dias.' : 'Impressões semanais das últimas 4 semanas.'}
           <div className="absolute top-full right-4 border-4 border-transparent border-t-gray-900" />
         </div>
       </div>
       
       {isEmpty ? (
-        <div className="flex flex-col items-center justify-center h-48 text-gray-500">
-          <h4 className="text-lg font-medium mb-2">Sem dados no período</h4>
+        <div className="flex flex-col items-center justify-center h-48 sm:h-64 text-gray-500">
+          <h4 className="text-base sm:text-lg font-medium mb-2">Sem dados no período</h4>
           <button
             onClick={handleRefresh}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
           >
             Atualizar
           </button>
         </div>
       ) : (
-        <div className="flex items-end justify-between h-48 gap-2">
-        {data.map((value, index) => {
+        <div className="flex items-end justify-between h-48 sm:h-64 gap-1 sm:gap-2">
+        {values.map((value, index) => {
           const height = (value / maxValue) * 100;
           const isHovered = hoveredIndex === index;
           
@@ -76,7 +79,7 @@ export const WeekChart: React.FC<WeekChartProps> = ({ data }) => {
               </div>
               
               <div className="text-xs text-gray-600 mt-2 font-medium">
-                {days[index]}
+                {labels[index]}
               </div>
             </div>
           );

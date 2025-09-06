@@ -1,0 +1,17 @@
+# builds/cache
+dist/**
+.out/**
+.next/**
+node_modules/**
+
+# assets pesados (deixe só o que realmente precisa editar)
+public/**/*.png
+public/**/*.jpg
+public/**/*.mp4
+public/**/*.pdf
+assets/**
+
+# dados brutos
+*.csv
+*.xlsx
+*.jsonl

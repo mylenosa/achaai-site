@@ -32,7 +32,7 @@ interface TopItemsProps {
   onAddItem: (itemName: string) => void;
 }
 
-type SortField = 'nome' | 'exibicoes' | 'conversas' | 'diffPct';
+type SortField = 'nome' | 'conversas' | 'diffPct';
 type SortDirection = 'asc' | 'desc';
 
 export const TopItems: React.FC<TopItemsProps> = ({
@@ -70,10 +70,6 @@ export const TopItems: React.FC<TopItemsProps> = ({
         aVal = a.nome.toLowerCase();
         bVal = b.nome.toLowerCase();
         break;
-      case 'exibicoes':
-        aVal = a.exibicoes;
-        bVal = b.exibicoes;
-        break;
       case 'conversas':
         aVal = a.conversas;
         bVal = b.conversas;
@@ -94,32 +90,30 @@ export const TopItems: React.FC<TopItemsProps> = ({
   const displayedMeus = showAll ? sortedMeus : sortedMeus.slice(0, 5);
   const displayedGeral = showAll ? geral : geral.slice(0, 5);
 
-  const DiffBadge: React.FC<{ 
-    diffPct?: number | null; 
-    meuPreco?: number | null; 
-    mediana?: number | null;
-  }> = ({ diffPct, meuPreco, mediana }) => {
-    let value = diffPct;
-
-    if (value == null && meuPreco != null && mediana != null && mediana > 0) {
-      value = (meuPreco - mediana) / mediana;
+  const DiffBadge = ({ diffPct, meuPreco, mediana }: { diffPct?: number | null; meuPreco?: number | null; mediana?: number | null }) => {
+    if (meuPreco == null || mediana == null) {
+      return (
+        <div className="relative group">
+          <span className="text-gray-400">—</span>
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+            Adicione preço para comparar
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+          </div>
+        </div>
+      );
     }
-
-    if (value == null) {
-      return <span className="text-gray-400">—</span>;
-    }
-
-    const up = value > 0;
+    
+    if (diffPct == null) return <span className="text-gray-400">—</span>;
+    
+    const up = diffPct > 0;
     const color = up ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50';
     const icon = up ? '↑' : '↓';
-
     return (
       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${color}`}>
-        {icon} {formatPct(Math.abs(value), false)}
+        {icon} {formatPct(Math.abs(diffPct), false)}
       </span>
     );
   };
-
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5">
@@ -128,8 +122,8 @@ export const TopItems: React.FC<TopItemsProps> = ({
           <h3 className="text-lg font-semibold text-gray-900">Top Itens</h3>
           <p className="text-sm text-gray-500 mt-1">
             {activeTab === 'meus'
-              ? 'Exibições e conversas; Dif.% = seu preço vs mediana (anônimo).'
-              : 'Panorama da cidade: mediana (n≥5) e nº de lojas.'}
+              ? "Itens mais procurados da sua loja. 'Cliques' somam aberturas de WhatsApp e Mapa. 'Dif.%' compara seu preço à mediana da cidade (anônimo)."
+              : 'Panorama da cidade: mediana de preço (n≥5) e número de lojas com o item.'}
           </p>
         </div>
 
@@ -172,27 +166,11 @@ export const TopItems: React.FC<TopItemsProps> = ({
 
                 <th
                   className="relative group text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
-                  onClick={() => handleSort('exibicoes')}
-                  aria-sort={sortField === 'exibicoes' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
-                >
-                  <div className="flex items-center justify-center gap-1">
-                    Exibições
-                    {getSortIcon('exibicoes')}
-                  </div>
-                  {/* Tooltip */}
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                    Cada vez que seu item apareceu para um cliente.
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-                  </div>
-                </th>
-
-                <th
-                  className="relative group text-center py-3 px-4 font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('conversas')}
                   aria-sort={sortField === 'conversas' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
                 >
                   <div className="flex items-center justify-center gap-1">
-                    Conversas
+                    Cliques
                     {getSortIcon('conversas')}
                   </div>
                   {/* Tooltip */}
@@ -255,7 +233,6 @@ export const TopItems: React.FC<TopItemsProps> = ({
                     )}
                   </td>
 
-                  <td className="py-3 px-4 text-center text-gray-700">{formatNumber(item.exibicoes)}</td>
                   <td className="py-3 px-4 text-center text-gray-700">{formatNumber(item.conversas)}</td>
                   <td className="py-3 px-4 text-center">
                     <DiffBadge diffPct={item.diffPct} meuPreco={item.meuPreco} mediana={item.mediana} />

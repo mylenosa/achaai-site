@@ -50,25 +50,25 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
   const hasMore = activities.length > maxItems;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 flex flex-col">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 flex flex-col">
+      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">
         Atividade Recente
       </h3>
       
-      <div className="space-y-4 flex-1">
+      <div className="space-y-3 sm:space-y-4 flex-1">
         {displayedActivities.map((activity, index) => (
           <motion.div
             key={`${activity.tipo}-${activity.ts.getTime()}-${index}`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: index * 0.05 }}
-            className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <div className="flex-shrink-0 mt-1">
               {getActivityIcon(activity.tipo)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-gray-900 leading-relaxed">
+              <p className="text-xs sm:text-sm text-gray-900 leading-relaxed">
                 {getActivityText(activity)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
@@ -86,8 +86,8 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
       )}
       
       {showSeeAll && hasMore && (
-        <div className="text-center mt-4 pt-4 border-t border-gray-100">
-          <button className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+        <div className="text-center mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
+          <button className="text-emerald-600 hover:text-emerald-700 text-xs sm:text-sm font-medium">
             Ver tudo
           </button>
         </div>
