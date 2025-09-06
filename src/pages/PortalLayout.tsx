@@ -40,11 +40,6 @@ export const PortalLayout: React.FC = () => {
   // Simular nome da loja (em produção viria do perfil)
   const storeName = 'Minha Loja'; // TODO: Buscar do perfil real
 
-  // Se não estiver configurado, mostrar erro
-  if (!isConfigured) {
-    return <Navigate to="/login" replace />;
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
