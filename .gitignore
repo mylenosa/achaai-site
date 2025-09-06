@@ -23,3 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# extras
+.vite/
+.bolt/
+*.mp4
+*.zip
+coverage/
