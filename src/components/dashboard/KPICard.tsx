@@ -50,7 +50,7 @@ export const KPICard: React.FC<KPICardProps> = ({ title, value, delta = 0, index
         <div className="bg-emerald-50 rounded-lg sm:rounded-xl p-2 sm:p-3">
           <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
         </div>
-        <div className={`text-xs sm:text-sm font-medium flex items-center gap-1 ${delta >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        <div className={`text-sm font-medium flex items-center gap-1 ${getDeltaColor(delta)}`}>
           <span>{getDeltaIcon(delta)}</span>
           <span>{formatPct(Math.abs(delta), false)}</span>
         </div>

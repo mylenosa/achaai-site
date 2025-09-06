@@ -68,6 +68,7 @@ export function createDashboardService() {
 
   return {
     getKPIs(periodo: Period): KPIData {
+      void periodo;
       const impressoes = rndInt(400, 2400);
       const whatsapp = rndInt(30, 250);
       const mapa = rndInt(20, 180);
@@ -84,18 +85,16 @@ export function createDashboardService() {
       return { whatsapp, mapa, impressoes, ctr, deltaKpis: delta };
     },
 
-    // Série para o gráfico de impressões (alinha com 7d vs 30d)
-    getSerieImpressoes(periodo: Period): { labels: string[]; values: number[] } {
+    getSerieImpressoes(periodo: '7d' | '30d'): { labels: string[]; values: number[] } {
+      void periodo;
       if (periodo === '7d') {
-        const labels = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-        const values = Array.from({ length: 7 }, () => rndInt(50, 450));
+        const labels = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+        const values = Array.from({length: 7}, () => Math.floor(Math.random()*401)+50);
         return { labels, values };
       }
-      // 30d → por semana
-      return {
-        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-        values: Array.from({ length: 4 }, () => rndInt(400, 2400)),
-      };
+      const labels = ['Semana 1','Semana 2','Semana 3','Semana 4'];
+      const values = Array.from({length: 4}, () => Math.floor(Math.random()*2201)+400);
+      return { labels, values };
     },
 
     // Mantido para compat com componentes que ainda usam apenas um array
@@ -105,6 +104,7 @@ export function createDashboardService() {
     },
 
     getTopItensMeus(periodo: Period): TopItemMeu[] {
+      void periodo;
       const base = termosBase.map((nome) => {
         const exibicoes = rndInt(40, 900);
         const conversas = rndInt(3, Math.max(5, Math.floor(exibicoes * 0.25)));
@@ -131,6 +131,7 @@ export function createDashboardService() {
     },
 
     getTopItensGeral(periodo: Period): TopItemGeral[] {
+      void periodo;
       return termosBase
         .map((nome) => {
           const lojas = rndInt(2, 15);
@@ -142,6 +143,7 @@ export function createDashboardService() {
     },
 
     getAtividadeRecente(periodo: Period): AtividadeRecente[] {
+      void periodo;
       const agora = Date.now();
       const eventos: AtividadeRecente[] = [];
       for (let i = 0; i < 12; i++) {
@@ -156,6 +158,7 @@ export function createDashboardService() {
     },
 
     getTipsSemResultado(periodo: Period): TipSemResultado[] {
+      void periodo;
       const termos = ['furadeira de impacto', 'serrote', 'broca 12mm', 'cola epóxi', 'serra circular'];
       const lista = termos.map((termo) => ({ termo, qtd: rndInt(2, 24) }));
       // top 5 por quantidade
