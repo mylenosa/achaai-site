@@ -94,30 +94,32 @@ export const TopItems: React.FC<TopItemsProps> = ({
   const displayedMeus = showAll ? sortedMeus : sortedMeus.slice(0, 5);
   const displayedGeral = showAll ? geral : geral.slice(0, 5);
 
-  const DiffBadge = ({ diffPct }: { diffPct?: number | null }) => {
-    if (meuPreco == null || mediana == null) {
-      return (
-        <div className="relative group">
-          <span className="text-gray-400">—</span>
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-            Adicione preço para comparar
-            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-          </div>
-        </div>
-      );
+  const DiffBadge: React.FC<{ 
+    diffPct?: number | null; 
+    meuPreco?: number | null; 
+    mediana?: number | null;
+  }> = ({ diffPct, meuPreco, mediana }) => {
+    let value = diffPct;
+
+    if (value == null && meuPreco != null && mediana != null && mediana > 0) {
+      value = (meuPreco - mediana) / mediana;
     }
-    
-    if (diffPct == null) return <span className="text-gray-400">—</span>;
-    
-    const up = diffPct > 0;
+
+    if (value == null) {
+      return <span className="text-gray-400">—</span>;
+    }
+
+    const up = value > 0;
     const color = up ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50';
     const icon = up ? '↑' : '↓';
+
     return (
       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${color}`}>
-        {icon} {formatPct(Math.abs(diffPct), false)}
+        {icon} {formatPct(Math.abs(value), false)}
       </span>
     );
   };
+
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5">
