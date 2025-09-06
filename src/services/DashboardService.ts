@@ -19,9 +19,9 @@ export interface KPIData {
 
 export interface AtividadeRecente {
   tipo: 'BUSCA' | 'MOSTRADO' | 'WPP' | 'MAPA' | 'BUSCA_ZERO';
-  ts: Date;             // quando ocorrer backend real, pode virar string ISO
+  ts: Date;
   termo?: string;
-  count?: number;       // para BUSCA_ZERO
+  count?: number;
 }
 
 export interface TipSemResultado {
@@ -33,116 +33,143 @@ export interface TopItemMeu {
   nome: string;
   exibicoes: number;
   conversas: number;
-  ctr: number;               // 0..1
-  meuPreco?: number | null;  // opcional
-  mediana?: number | null;   // mediana na cidade (pode faltar)
-  diffPct?: number | null;   // (meuPreco - mediana) / mediana
+  ctr: number;
+  meuPreco?: number | null;
+  mediana?: number | null;
+  diffPct?: number | null;
 }
 
 export interface TopItemGeral {
   nome: string;
   mediana: number;
   lojas: number;
-  hasMine: boolean;          // se eu tenho esse item no meu estoque
+  hasMine: boolean;
 }
 
 // ==== Helpers (mock) ====
+// Calcula diferença percentual com segurança
+const calcDiffPct = (myPrice?: number | null, median?: number | null): number | null => {
+  if (myPrice == null || median == null || median <= 0) return null;
+  return (myPrice - median) / median;
+};
+
 const rndInt = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
-const sample = <T,>(arr: T[], n: number) => arr.slice(0, n);
+// ==== Alias de período ====
+type Period = '7d' | '30d';
 
-// calcula diff % com safety
-const calcDiffPct = (meu?: number | null, mediana?: number | null) => {
-  if (meu == null || mediana == null || mediana <= 0) return null;
-  return (meu - mediana) / mediana;
+// ==== Cache simples por período ====
+const cache = {
+  kpis: new Map<Period, KPIData>(),
+  barras: new Map<Period, number[]>(),
+  meus: new Map<Period, TopItemMeu[]>(),
+  geral: new Map<Period, TopItemGeral[]>(),
+  atividade: new Map<Period, AtividadeRecente[]>(),
+  tips: new Map<Period, TipSemResultado[]>(),
 };
 
 // ==== Factory do service ====
 export function createDashboardService() {
-  // dados estáticos de exemplo
   const termosBase = [
     'Furadeira 500W', 'Parafusadeira', 'Martelo pena', 'Chave Phillips 3x20',
     'Serra Tico-Tico', 'Trena 5m', 'Broca Aço 8mm', 'WD-40 300ml',
   ];
 
   return {
-    getKPIs(periodo: '7d' | '30d'): KPIData {
+    getKPIs(periodo: Period): KPIData {
+      const hit = cache.kpis.get(periodo);
+      if (hit) return hit;
+
       const impressoes = rndInt(400, 2400);
       const whatsapp = rndInt(30, 250);
       const mapa = rndInt(20, 180);
-      const ctr = (whatsapp + mapa) / Math.max(impressoes, 1);
+      const ctr = Number(((whatsapp + mapa) / Math.max(impressoes, 1)).toFixed(3));
 
-      // deltas de exemplo
       const delta = {
-        whatsapp: (Math.random() - 0.5) * 0.4,   // -20%..+20%
+        whatsapp: (Math.random() - 0.5) * 0.4,
         mapa:     (Math.random() - 0.5) * 0.4,
         impressoes:(Math.random() - 0.5) * 0.3,
         ctr:      (Math.random() - 0.5) * 0.2,
       };
 
-      return { whatsapp, mapa, impressoes, ctr, deltaKpis: delta };
+      const out = { whatsapp, mapa, impressoes, ctr, deltaKpis: delta };
+      cache.kpis.set(periodo, out);
+      return out;
     },
 
     getBarrasSemana(): number[] {
-      // 7 valores DOM..SÁB
-      return Array.from({ length: 7 }, () => rndInt(50, 450));
+      // barras podem ser independentes de período; se quiser cachear por '7d/30d':
+      const p: Period = '7d';
+      const hit = cache.barras.get(p);
+      if (hit) return hit;
+      const out = Array.from({ length: 7 }, () => rndInt(50, 450));
+      cache.barras.set(p, out);
+      return out;
     },
 
-    getTopItensMeus(periodo: '7d' | '30d'): TopItemMeu[] {
-      const base = termosBase.map((nome) => {
+    getTopItensMeus(periodo: Period): TopItemMeu[] {
+      const hit = cache.meus.get(periodo);
+      if (hit) return hit;
+      const out = termosBase.map((nome) => {
         const exibicoes = rndInt(40, 900);
         const conversas = rndInt(3, Math.max(5, Math.floor(exibicoes * 0.25)));
-        const ctr = conversas / Math.max(exibicoes, 1);
-
-        // 60% dos itens têm preço próprio
+        const ctr = Number((conversas / Math.max(exibicoes, 1)).toFixed(3));
         const hasMeu = Math.random() < 0.6;
-        const mediana = Math.random() < 0.75 ? rndInt(15, 350) : null; // às vezes não há base suficiente
-        const meuPreco = hasMeu ? rndInt(10, 400) : null;
+        const myPrice = hasMeu ? rndInt(10, 400) : null;
+        const median = Math.random() < 0.75 ? rndInt(15, 350) : null;
 
         return {
           nome,
           exibicoes,
           conversas,
           ctr,
-          meuPreco,
-          mediana,
-          diffPct: calcDiffPct(meuPreco, mediana),
-        } as TopItemMeu;
-      });
-
-      // ordena por conversas desc (default no dashboard)
-      return base.sort((a, b) => b.conversas - a.conversas);
+          meuPreco: myPrice,
+          mediana: median,
+          diffPct: calcDiffPct(myPrice, median),
+        };
+      }).sort((a, b) => b.conversas - a.conversas);
+      cache.meus.set(periodo, out);
+      return out;
     },
 
-    getTopItensGeral(periodo: '7d' | '30d'): TopItemGeral[] {
-      return termosBase.map((nome) => {
+    getTopItensGeral(periodo: Period): TopItemGeral[] {
+      const hit = cache.geral.get(periodo);
+      if (hit) return hit;
+      const out = termosBase.map((nome) => {
         const lojas = rndInt(2, 15);
-        // só faz sentido mostrar mediana quando n≥5; aqui geramos sempre,
-        // o componente decide mostrar "—" quando lojas<5.
         const mediana = rndInt(15, 350);
-        return { nome, mediana, lojas };
+        const hasMine = Math.random() < 0.5;
+        return { nome, mediana, lojas, hasMine };
       }).sort((a, b) => b.lojas - a.lojas);
+      cache.geral.set(periodo, out);
+      return out;
     },
 
-    getAtividadeRecente(periodo: '7d' | '30d'): AtividadeRecente[] {
+    getAtividadeRecente(periodo: Period): AtividadeRecente[] {
+      const hit = cache.atividade.get(periodo);
+      if (hit) return hit;
       const agora = Date.now();
       const eventos: AtividadeRecente[] = [];
       for (let i = 0; i < 12; i++) {
         const tipo: AtividadeRecente['tipo'] = ['BUSCA', 'MOSTRADO', 'WPP', 'MAPA'][rndInt(0, 3)] as any;
         const termo = ['furadeira', 'wd-40', 'parafuso', 'trena', 'broca'][rndInt(0, 4)];
-        const ts = new Date(agora - rndInt(1, 72) * 3600 * 1000); // últimas 72h
+        const ts = new Date(agora - rndInt(1, 72) * 3600 * 1000);
         eventos.push({ tipo, termo, ts });
       }
-      // mais recente primeiro
-      return eventos.sort((a, b) => b.ts.getTime() - a.ts.getTime());
+      const out = eventos.sort((a, b) => b.ts.getTime() - a.ts.getTime());
+      cache.atividade.set(periodo, out);
+      return out;
     },
 
-    getTipsSemResultado(periodo: '7d' | '30d'): TipSemResultado[] {
+    getTipsSemResultado(periodo: Period): TipSemResultado[] {
+      const hit = cache.tips.get(periodo);
+      if (hit) return hit;
       const termos = ['furadeira de impacto', 'serrote', 'broca 12mm', 'cola epóxi', 'serra circular'];
       const lista = termos.map((termo) => ({ termo, qtd: rndInt(2, 24) }));
-      // top 5 por quantidade
-      return lista.sort((a, b) => b.qtd - a.qtd).slice(0, 5);
+      const out = lista.sort((a, b) => b.qtd - a.qtd).slice(0, 5);
+      cache.tips.set(periodo, out);
+      return out;
     },
   };
 }
