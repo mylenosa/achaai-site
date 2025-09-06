@@ -21,7 +21,7 @@ export const Dashboard: React.FC = () => {
   
   // Estados dos dados
   const [kpis, setKpis] = useState<KPIData | null>(null);
-  const [weekData, setWeekData] = useState<number[]>([]);
+  const [weekSerie, setWeekSerie] = useState<{labels:string[]; values:number[]}>({ labels: [], values: [] });
   const [topMeus, setTopMeus] = useState<TopItemMeu[]>([]);
   const [topGeral, setTopGeral] = useState<TopItemGeral[]>([]);
   const [activities, setActivities] = useState<AtividadeRecente[]>([]);
@@ -31,7 +31,7 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     const loadData = () => {
       setKpis(dashboardService.getKPIs(periodo));
-      setWeekData(dashboardService.getBarrasSemana());
+      setWeekSerie(dashboardService.getSerieImpressoes(periodo));
       setTopMeus(dashboardService.getTopItensMeus(periodo));
       setTopGeral(dashboardService.getTopItensGeral(periodo));
       setActivities(dashboardService.getAtividadeRecente(periodo));
@@ -66,22 +66,20 @@ export const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-          <div className="text-gray-600 mt-1 text-sm sm:text-base space-y-1">
-            <p>Acompanhe o desempenho da sua loja</p>
-            <p className="text-xs text-gray-500">Última atualização: agora</p>
-          </div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">Acompanhe o desempenho da sua loja.</p>
+          <p className="text-xs text-gray-500 mt-1">Última atualização: agora</p>
         </div>
         
         {/* Period Toggle */}
-        <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto">
+        <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto flex-shrink-0">
           <button
             onClick={() => setPeriodo('7d')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
               periodo === '7d' 
                 ? 'bg-white text-gray-900 shadow-sm' 
                 : 'text-gray-600 hover:text-gray-900'
@@ -91,7 +89,7 @@ export const Dashboard: React.FC = () => {
           </button>
           <button
             onClick={() => setPeriodo('30d')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
               periodo === '30d' 
                 ? 'bg-white text-gray-900 shadow-sm' 
                 : 'text-gray-600 hover:text-gray-900'
@@ -104,7 +102,7 @@ export const Dashboard: React.FC = () => {
 
       {/* KPIs */}
       {kpis && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           {kpiConfigs.map((config, index) => (
             <KPICard
               key={config.key}
@@ -117,18 +115,7 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Row 2: Chart + Activity + Tips */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-        <div className="xl:col-span-8">
-          <WeekChart data={weekData} />
-        </div>
-        <div className="xl:col-span-4 space-y-4">
-          <RecentActivity activities={activities} maxItems={5} showSeeAll />
-          <NoResultTips tips={tips} onAddItem={handleAddItem} limit={5} />
-        </div>
-      </div>
-
-      {/* Row 3: Top Items (full width) */}
+      {/* Top Items */}
       <TopItems
         meus={topMeus}
         geral={topGeral}
@@ -136,6 +123,17 @@ export const Dashboard: React.FC = () => {
         onViewInStock={handleViewInStock}
         onAddItem={handleAddItem}
       />
+
+      {/* Row 2: Chart + Activity + Tips */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
+        <div className="xl:col-span-8">
+          <WeekChart period={periodo} labels={weekSerie.labels} values={weekSerie.values} />
+        </div>
+        <div className="xl:col-span-4 space-y-4">
+          <RecentActivity activities={activities} />
+          <NoResultTips tips={tips} onAddItem={handleAddItem} />
+        </div>
+      </div>
     </div>
   );
 };

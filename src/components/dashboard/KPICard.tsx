@@ -38,29 +38,29 @@ export const KPICard: React.FC<KPICardProps> = ({ title, value, delta = 0, index
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 hover:shadow-md transition-shadow relative group"
+      className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-5 hover:shadow-md transition-shadow relative group"
     >
       {/* Tooltip */}
-      <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+      <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-2 sm:px-3 py-1 sm:py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
         {tooltip}
         <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
       </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <div className="bg-emerald-50 rounded-xl p-3">
-          <Icon className="w-6 h-6 text-emerald-600" />
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="bg-emerald-50 rounded-lg sm:rounded-xl p-2 sm:p-3">
+          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
         </div>
-        <div className={`text-sm font-medium flex items-center gap-1 ${delta >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        <div className={`text-xs sm:text-sm font-medium flex items-center gap-1 ${delta >= 0 ? 'text-green-600' : 'text-red-600'}`}>
           <span>{getDeltaIcon(delta)}</span>
           <span>{formatPct(Math.abs(delta), false)}</span>
         </div>
       </div>
 
       <div className="space-y-1">
-        <h3 className="text-3xl font-bold text-gray-900">
+        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
           {title === 'CTR' ? formatPct(value, false) : formatNumber(value)}
         </h3>
-        <p className="text-sm text-gray-600">{title}</p>
+        <p className="text-xs sm:text-sm text-gray-600">{title}</p>
       </div>
     </motion.div>
   );

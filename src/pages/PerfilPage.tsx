@@ -38,10 +38,10 @@ export const PerfilPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Perfil da Loja</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Perfil da Loja</h1>
         <p className="text-gray-600 mt-1 text-sm sm:text-base">
           Configure as informações básicas da sua loja
         </p>
