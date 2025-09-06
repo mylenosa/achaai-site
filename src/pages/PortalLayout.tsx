@@ -1,5 +1,6 @@
+// src/pages/PortalLayout.tsx
 import React, { useState } from 'react';
-import { Outlet, useLocation, Navigate } from 'react-router-dom';
+import { Outlet, useLocation, Navigate, NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BarChart3, 
@@ -21,7 +22,7 @@ export const PortalLayout: React.FC = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, signOut, isConfigured, dev, setDev } = useAuthContext();
   const location = useLocation();
-  
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -37,10 +38,9 @@ export const PortalLayout: React.FC = () => {
     { id: 'perfil', label: 'Perfil da Loja', icon: Store, path: '/portal/perfil' },
   ];
 
-  // Simular nome da loja (em produção viria do perfil)
-  const storeName = 'Minha Loja'; // TODO: Buscar do perfil real
+  const storeName = 'Minha Loja'; // TODO: trazer do perfil real
 
-  // Se não estiver configurado, mostrar erro
+  // Se você ainda estiver usando o ProtectedRoute em App.tsx, pode remover este redirect.
   if (!isConfigured) {
     return <Navigate to="/login" replace />;
   }
@@ -72,7 +72,6 @@ export const PortalLayout: React.FC = () => {
 
             {/* DEV Toggle + Menu do Usuário */}
             <div className="flex items-center space-x-2">
-              {/* Botão DEV Toggle */}
               <button
                 onClick={() => setDev(!dev)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
@@ -108,7 +107,6 @@ export const PortalLayout: React.FC = () => {
                   <ChevronDown className={`w-4 h-4 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Dropdown Menu */}
                 <AnimatePresence>
                   {userMenuOpen && (
                     <motion.div
@@ -123,14 +121,16 @@ export const PortalLayout: React.FC = () => {
                         <div className="text-xs text-gray-500 truncate">{user?.email}</div>
                       </div>
                       
-                      <a
-                        href="/portal/perfil"
+                      <NavLink
+                        to="/portal/perfil"
                         onClick={() => setUserMenuOpen(false)}
-                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center"
+                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                        <User className="w-4 h-4 mr-3" />
-                        Minha Conta
-                      </a>
+                        <div className="flex items-center">
+                          <User className="w-4 h-4 mr-3" />
+                          Minha Conta
+                        </div>
+                      </NavLink>
                       
                       <button
                         onClick={handleSignOut}
@@ -148,59 +148,56 @@ export const PortalLayout: React.FC = () => {
         </div>
       </header>
 
-      <div className="flex min-h-0">
+      <div className="flex">
         {/* Sidebar */}
-        <aside className={`
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 fixed lg:static top-16 lg:top-0 bottom-0 left-0 z-30
-          w-64 sm:w-72 lg:w-64 xl:w-72 bg-white shadow-lg lg:shadow-none transition-transform duration-300 ease-in-out
-          border-r border-gray-200
-          lg:min-h-screen
-        `}>
-          <nav className="mt-4 sm:mt-6 lg:mt-8 px-3 sm:px-4 h-full overflow-y-auto">
+        <aside
+          className={`
+            fixed top-16 bottom-0 left-0 z-30
+            w-64 bg-white shadow-lg border-r border-gray-200
+            transform transition-transform duration-300 ease-in-out
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            lg:translate-x-0
+          `}
+        >
+          <nav className="mt-4 sm:mt-6 px-3 sm:px-4 h-full overflow-y-auto">
             <ul className="space-y-2">
-              {menuItems.map((item) => {
-                const isActive = location.pathname === item.path;
-                return (
-                  <li key={item.id}>
-                    <a
-                      href={item.path}
-                      onClick={() => setSidebarOpen(false)}
-                      className={`
-                        w-full flex items-center px-3 sm:px-4 py-2 sm:py-3 text-left rounded-lg transition-all duration-200
-                        ${isActive
-                          ? 'bg-emerald-50 text-emerald-700 shadow-sm font-medium border-r-2 border-emerald-500'
+              {menuItems.map((item) => (
+                <li key={item.id}>
+                  <NavLink
+                    to={item.path}
+                    onClick={() => setSidebarOpen(false)}
+                    className={({ isActive }) =>
+                      `w-full flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                        isActive
+                          ? 'bg-emerald-50 text-emerald-700 shadow-sm font-medium'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }
-                      `}
-                    >
-                      <item.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 flex-shrink-0" />
-                      <span className="text-sm sm:text-base">{item.label}</span>
-                    </a>
-                  </li>
-                );
-              })}
+                      }`
+                    }
+                  >
+                    <item.icon className="w-5 h-5 mr-3" />
+                    <span className="text-sm sm:text-base">{item.label}</span>
+                  </NavLink>
+                </li>
+              ))}
             </ul>
           </nav>
         </aside>
 
-        {/* Overlay para mobile */}
+        {/* Overlay mobile */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+            className="fixed inset-0 bg-black/40 z-20 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 lg:ml-64 xl:ml-72 p-3 sm:p-4 lg:p-6 xl:p-8 max-w-full overflow-hidden pt-20 lg:pt-6 min-h-screen bg-gray-50">
-          <div className="max-w-7xl mx-auto">
-            <Outlet />
-          </div>
+        {/* Main */}
+        <main className="flex-1 pt-4 sm:pt-6 lg:pt-8 px-3 sm:px-4 lg:px-6 xl:px-8 lg:ml-64">
+          <Outlet />
         </main>
       </div>
 
-      {/* Click outside handler para fechar menu do usuário */}
+      {/* Click outside para fechar menu do usuário */}
       {userMenuOpen && (
         <div
           className="fixed inset-0 z-10"
