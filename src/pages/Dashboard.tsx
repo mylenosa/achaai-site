@@ -97,9 +97,15 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Gráfico antes para evitar “buracos” de layout */}
-      <WeekChart period={periodo} labels={serie.labels} values={serie.values} />
-
+      {/* Linha 2: Semana (esquerda) + Atividades (direita, com scroll) */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
+        <div className="xl:col-span-8">
+          <WeekChart period={periodo} labels={serie.labels} values={serie.values} />
+        </div>
+        <div className="xl:col-span-4">
+          <RecentActivity activities={activities} maxHeight={360} />
+        </div>
+      </div>
       {/* Duas colunas: esquerda Top Itens (sem scroll) • direita Activity+Tips (com scroll interno só no Activity) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
         <div className="xl:col-span-7">
