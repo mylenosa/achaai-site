@@ -15,31 +15,19 @@ import TopItems from '../components/dashboard/TopItems';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { NoResultTips } from '../components/dashboard/NoResultTips';
 
-// Dependency Inversion: Usa abstração do serviço
 const dashboardService = createDashboardService();
-
-// chaves fortes para acessar KPIData sem casts
-type KPIKey = 'whatsapp' | 'mapa' | 'impressoes' | 'ctr';
-type KPITitle = 'WhatsApp' | 'Mapa' | 'Impressões' | 'CTR';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-
-  // Estado do período
   const [periodo, setPeriodo] = useState<'7d' | '30d'>('7d');
 
-  // Estados dos dados
   const [kpis, setKpis] = useState<KPIData | null>(null);
-  const [serie, setSerie] = useState<{ labels: string[]; values: number[] }>({
-    labels: [],
-    values: [],
-  });
+  const [serie, setSerie] = useState<{ labels: string[]; values: number[] }>({ labels: [], values: [] });
   const [topMeus, setTopMeus] = useState<TopItemMeu[]>([]);
   const [topGeral, setTopGeral] = useState<TopItemGeral[]>([]);
   const [activities, setActivities] = useState<AtividadeRecente[]>([]);
   const [tips, setTips] = useState<TipSemResultado[]>([]);
 
-  // Carregar dados quando período muda
   useEffect(() => {
     setKpis(dashboardService.getKPIs(periodo));
     setSerie(dashboardService.getSerieImpressoes(periodo));
@@ -49,26 +37,16 @@ export const Dashboard: React.FC = () => {
     setTips(dashboardService.getTipsSemResultado(periodo));
   }, [periodo]);
 
-  // Handlers para navegação
-  const handleAddPrice = (itemName: string) => {
-    navigate(`/portal/estoque?search=${encodeURIComponent(itemName)}`);
-  };
+  const handleAddPrice = (itemName: string) => navigate(`/portal/estoque?search=${encodeURIComponent(itemName)}`);
+  const handleViewInStock = (itemName: string) => navigate(`/portal/estoque?search=${encodeURIComponent(itemName)}`);
+  const handleAddItem = (itemName: string) => navigate(`/portal/estoque?add=${encodeURIComponent(itemName)}`);
 
-  const handleViewInStock = (itemName: string) => {
-    navigate(`/portal/estoque?search=${encodeURIComponent(itemName)}`);
-  };
-
-  const handleAddItem = (itemName: string) => {
-    navigate(`/portal/estoque?add=${encodeURIComponent(itemName)}`);
-  };
-
-  // KPIs configuration (tipado)
-  const kpiConfigs: { key: KPIKey; title: KPITitle }[] = [
+  const kpiConfigs = [
     { key: 'whatsapp', title: 'WhatsApp' },
     { key: 'mapa', title: 'Mapa' },
     { key: 'impressoes', title: 'Impressões' },
     { key: 'ctr', title: 'CTR' },
-  ];
+  ] as const;
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -79,9 +57,7 @@ export const Dashboard: React.FC = () => {
           <p className="text-gray-600 mt-1 text-sm sm:text-base">Acompanhe o desempenho da sua loja.</p>
           <p className="text-xs text-gray-500 mt-1">Última atualização: agora</p>
         </div>
-
-        {/* Period Toggle */}
-        <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto flex-shrink-0">
+        <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto">
           <button
             onClick={() => setPeriodo('7d')}
             className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
@@ -108,35 +84,36 @@ export const Dashboard: React.FC = () => {
             <KPICard
               key={config.key}
               title={config.title}
-              value={kpis[config.key]}
-              delta={kpis.deltaKpis[config.key]}
+              value={kpis[config.key as keyof KPIData] as number}
+              delta={kpis.deltaKpis[config.key as keyof typeof kpis.deltaKpis]}
               index={index}
             />
           ))}
         </div>
       )}
 
-      {/* Top Items */}
-      <TopItems
-        meus={topMeus}
-        geral={topGeral}
-        onAddPrice={handleAddPrice}
-        onViewInStock={handleViewInStock}
-        onAddItem={handleAddItem}
-      />
-
-      {/* Row 2: Chart + Activity + Tips */}
+      {/* Row: Top Itens (esq) + Atividade/Tips (dir) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
         <div className="xl:col-span-8">
-          <WeekChart period={periodo} labels={serie.labels} values={serie.values} />
+          <TopItems
+            meus={topMeus}
+            geral={topGeral}
+            onAddPrice={handleAddPrice}
+            onViewInStock={handleViewInStock}
+            onAddItem={handleAddItem}
+          />
         </div>
         <div className="xl:col-span-4 space-y-4">
-          <div className="grid grid-cols-1 gap-4">
-            <RecentActivity activities={activities} />
-            <NoResultTips tips={tips} onAddItem={handleAddItem} />
-          </div>
+          <RecentActivity activities={activities} />
+          <NoResultTips tips={tips} onAddItem={handleAddItem} />
         </div>
       </div>
+
+      {/* Gráfico abaixo (usa série conforme período) */}
+      <WeekChart
+        series={serie}
+        title={periodo === '7d' ? 'Impressões por dia (últimos 7 dias)' : 'Impressões por semana (últimos 30 dias)'}
+      />
     </div>
   );
 };
