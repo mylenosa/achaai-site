@@ -15,31 +15,22 @@ import TopItems from '../components/dashboard/TopItems';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { NoResultTips } from '../components/dashboard/NoResultTips';
 
-// Dependency Inversion: Usa abstração do serviço
 const dashboardService = createDashboardService();
 
-// chaves fortes para acessar KPIData sem casts
 type KPIKey = 'whatsapp' | 'mapa' | 'impressoes' | 'ctr';
 type KPITitle = 'WhatsApp' | 'Mapa' | 'Impressões' | 'CTR';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-
-  // Estado do período
   const [periodo, setPeriodo] = useState<'7d' | '30d'>('7d');
 
-  // Estados dos dados
   const [kpis, setKpis] = useState<KPIData | null>(null);
-  const [serie, setSerie] = useState<{ labels: string[]; values: number[] }>({
-    labels: [],
-    values: [],
-  });
+  const [serie, setSerie] = useState<{ labels: string[]; values: number[] }>({ labels: [], values: [] });
   const [topMeus, setTopMeus] = useState<TopItemMeu[]>([]);
   const [topGeral, setTopGeral] = useState<TopItemGeral[]>([]);
   const [activities, setActivities] = useState<AtividadeRecente[]>([]);
   const [tips, setTips] = useState<TipSemResultado[]>([]);
 
-  // Carregar dados quando período muda
   useEffect(() => {
     setKpis(dashboardService.getKPIs(periodo));
     setSerie(dashboardService.getSerieImpressoes(periodo));
@@ -49,20 +40,10 @@ export const Dashboard: React.FC = () => {
     setTips(dashboardService.getTipsSemResultado(periodo));
   }, [periodo]);
 
-  // Handlers para navegação
-  const handleAddPrice = (itemName: string) => {
-    navigate(`/portal/estoque?search=${encodeURIComponent(itemName)}`);
-  };
+  const handleAddPrice = (itemName: string) => navigate(`/portal/estoque?search=${encodeURIComponent(itemName)}`);
+  const handleViewInStock = (itemName: string) => navigate(`/portal/estoque?search=${encodeURIComponent(itemName)}`);
+  const handleAddItem = (itemName: string) => navigate(`/portal/estoque?add=${encodeURIComponent(itemName)}`);
 
-  const handleViewInStock = (itemName: string) => {
-    navigate(`/portal/estoque?search=${encodeURIComponent(itemName)}`);
-  };
-
-  const handleAddItem = (itemName: string) => {
-    navigate(`/portal/estoque?add=${encodeURIComponent(itemName)}`);
-  };
-
-  // KPIs configuration (tipado)
   const kpiConfigs: { key: KPIKey; title: KPITitle }[] = [
     { key: 'whatsapp', title: 'WhatsApp' },
     { key: 'mapa', title: 'Mapa' },
@@ -116,9 +97,12 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Row: Top Itens (esq) + Atividade/Tips (dir) */}
+      {/* Gráfico antes para evitar “buracos” de layout */}
+      <WeekChart period={periodo} labels={serie.labels} values={serie.values} />
+
+      {/* Duas colunas: esquerda Top Itens (sem scroll) • direita Activity+Tips (com scroll interno só no Activity) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
-        <div className="xl:col-span-8">
+        <div className="xl:col-span-7">
           <TopItems
             meus={topMeus}
             geral={topGeral}
@@ -127,14 +111,12 @@ export const Dashboard: React.FC = () => {
             onAddItem={handleAddItem}
           />
         </div>
-        <div className="xl:col-span-4 space-y-4">
+
+        <div className="xl:col-span-5 space-y-4">
           <RecentActivity activities={activities} />
           <NoResultTips tips={tips} onAddItem={handleAddItem} />
         </div>
       </div>
-
-      {/* Gráfico abaixo (usa série conforme período) */}
-      <WeekChart period={periodo} labels={serie.labels} values={serie.values} />
     </div>
   );
 };
