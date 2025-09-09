@@ -1,4 +1,3 @@
-/acesso  /login  302
-/portal  /login  302
-/lojista /login  302
-/*       /index.html 200
+/login        /acesso             301
+/dashboard    /portal/dashboard   301
+/*            /index.html         200
