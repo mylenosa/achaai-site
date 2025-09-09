@@ -1,54 +1,49 @@
-// Single Responsibility: Lista de atividade recente com scroll interno
+// Single Responsibility: Lista de atividades recentes (com scroll, sem “ver mais”)
 import React from 'react';
-import { AtividadeRecente } from '../../services/DashboardService';
-import { MessageCircle, MapPin, Eye, Search } from 'lucide-react';
+import { MessageCircle, MapPin, Eye } from 'lucide-react';
 
-const iconByType: Record<AtividadeRecente['tipo'], React.ElementType> = {
-  BUSCA: Search,
-  MOSTRADO: Eye,
-  WPP: MessageCircle,
-  MAPA: MapPin,
-  BUSCA_ZERO: Search,
-};
+export interface AtividadeRecente {
+  tipo: 'BUSCA' | 'MOSTRADO' | 'WPP' | 'MAPA' | 'BUSCA_ZERO';
+  ts: Date;
+  termo?: string;
+}
 
-type Props = { activities: AtividadeRecente[] };
+export const RecentActivity: React.FC<{ activities: AtividadeRecente[] }> = ({ activities }) => {
+  const iconByType = (t: AtividadeRecente['tipo']) => {
+    switch (t) {
+      case 'WPP': return <MessageCircle className="w-4 h-4 text-emerald-600" />;
+      case 'MAPA': return <MapPin className="w-4 h-4 text-blue-600" />;
+      default: return <Eye className="w-4 h-4 text-orange-600" />;
+    }
+  };
 
-export const RecentActivity: React.FC<Props> = ({ activities }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5">
-      <h3 className="text-lg font-semibold text-gray-900 mb-3">Atividade recente</h3>
-      {/* Scroll interno, sem “ver mais” */}
-      <div className="max-h-80 overflow-y-auto pr-1">
-        <ul className="divide-y divide-gray-100">
-          {activities.map((ev, i) => {
-            const Icon = iconByType[ev.tipo];
-            const when = new Date(ev.ts).toLocaleString();
-            const label =
-              ev.tipo === 'BUSCA'
-                ? `Cliente buscou “${ev.termo ?? ''}”`
-                : ev.tipo === 'BUSCA_ZERO'
-                ? `Sem resultados para “${ev.termo ?? ''}”`
-                : ev.tipo === 'WPP'
-                ? `WhatsApp aberto`
-                : ev.tipo === 'MAPA'
-                ? `Mapa aberto`
-                : `Item mostrado`;
-            return (
-              <li key={i} className="py-3 flex items-start gap-3">
-                <div className="mt-0.5">
-                  <Icon className="w-4.5 h-4.5 text-emerald-600" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm text-gray-900 truncate">{label}</div>
-                  <div className="text-xs text-gray-500">{when}</div>
-                </div>
-              </li>
-            );
-          })}
-          {activities.length === 0 && (
-            <li className="py-6 text-sm text-gray-500 text-center">Sem atividade no período.</li>
-          )}
-        </ul>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 h-full">
+      <h3 className="text-lg font-semibold text-gray-900 mb-3">Atividade Recente</h3>
+      <div className="max-h-[420px] overflow-y-auto pr-2 divide-y divide-gray-100">
+        {activities.slice(0, 50).map((a, i) => (
+          <div key={i} className="py-3 flex items-start gap-3">
+            <div className="mt-0.5">{iconByType(a.tipo)}</div>
+            <div className="min-w-0">
+              <div className="text-sm text-gray-900">
+                {a.tipo === 'WPP' && <>Cliente abriu WhatsApp</>}
+                {a.tipo === 'MAPA' && <>Cliente abriu Mapa</>}
+                {a.tipo === 'MOSTRADO' && <>Você apareceu para ‘{a.termo}’</>}
+                {a.tipo === 'BUSCA' && <>Busca por ‘{a.termo}’</>}
+                {a.tipo === 'BUSCA_ZERO' && <>Sem resultado para ‘{a.termo}’</>}
+              </div>
+              <div className="text-xs text-gray-500">
+                {new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' }).format(
+                  Math.round((a.ts.getTime() - Date.now()) / (60 * 60 * 1000)),
+                  'hour'
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+        {activities.length === 0 && (
+          <div className="py-10 text-center text-gray-500 text-sm">Sem atividades no período</div>
+        )}
       </div>
     </div>
   );
