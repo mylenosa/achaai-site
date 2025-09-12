@@ -1,64 +1,47 @@
 // src/lib/supabase.ts
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-// Lê as envs tanto em Vite (VITE_*) quanto em Next (NEXT_PUBLIC_*)
-const url =
-  (import.meta as any)?.env?.VITE_SUPABASE_URL ??
-  (typeof process !== 'undefined' ? (process as any)?.env?.NEXT_PUBLIC_SUPABASE_URL : undefined);
+// ATENÇÃO: use SEMPRE o padrão literal "import.meta.env.VITE_*"
+// para que o Vite injete na build de produção.
+const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const anon = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-const anon =
-  (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY ??
-  (typeof process !== 'undefined' ? (process as any)?.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined);
+// Flag simples para a UI/Contexto
+export const isSupabaseConfigured: boolean = !!(url && anon);
 
-// Exporte um flag simples (boolean) para saber se o Supabase está configurado
-export const isSupabaseConfigured: boolean = Boolean(url && anon);
-
-// Se alguém tentar usar o client sem envs, mostramos erro claro
+// Client não-nulo. Se faltar env, lança erro claro ao usar.
 function createFailingClient(): SupabaseClient {
   return new Proxy({} as SupabaseClient, {
     get() {
       throw new Error(
-        'Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY (ou NEXT_PUBLIC_*) no ambiente.'
+        'Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no ambiente.'
       );
     },
   });
 }
 
-// Client **não-nulo** (evita "possibly null" do TypeScript)
 export const supabase: SupabaseClient = isSupabaseConfigured
-  ? createClient(url as string, anon as string, {
-      auth: { persistSession: true, autoRefreshToken: true },
-    })
+  ? createClient(url!, anon!, { auth: { persistSession: true, autoRefreshToken: true } })
   : createFailingClient();
 
-// --------- Helper de redirect (usado pelo AuthContext) ----------
-const envSiteUrl =
-  (import.meta as any)?.env?.VITE_SITE_URL ??
-  (typeof process !== 'undefined' ? (process as any)?.env?.NEXT_PUBLIC_SITE_URL : undefined) ??
-  '';
+// --------- Helpers ---------
+const siteUrl = (import.meta.env.VITE_SITE_URL as string | undefined) ?? '';
 
-/**
- * Monta a URL absoluta de redirect para fluxos de Auth.
- * - Usa VITE_SITE_URL / NEXT_PUBLIC_SITE_URL se existirem (produção/preview).
- * - Senão, em runtime usa window.location.origin (dev/local).
- * - Em build (sem window), devolve apenas o path.
- */
+/** Monta URL absoluta para redirects de auth */
 export function getRedirectUrl(path: string = '/auth/callback'): string {
   const base =
-    envSiteUrl ||
-    (typeof window !== 'undefined' && window.location?.origin ? window.location.origin : '');
+    siteUrl || (typeof window !== 'undefined' ? window.location.origin : '');
   const clean = path.startsWith('/') ? path : `/${path}`;
   return base ? `${base}${clean}` : clean;
 }
 
-// --- helper: normaliza mensagens de erro do Supabase para UX amigável ---
+/** Mensagens amigáveis de erro do Supabase */
 export function getSupabaseErrorMessage(err: unknown): string {
   const e = (err ?? {}) as any;
   const code = e?.code ?? e?.error?.code ?? e?.name;
   const status = e?.status ?? e?.error?.status;
   const msg = (e?.message ?? e?.error?.message ?? '').toLowerCase();
 
-  // Casos comuns de Auth
   if (code === 'invalid_credentials' || status === 400 || msg.includes('invalid login credentials')) {
     return 'E-mail ou senha inválidos.';
   }
@@ -77,7 +60,5 @@ export function getSupabaseErrorMessage(err: unknown): string {
   if (status === 403) {
     return 'Ação não permitida para sua conta.';
   }
-
-  // Fallback genérico
   return e?.message || 'Algo deu errado. Tente novamente.';
 }
