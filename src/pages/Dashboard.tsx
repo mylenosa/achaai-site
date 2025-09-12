@@ -16,8 +16,8 @@ import { TopItems } from '../components/dashboard/TopItems';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { NoResultTips } from '../components/dashboard/NoResultTips';
 
-// Criamos a instância do serviço aqui para poder chamá-la
-const dashboardService = createDashboardService();
+// Importamos a instância do serviço e o perfil mockado
+const { getDashboardData, mockStoreProfile } = createDashboardService();
 
 type KPIKey = 'whatsapp' | 'mapa' | 'impressoes' | 'ctr';
 type KPITitle = 'WhatsApp' | 'Mapa' | 'Impressões' | 'CTR';
@@ -34,15 +34,15 @@ export const Dashboard: React.FC = () => {
   const [topGeral, setTopGeral] = useState<TopItemGeral[]>([]);
   const [activities, setActivities] = useState<AtividadeRecente[]>([]);
   const [tips, setTips] = useState<TipSemResultado[]>([]);
-  // Novo estado para armazenar as categorias da loja
-  const [storeCategories, setStoreCategories] = useState<string[]>([]);
+  // Usamos o perfil mockado como estado inicial. A função de set não é necessária por enquanto.
+  const [storeProfile] = useState(mockStoreProfile);
 
   useEffect(() => {
     setLoading(true);
     // Simula uma pequena demora, como se fosse uma chamada de API
     setTimeout(() => {
-      // Passa as categorias da loja para o serviço (ou um array vazio se ainda não carregou)
-      const data = dashboardService.getDashboardData(periodo, storeCategories);
+      // Passa o objeto de perfil completo para o serviço
+      const data = getDashboardData(periodo, storeProfile);
       setKpis(data.kpis);
       setSerie(data.serie);
       setTopMeus(data.topMeus);
@@ -50,15 +50,9 @@ export const Dashboard: React.FC = () => {
       setActivities(data.activities);
       setTips(data.tips);
       
-      // Armazena as categorias da loja (vindo do mock por enquanto)
-      // Isso garante que só vamos pegar as categorias na primeira vez
-      if (storeCategories.length === 0 && data.storeProfile?.categories) {
-        setStoreCategories(data.storeProfile.categories);
-      }
-      
       setLoading(false);
     }, 500);
-  }, [periodo, storeCategories]); // Adicionamos a dependência para recarregar se as categorias mudarem
+  }, [periodo, storeProfile]); // Depende do perfil para recarregar se ele mudar
 
   const handleAddItem = (itemName: string) => navigate(`/portal/estoque?add=${encodeURIComponent(itemName)}`);
 
@@ -70,7 +64,6 @@ export const Dashboard: React.FC = () => {
   ];
 
   if (loading || !kpis || !serie) {
-    // Aqui você pode adicionar um componente de "skeleton loader" para uma UX melhor
     return <div className="text-center p-8">Carregando dados do dashboard...</div>;
   }
 

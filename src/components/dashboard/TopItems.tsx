@@ -81,8 +81,9 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddItem }) => {
                   <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{item.nome}</p>
+                    {/* Linha Corrigida: removi a exibição da categoria */}
                     <p className="text-xs text-gray-500">
-                      {item.interesses} interesses • <span className="font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">{item.categoria}</span>
+                      {item.interesses} interesses {tab === 'cidade' ? 'na cidade' : 'de clientes'}
                     </p>
                   </div>
                 </div>

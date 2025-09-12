@@ -1,13 +1,13 @@
 // src/components/dashboard/StoreProfileForm.tsx
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Save, 
-  Store, 
-  MapPin, 
+import {
+  Save,
+  Store,
+  MapPin,
   MessageCircle,
   Loader2,
-  Tag 
+  Tag
 } from 'lucide-react';
 import { storeService, StoreProfile } from '../../services/StoreService';
 import { isSupabaseConfigured } from '../../lib/supabase';
@@ -33,12 +33,17 @@ export const StoreProfileForm: React.FC = () => {
   
   const { user, isConfigured, setHasLoja } = useAuthContext();
 
+  // --- LISTA DE CATEGORIAS ATUALIZADA (SEM "OUTROS") ---
   const availableCategories = [
-    'Ferramentas', 'Tintas', 'Materiais de Construção', 'Elétrica', 
-    'Hidráulica', 'Jardinagem', 'Automotivo', 'Casa e Decoração',
-    'Roupas', 'Calçados', 'Eletrônicos', 'Informática', 'Celulares',
-    'Farmácia', 'Cosméticos', 'Alimentação', 'Bebidas', 'Padaria',
-    'Açougue', 'Hortifruti', 'Pet Shop', 'Livraria', 'Papelaria'
+    'Casa e Construção',
+    'Automotivo',
+    'Moda e Vestuário',
+    'Eletrônicos e Informática',
+    'Saúde e Beleza',
+    'Supermercado e Alimentos',
+    'Pet Shop',
+    'Livraria e Papelaria',
+    'Casa e Decoração'
   ];
 
   useEffect(() => {
