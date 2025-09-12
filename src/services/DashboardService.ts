@@ -39,13 +39,11 @@ export interface TipSemResultado {
 
 export interface TopItemMeu {
   nome: string;
-  exibicoes: number;
-  conversas: number;
-  ctr: number;
+  interesses: number;
   meuPreco?: number | null;
   mediana?: number | null;
   diffPct?: number | null;
-  lojas?: number; // Adicionado para consistência
+  lojas?: number;
 }
 
 export interface TopItemGeral {
@@ -53,8 +51,8 @@ export interface TopItemGeral {
   mediana: number;
   lojas: number;
   hasMine: boolean;
-  meuPreco?: number | null; // Adicionado para comparação direta
-  diffPct?: number | null;  // Adicionado para comparação direta
+  meuPreco?: number | null;
+  diffPct?: number | null;
 }
 
 // ==== Helpers (mock) ====
@@ -76,7 +74,6 @@ export function createDashboardService() {
   ];
   
   const getDashboardData = (periodo: Period) => {
-    // 1. Gera a série de impressões primeiro (Fonte da Verdade)
     let serie: SerieData;
     if (periodo === '7d') {
       const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -94,7 +91,6 @@ export function createDashboardService() {
       serie = { title: 'Suas Impressões no Mês', labels, values, total, prevTotal, delta };
     }
 
-    // 2. Gera os KPIs USANDO o total de impressões da série
     const impressoes = serie.total;
     const whatsapp = rndInt(Math.floor(impressoes * 0.05), Math.floor(impressoes * 0.15));
     const mapa = rndInt(Math.floor(impressoes * 0.03), Math.floor(impressoes * 0.10));
@@ -107,7 +103,6 @@ export function createDashboardService() {
     };
     const kpis: KPIData = { whatsapp, mapa, impressoes, ctr, deltaKpis };
 
-    // 3. Gera o resto dos dados
     const topMeus: TopItemMeu[] = [];
     const topGeral: TopItemGeral[] = [];
 
@@ -117,31 +112,14 @@ export function createDashboardService() {
         const mediana = Math.random() < 0.75 ? rndInt(15, 350) : null;
         const lojas = rndInt(2, 15);
         const diffPct = calcDiffPct(meuPreco, mediana);
-        const conversas = rndInt(3, 120);
+        const interesses = rndInt(3, 160);
 
-        topMeus.push({
-            nome,
-            exibicoes: rndInt(40, 900),
-            conversas,
-            ctr: conversas / rndInt(40, 900),
-            meuPreco,
-            mediana,
-            diffPct,
-            lojas,
-        });
-
-        topGeral.push({
-            nome,
-            mediana: mediana ?? rndInt(15, 350), // Garante que sempre haja uma mediana na visão da cidade
-            lojas,
-            hasMine: hasMeu,
-            meuPreco,
-            diffPct,
-        });
+        topMeus.push({ nome, interesses, meuPreco, mediana, diffPct, lojas });
+        topGeral.push({ nome, mediana: mediana ?? rndInt(15, 350), lojas, hasMine: hasMeu, meuPreco, diffPct });
     });
 
-    topMeus.sort((a, b) => b.conversas - a.conversas);
-    topGeral.sort((a, b) => b.lojas - a.lojas);
+    topMeus.sort((a, b) => b.interesses - a.interesses);
+    topGeral.sort((a, b) => (b.hasMine ? -1 : 1) - (a.hasMine ? -1 : 1) || b.lojas - a.lojas); // Oportunidades primeiro
 
     const activities: AtividadeRecente[] = Array.from({ length: 8 }).map(() => ({
         tipo: ['WPP', 'MAPA'][rndInt(0, 1)] as 'WPP' | 'MAPA',
@@ -158,5 +136,4 @@ export function createDashboardService() {
   return { getDashboardData };
 }
 
-// Re-exporta os tipos para garantir que o TopItems tenha acesso
 export * from './DashboardService';

@@ -13,10 +13,9 @@ type Props = {
   onAddItem: (nome: string) => void;
 };
 
-// CORREÇÃO: Usamos a prop 'media' para exibir o valor de referência
 const PriceComparison: React.FC<{ diff: number | null, media: number | null }> = ({ diff, media }) => {
     if (diff === null || diff === undefined) return null;
-    const color = getDeltaColor(-diff); // Invertido: abaixo da média é bom (verde)
+    const color = getDeltaColor(-diff);
     const text = diff > 0 ? `acima da média` : `abaixo da média`;
     const mediaText = media ? ` (Média: ${formatBRL(media)})` : '';
 
@@ -65,12 +64,12 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
             className="divide-y divide-gray-100"
           >
             {tab === 'loja' && meus.slice(0, 5).map((item, index) => (
-              <li key={index} className="py-3.5 flex items-center justify-between gap-4">
+              <li key={item.nome} className="py-3.5 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{item.nome}</p>
-                    <p className="text-xs text-gray-500">{item.conversas} contatos recebidos</p>
+                    <p className="text-xs text-gray-500">{item.interesses} interesses de clientes</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -78,7 +77,6 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
                         {item.meuPreco != null ? (
                             <>
                                 <p className="font-semibold text-gray-800">{formatBRL(item.meuPreco)}</p>
-                                {/* CORREÇÃO: Usamos '?? null' para garantir que não passamos 'undefined' */}
                                 <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} />
                             </>
                         ) : (
@@ -96,19 +94,17 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
             ))}
 
             {tab === 'cidade' && geral.slice(0, 5).map((item, index) => (
-              <li key={index} className="py-3.5 flex items-center justify-between gap-4">
+              <li key={item.nome} className="py-3.5 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{item.nome}</p>
-                    {/* CORREÇÃO: Usamos '?? null' para garantir que não passamos 'undefined' */}
                     <p className="text-xs text-gray-500">Média de {formatBRL(item.mediana ?? null)} em {item.lojas} lojas</p>
                   </div>
                 </div>
                 {item.hasMine ? (
                     <div className="flex items-center gap-2">
                         <div className="text-right">
-                            {/* CORREÇÃO: Usamos '?? null' para garantir que não passamos 'undefined' */}
                             <p className="font-semibold text-gray-800">{formatBRL(item.meuPreco ?? null)}</p>
                             <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} />
                         </div>
@@ -118,7 +114,7 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
                     </div>
                 ) : (
                     <button onClick={() => onAddItem(item.nome)} className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0">
-                        <Plus className="w-4 h-4" /> Adicionar
+                        <Plus className="w-4 h-4" /> Adicionar ao Estoque
                     </button>
                 )}
               </li>
