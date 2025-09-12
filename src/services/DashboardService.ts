@@ -68,7 +68,7 @@ const buscasSemResultado = [
   { termo: 'furadeira de impacto', qtd: 25 },
   { termo: 'serrote', qtd: 18 },
   { termo: 'cola epóxi', qtd: 12 },
-  { termo: 'filtro de óleo', qtd: 9 }, // Menos relevante para a loja do usuário
+  { termo: 'filtro de óleo', qtd: 9 },
 ];
 
 // --- FIM DA SIMULAÇÃO ---
@@ -112,7 +112,7 @@ export function createDashboardService() {
         
         return {
           nome,
-          interesses: rndInt(10, 200), // Simulação de interesse
+          interesses: rndInt(10, 200), // Simulação de interesse/buscas
           mediana,
           lojas: data.lojas,
           hasMine: !!meuItem,
