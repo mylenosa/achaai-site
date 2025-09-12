@@ -1,4 +1,4 @@
-// Single Responsibility: Página principal do dashboard
+// src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -23,7 +23,9 @@ type KPITitle = 'WhatsApp' | 'Mapa' | 'Impressões' | 'CTR';
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [periodo, setPeriodo] = useState<'7d' | '30d'>('7d');
+  const [loading, setLoading] = useState(true);
 
+  // Estados dos dados
   const [kpis, setKpis] = useState<KPIData | null>(null);
   const [serie, setSerie] = useState<{ labels: string[]; values: number[] }>({ labels: [], values: [] });
   const [topMeus, setTopMeus] = useState<TopItemMeu[]>([]);
@@ -32,16 +34,19 @@ export const Dashboard: React.FC = () => {
   const [tips, setTips] = useState<TipSemResultado[]>([]);
 
   useEffect(() => {
-    setKpis(dashboardService.getKPIs(periodo));
-    setSerie(dashboardService.getSerieImpressoes(periodo));
-    setTopMeus(dashboardService.getTopItensMeus(periodo));
-    setTopGeral(dashboardService.getTopItensGeral(periodo));
-    setActivities(dashboardService.getAtividadeRecente(periodo));
-    setTips(dashboardService.getTipsSemResultado(periodo));
+    setLoading(true);
+    // Simula uma pequena demora, como se fosse uma chamada de API
+    setTimeout(() => {
+      setKpis(dashboardService.getKPIs(periodo));
+      setSerie(dashboardService.getSerieImpressoes(periodo));
+      setTopMeus(dashboardService.getTopItensMeus(periodo));
+      setTopGeral(dashboardService.getTopItensGeral(periodo));
+      setActivities(dashboardService.getAtividadeRecente(periodo));
+      setTips(dashboardService.getTipsSemResultado(periodo));
+      setLoading(false);
+    }, 500);
   }, [periodo]);
 
-  const handleAddPrice = (itemName: string) => navigate(`/portal/estoque?search=${encodeURIComponent(itemName)}`);
-  const handleViewInStock = (itemName: string) => navigate(`/portal/estoque?search=${encodeURIComponent(itemName)}`);
   const handleAddItem = (itemName: string) => navigate(`/portal/estoque?add=${encodeURIComponent(itemName)}`);
 
   const kpiConfigs: { key: KPIKey; title: KPITitle }[] = [
@@ -51,6 +56,11 @@ export const Dashboard: React.FC = () => {
     { key: 'ctr', title: 'CTR' },
   ];
 
+  if (loading) {
+    // Aqui você pode adicionar um componente de "skeleton loader" para uma UX melhor
+    return <div className="text-center p-8">Carregando dados do dashboard...</div>;
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
@@ -58,10 +68,7 @@ export const Dashboard: React.FC = () => {
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-1 text-sm sm:text-base">Acompanhe o desempenho da sua loja.</p>
-          <p className="text-xs text-gray-500 mt-1">Última atualização: agora</p>
         </div>
-
-        {/* Period Toggle */}
         <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto flex-shrink-0">
           <button
             onClick={() => setPeriodo('7d')}
@@ -69,7 +76,7 @@ export const Dashboard: React.FC = () => {
               periodo === '7d' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            7 dias
+            Últimos 7 dias
           </button>
           <button
             onClick={() => setPeriodo('30d')}
@@ -77,7 +84,7 @@ export const Dashboard: React.FC = () => {
               periodo === '30d' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            30 dias
+            Últimos 30 dias
           </button>
         </div>
       </div>
@@ -97,31 +104,26 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Linha 2: Semana (esquerda) + Atividades (direita, com scroll) */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
-        <div className="xl:col-span-8">
+      {/* Gráfico e Atividade Recente */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+        <div className="xl:col-span-2">
           <WeekChart period={periodo} labels={serie.labels} values={serie.values} />
         </div>
-        <div className="xl:col-span-4">
-          <RecentActivity activities={activities} maxHeight={360} />
+        <div className="xl:col-span-1">
+           <RecentActivity activities={activities} />
         </div>
       </div>
-      {/* Duas colunas: esquerda Top Itens (sem scroll) • direita Activity+Tips (com scroll interno só no Activity) */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
-        <div className="xl:col-span-7">
-          <TopItems
+
+      {/* Insights e Oportunidades */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+         <TopItems
             meus={topMeus}
             geral={topGeral}
-            onAddPrice={handleAddPrice}
-            onViewInStock={handleViewInStock}
+            onAddPrice={(name) => navigate(`/portal/estoque?search=${encodeURIComponent(name)}`)}
+            onViewInStock={(name) => navigate(`/portal/estoque?search=${encodeURIComponent(name)}`)}
             onAddItem={handleAddItem}
           />
-        </div>
-
-        <div className="xl:col-span-5 space-y-4">
-          <RecentActivity activities={activities} />
-          <NoResultTips tips={tips} onAddItem={handleAddItem} />
-        </div>
+        <NoResultTips tips={tips} onAddItem={handleAddItem} />
       </div>
     </div>
   );
