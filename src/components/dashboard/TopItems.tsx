@@ -1,7 +1,7 @@
 // src/components/dashboard/TopItems.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, CheckCircle } from 'lucide-react';
+import { Plus, Edit } from 'lucide-react';
 import { formatBRL, formatPct, getDeltaColor } from '../../utils/formatters';
 import { TopItemMeu, TopItemGeral } from '../../services/DashboardService';
 
@@ -13,7 +13,7 @@ type Props = {
   onAddItem: (nome: string) => void;
 };
 
-// Componente para a comparação de preço, agora mostrando a média
+// CORREÇÃO: Usamos a prop 'media' para exibir o valor de referência
 const PriceComparison: React.FC<{ diff: number | null, media: number | null }> = ({ diff, media }) => {
     if (diff === null || diff === undefined) return null;
     const color = getDeltaColor(-diff); // Invertido: abaixo da média é bom (verde)
@@ -34,7 +34,7 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 h-full flex flex-col">
-      {/* Cabeçalho com Tabs */}
+      {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Itens em Destaque</h3>
         <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto">
@@ -53,7 +53,7 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
         </div>
       </div>
 
-      {/* Lista de Itens */}
+      {/* Lista */}
       <div className="flex-1 overflow-y-auto pr-2">
         <AnimatePresence mode="wait">
           <motion.ul
@@ -65,7 +65,7 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
             className="divide-y divide-gray-100"
           >
             {tab === 'loja' && meus.slice(0, 5).map((item, index) => (
-              <li key={index} className="py-3 flex items-center justify-between gap-4">
+              <li key={index} className="py-3.5 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
                   <div className="min-w-0">
@@ -78,6 +78,7 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
                         {item.meuPreco != null ? (
                             <>
                                 <p className="font-semibold text-gray-800">{formatBRL(item.meuPreco)}</p>
+                                {/* CORREÇÃO: Usamos '?? null' para garantir que não passamos 'undefined' */}
                                 <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} />
                             </>
                         ) : (
@@ -95,26 +96,31 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
             ))}
 
             {tab === 'cidade' && geral.slice(0, 5).map((item, index) => (
-              <li key={index} className="py-3 flex items-center justify-between gap-4">
+              <li key={index} className="py-3.5 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{item.nome}</p>
-                    <p className="text-xs text-gray-500">Média de {formatBRL(item.mediana)} em {item.lojas} lojas</p>
+                    {/* CORREÇÃO: Usamos '?? null' para garantir que não passamos 'undefined' */}
+                    <p className="text-xs text-gray-500">Média de {formatBRL(item.mediana ?? null)} em {item.lojas} lojas</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    {item.hasMine ? (
-                        <div className="text-sm font-semibold text-green-600 flex items-center gap-2 pr-2">
-                            <CheckCircle className="w-4 h-4" />
-                            <span>Você já vende</span>
+                {item.hasMine ? (
+                    <div className="flex items-center gap-2">
+                        <div className="text-right">
+                            {/* CORREÇÃO: Usamos '?? null' para garantir que não passamos 'undefined' */}
+                            <p className="font-semibold text-gray-800">{formatBRL(item.meuPreco ?? null)}</p>
+                            <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} />
                         </div>
-                    ) : (
-                        <button onClick={() => onAddItem(item.nome)} className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0">
-                            <Plus className="w-4 h-4" /> Vender
+                        <button onClick={() => onViewInStock(item.nome)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                            <Edit className="w-4 h-4" />
                         </button>
-                    )}
-                </div>
+                    </div>
+                ) : (
+                    <button onClick={() => onAddItem(item.nome)} className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0">
+                        <Plus className="w-4 h-4" /> Adicionar
+                    </button>
+                )}
               </li>
             ))}
           </motion.ul>

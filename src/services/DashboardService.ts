@@ -45,6 +45,7 @@ export interface TopItemMeu {
   meuPreco?: number | null;
   mediana?: number | null;
   diffPct?: number | null;
+  lojas?: number; // Adicionado para consistência
 }
 
 export interface TopItemGeral {
@@ -52,6 +53,8 @@ export interface TopItemGeral {
   mediana: number;
   lojas: number;
   hasMine: boolean;
+  meuPreco?: number | null; // Adicionado para comparação direta
+  diffPct?: number | null;  // Adicionado para comparação direta
 }
 
 // ==== Helpers (mock) ====
@@ -105,24 +108,40 @@ export function createDashboardService() {
     const kpis: KPIData = { whatsapp, mapa, impressoes, ctr, deltaKpis };
 
     // 3. Gera o resto dos dados
-    const topMeus = termosBase.map((nome) => { // CORREÇÃO: A variável aqui se chama 'nome'
-      const exibicoes = rndInt(40, 900);
-      const conversas = rndInt(3, Math.max(5, Math.floor(exibicoes * 0.25)));
-      const hasMeu = Math.random() < 0.6;
-      const mediana = Math.random() < 0.75 ? rndInt(15, 350) : null;
-      const meuPreco = hasMeu ? rndInt(10, 400) : null;
-      // Usamos a variável 'nome' que já existe no escopo do map.
-      const diff = calcDiffPct(meuPreco, mediana);
+    const topMeus: TopItemMeu[] = [];
+    const topGeral: TopItemGeral[] = [];
 
-      return { nome, exibicoes, conversas, ctr: conversas / Math.max(exibicoes, 1), meuPreco, mediana, diffPct: diff };
-    }).sort((a, b) => b.conversas - a.conversas);
+    termosBase.forEach(nome => {
+        const hasMeu = Math.random() < 0.6;
+        const meuPreco = hasMeu ? rndInt(10, 400) : null;
+        const mediana = Math.random() < 0.75 ? rndInt(15, 350) : null;
+        const lojas = rndInt(2, 15);
+        const diffPct = calcDiffPct(meuPreco, mediana);
+        const conversas = rndInt(3, 120);
 
-    const topGeral = termosBase.map((nome) => ({
-      nome,
-      mediana: rndInt(15, 350),
-      lojas: rndInt(2, 15),
-      hasMine: Math.random() < 0.5
-    })).sort((a, b) => b.lojas - a.lojas);
+        topMeus.push({
+            nome,
+            exibicoes: rndInt(40, 900),
+            conversas,
+            ctr: conversas / rndInt(40, 900),
+            meuPreco,
+            mediana,
+            diffPct,
+            lojas,
+        });
+
+        topGeral.push({
+            nome,
+            mediana: mediana ?? rndInt(15, 350), // Garante que sempre haja uma mediana na visão da cidade
+            lojas,
+            hasMine: hasMeu,
+            meuPreco,
+            diffPct,
+        });
+    });
+
+    topMeus.sort((a, b) => b.conversas - a.conversas);
+    topGeral.sort((a, b) => b.lojas - a.lojas);
 
     const activities: AtividadeRecente[] = Array.from({ length: 8 }).map(() => ({
         tipo: ['WPP', 'MAPA'][rndInt(0, 1)] as 'WPP' | 'MAPA',
@@ -138,3 +157,6 @@ export function createDashboardService() {
 
   return { getDashboardData };
 }
+
+// Re-exporta os tipos para garantir que o TopItems tenha acesso
+export * from './DashboardService';
