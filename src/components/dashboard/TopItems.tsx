@@ -1,7 +1,7 @@
 // src/components/dashboard/TopItems.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, CheckCircle, Gift } from 'lucide-react';
+import { Plus, Edit, CheckCircle } from 'lucide-react';
 import { formatBRL, formatPct, getDeltaColor } from '../../utils/formatters';
 import { TopItemMeu, TopItemGeral } from '../../services/DashboardService';
 
@@ -13,14 +13,18 @@ type Props = {
   onAddItem: (nome: string) => void;
 };
 
-const PriceComparison: React.FC<{ diff: number | null }> = ({ diff }) => {
+// Componente para a comparação de preço, agora mostrando a média
+const PriceComparison: React.FC<{ diff: number | null, media: number | null }> = ({ diff, media }) => {
     if (diff === null || diff === undefined) return null;
     const color = getDeltaColor(-diff); // Invertido: abaixo da média é bom (verde)
     const text = diff > 0 ? `acima da média` : `abaixo da média`;
-    if (Math.abs(diff) < 0.01) return <div className="text-xs text-gray-500 mt-0.5">Na média</div>;
+    const mediaText = media ? ` (Média: ${formatBRL(media)})` : '';
+
+    if (Math.abs(diff) < 0.01) return <div className="text-xs text-gray-500 mt-0.5">Na média{mediaText}</div>;
     return (
         <div className={`text-xs font-semibold mt-0.5 ${color}`}>
             {formatPct(Math.abs(diff * 100))} {text}
+            <span className="text-gray-500 font-normal">{mediaText}</span>
         </div>
     );
 };
@@ -36,13 +40,13 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
         <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto">
           <button
             onClick={() => setTab('loja')}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'loja' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'loja' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
           >
             Minha Loja
           </button>
           <button
             onClick={() => setTab('cidade')}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'cidade' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'cidade' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
           >
             Cidade
           </button>
@@ -50,7 +54,7 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
       </div>
 
       {/* Lista de Itens */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pr-2">
         <AnimatePresence mode="wait">
           <motion.ul
             key={tab}
@@ -69,15 +73,18 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
                     <p className="text-xs text-gray-500">{item.conversas} contatos recebidos</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                     <div className="text-right">
                         {item.meuPreco != null ? (
                             <>
                                 <p className="font-semibold text-gray-800">{formatBRL(item.meuPreco)}</p>
-                                <PriceComparison diff={item.diffPct ?? null} />
+                                <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} />
                             </>
                         ) : (
-                            <button onClick={() => onAddPrice(item.nome)} className="text-xs text-emerald-600 font-semibold">Adicionar preço</button>
+                            <>
+                                <button onClick={() => onAddPrice(item.nome)} className="text-sm text-emerald-600 font-semibold hover:text-emerald-700">Adicionar preço</button>
+                                {item.mediana && <p className="text-xs text-gray-500 mt-0.5">Média: {formatBRL(item.mediana)}</p>}
+                            </>
                         )}
                     </div>
                     <button onClick={() => onViewInStock(item.nome)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
@@ -89,24 +96,25 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
 
             {tab === 'cidade' && geral.slice(0, 5).map((item, index) => (
               <li key={index} className="py-3 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  {item.hasMine ? (
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  ) : (
-                    <Gift className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-                  )}
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{item.nome}</p>
                     <p className="text-xs text-gray-500">Média de {formatBRL(item.mediana)} em {item.lojas} lojas</p>
                   </div>
                 </div>
-                {item.hasMine ? (
-                    <div className="text-sm font-semibold text-green-600">Você já vende</div>
-                ) : (
-                    <button onClick={() => onAddItem(item.nome)} className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0">
-                        <Plus className="w-4 h-4" /> Vender
-                    </button>
-                )}
+                <div className="flex items-center gap-2">
+                    {item.hasMine ? (
+                        <div className="text-sm font-semibold text-green-600 flex items-center gap-2 pr-2">
+                            <CheckCircle className="w-4 h-4" />
+                            <span>Você já vende</span>
+                        </div>
+                    ) : (
+                        <button onClick={() => onAddItem(item.nome)} className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0">
+                            <Plus className="w-4 h-4" /> Vender
+                        </button>
+                    )}
+                </div>
               </li>
             ))}
           </motion.ul>
