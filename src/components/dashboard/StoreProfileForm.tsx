@@ -31,7 +31,6 @@ interface DaySchedule {
 type WeekSchedule = Record<string, DaySchedule>;
 
 export const StoreProfileForm: React.FC = () => {
-  // CORREÇÃO: Adicionadas as propriedades 'created_at' e 'updated_at' para alinhar com a interface StoreProfile
   const [profile, setProfile] = useState<StoreProfile>({
     id: '',
     name: '',
@@ -47,8 +46,8 @@ export const StoreProfileForm: React.FC = () => {
     address: '',
     opening_hours: '',
     user_id: '',
-    created_at: '', // Adicionado
-    updated_at: ''  // Adicionado
+    created_at: new Date().toISOString(), // Adicionado para conformidade de tipo
+    updated_at: new Date().toISOString(), // Adicionado para conformidade de tipo
   });
 
   const [schedule, setSchedule] = useState<WeekSchedule>({
@@ -160,7 +159,6 @@ export const StoreProfileForm: React.FC = () => {
     }
   };
   
-  // CORREÇÃO: Nome da função corrigido para handleWhatsAppChange
   const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const phone = e.target.value.replace(/\D/g, '');
     const formatted = phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
@@ -263,7 +261,6 @@ export const StoreProfileForm: React.FC = () => {
     setProfile(prev => ({ ...prev, [name]: value }));
   };
 
-  // CORREÇÃO: O componente agora retorna JSX corretamente.
   return (
     <div className="space-y-4 sm:space-y-6">
       <div>
