@@ -1,6 +1,6 @@
 // Single Responsibility: Contexto de autenticação com localStorage
 import React, { createContext, useContext, useEffect } from 'react';
-import { User, AuthError } from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured, getRedirectUrl } from '../lib/supabase';
 import { usePersisted } from '../hooks/usePersisted';
 
@@ -40,7 +40,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const configured = isSupabaseConfigured();
+  const configured = isSupabaseConfigured;
 
   // Estados persistidos no localStorage
   const [isAuth, setIsAuth] = usePersisted<boolean>('isAuth', false);
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [setDev]);
 
   useEffect(() => {
-    if (!configured || !supabase) {
+    if (!configured) {
       setLoading(false);
       return;
     }
@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Login com email e senha
   const signIn = async (email: string, password: string) => {
-    if (!supabase) {
+    if (!configured) {
       throw new Error('Supabase não configurado');
     }
 
@@ -129,7 +129,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Login com Magic Link
   const signInWithMagicLink = async (email: string) => {
-    if (!supabase) {
+    if (!configured) {
       throw new Error('Supabase não configurado');
     }
 
