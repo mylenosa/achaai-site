@@ -22,6 +22,8 @@ export interface AtividadeRecente {
 export interface TipSemResultado {
   termo: string;
   qtd: number;
+  // Adicionado categoria
+  categoria: string;
 }
 export interface TopItemMeu {
   nome: string;
@@ -30,6 +32,8 @@ export interface TopItemMeu {
   mediana?: number | null;
   diffPct?: number | null;
   lojas?: number;
+  // Adicionado categoria
+  categoria: string;
 }
 export interface TopItemGeral {
   nome: string;
@@ -39,7 +43,16 @@ export interface TopItemGeral {
   hasMine: boolean;
   meuPreco?: number | null;
   diffPct?: number | null;
+  // Adicionado categoria
+  categoria: string;
 }
+
+// Simulação de Perfil de Loja com categorias
+// No futuro, isso virá do seu AuthContext ou API
+const mockStoreProfile = {
+  categories: ['Ferramentas', 'Tintas', 'Materiais de Construção']
+};
+
 
 const rndInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 const calcDiffPct = (meu?: number | null, mediana?: number | null): number | null => {
@@ -50,12 +63,20 @@ const calcDiffPct = (meu?: number | null, mediana?: number | null): number | nul
 export function createDashboardService() {
   type Period = '7d' | '30d';
 
+  // Base de dados com categorias
   const termosBase = [
-    'Furadeira 500W', 'Parafusadeira', 'Martelo pena', 'Chave Phillips 3x20',
-    'Serra Tico-Tico', 'Trena 5m', 'Broca Aço 8mm', 'WD-40 300ml',
+    { nome: 'Furadeira 500W', categoria: 'Ferramentas' },
+    { nome: 'Parafusadeira', categoria: 'Ferramentas' },
+    { nome: 'Martelo pena', categoria: 'Ferramentas' },
+    { nome: 'Tinta Spray Vermelha', categoria: 'Tintas' },
+    { nome: 'Serra Tico-Tico', categoria: 'Ferramentas' },
+    { nome: 'Cimento 50kg', categoria: 'Materiais de Construção' },
+    { nome: 'Broca Aço 8mm', categoria: 'Ferramentas' },
+    { nome: 'WD-40 300ml', categoria: 'Automotivo' }, // Item fora da categoria da loja
   ];
   
-  const getDashboardData = (periodo: Period) => {
+  // A função agora pode receber as categorias da loja
+  const getDashboardData = (periodo: Period, storeCategories: string[]) => {
     let serie: SerieData;
     if (periodo === '7d') {
       const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -85,29 +106,41 @@ export function createDashboardService() {
     };
     const kpis: KPIData = { whatsapp, mapa, impressoes, ctr, deltaKpis };
 
-    const unifiedItems = termosBase.map(nome => {
+    const unifiedItems = termosBase.map(item => {
         const hasMeu = Math.random() < 0.8;
         const meuPreco = hasMeu && Math.random() < 0.7 ? rndInt(10, 400) : null;
         const lojas = rndInt(2, 15);
         const mediana = lojas > 1 ? rndInt(15, 350) : null;
         const diffPct = calcDiffPct(meuPreco, mediana);
         const interesses = rndInt(3, 160);
-        return { nome, interesses, meuPreco, mediana, lojas, hasMine: hasMeu, diffPct };
+        return { ...item, interesses, meuPreco, mediana, lojas, hasMine: hasMeu, diffPct };
     });
 
-    const topMeus = [...unifiedItems].filter(p => p.hasMine).sort((a, b) => b.interesses - a.interesses);
-    const topGeral = [...unifiedItems].sort((a, b) => b.interesses - a.interesses);
+    // Filtra os itens com base nas categorias da loja
+    const topMeus = [...unifiedItems].filter(p => p.hasMine && storeCategories.includes(p.categoria)).sort((a, b) => b.interesses - a.interesses);
+    const topGeral = [...unifiedItems].filter(p => storeCategories.includes(p.categoria)).sort((a, b) => b.interesses - a.interesses);
 
     const activities: AtividadeRecente[] = Array.from({ length: 8 }).map(() => ({
         tipo: ['WPP', 'MAPA'][rndInt(0, 1)] as 'WPP' | 'MAPA',
         ts: new Date(Date.now() - rndInt(1, 48) * 3600 * 1000)
     })).sort((a, b) => b.ts.getTime() - a.ts.getTime());
     
-    const tips = ['furadeira de impacto', 'serrote', 'broca 12mm', 'cola epóxi', 'serra circular']
-        .map((termo) => ({ termo, qtd: rndInt(2, 24) }))
+    const tipsBase = [
+        { termo: 'furadeira de impacto', categoria: 'Ferramentas' }, 
+        { termo: 'serrote', categoria: 'Ferramentas' }, 
+        { termo: 'broca 12mm', categoria: 'Ferramentas' }, 
+        { termo: 'cola epóxi', categoria: 'Materiais de Construção' }, 
+        { termo: 'verniz marítimo', categoria: 'Tintas' },
+        { termo: 'pneu aro 15', categoria: 'Automotivo' } // Fora da categoria
+      ];
+      
+    // Filtra as oportunidades com base nas categorias
+    const tips = tipsBase
+        .filter(tip => storeCategories.includes(tip.categoria))
+        .map((tip) => ({ ...tip, qtd: rndInt(2, 24) }))
         .sort((a, b) => b.qtd - a.qtd).slice(0, 5);
 
-    return { kpis, serie, topMeus, topGeral, activities, tips };
+    return { kpis, serie, topMeus, topGeral, activities, tips, storeProfile: mockStoreProfile };
   }
 
   return { getDashboardData };

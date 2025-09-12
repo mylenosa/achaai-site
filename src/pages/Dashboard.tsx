@@ -12,12 +12,12 @@ import {
 } from '../services/DashboardService';
 import { KPICard } from '../components/dashboard/KPICard';
 import { WeekChart } from '../components/dashboard/WeekChart';
-// CORREÇÃO: Mude a importação para usar chaves {}
 import { TopItems } from '../components/dashboard/TopItems';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { NoResultTips } from '../components/dashboard/NoResultTips';
 
-const { getDashboardData } = createDashboardService();
+// Criamos a instância do serviço aqui para poder chamá-la
+const dashboardService = createDashboardService();
 
 type KPIKey = 'whatsapp' | 'mapa' | 'impressoes' | 'ctr';
 type KPITitle = 'WhatsApp' | 'Mapa' | 'Impressões' | 'CTR';
@@ -34,21 +34,31 @@ export const Dashboard: React.FC = () => {
   const [topGeral, setTopGeral] = useState<TopItemGeral[]>([]);
   const [activities, setActivities] = useState<AtividadeRecente[]>([]);
   const [tips, setTips] = useState<TipSemResultado[]>([]);
+  // Novo estado para armazenar as categorias da loja
+  const [storeCategories, setStoreCategories] = useState<string[]>([]);
 
   useEffect(() => {
     setLoading(true);
     // Simula uma pequena demora, como se fosse uma chamada de API
     setTimeout(() => {
-      const data = getDashboardData(periodo);
+      // Passa as categorias da loja para o serviço (ou um array vazio se ainda não carregou)
+      const data = dashboardService.getDashboardData(periodo, storeCategories);
       setKpis(data.kpis);
       setSerie(data.serie);
       setTopMeus(data.topMeus);
       setTopGeral(data.topGeral);
       setActivities(data.activities);
       setTips(data.tips);
+      
+      // Armazena as categorias da loja (vindo do mock por enquanto)
+      // Isso garante que só vamos pegar as categorias na primeira vez
+      if (storeCategories.length === 0 && data.storeProfile?.categories) {
+        setStoreCategories(data.storeProfile.categories);
+      }
+      
       setLoading(false);
     }, 500);
-  }, [periodo]);
+  }, [periodo, storeCategories]); // Adicionamos a dependência para recarregar se as categorias mudarem
 
   const handleAddItem = (itemName: string) => navigate(`/portal/estoque?add=${encodeURIComponent(itemName)}`);
 
@@ -120,8 +130,6 @@ export const Dashboard: React.FC = () => {
          <TopItems
             meus={topMeus}
             geral={topGeral}
-            onAddPrice={(name) => navigate(`/portal/estoque?search=${encodeURIComponent(name)}`)}
-            onViewInStock={(name) => navigate(`/portal/estoque?search=${encodeURIComponent(name)}`)}
             onAddItem={handleAddItem}
           />
         <NoResultTips tips={tips} onAddItem={handleAddItem} />
