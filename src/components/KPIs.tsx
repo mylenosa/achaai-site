@@ -1,61 +1,65 @@
-// Single Responsibility: Seção de métricas/KPIs
+// src/components/dashboard/KPICard.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Search, Clock, Store, Target } from 'lucide-react';
-import { kpis } from '../data/kpis';
+import { MessageCircle, MapPin, Eye, TrendingUp } from 'lucide-react';
+import { formatNumber, formatPct, getDeltaColor, getDeltaIcon } from '../../utils/formatters';
 
-const iconMap = {
-  search: Search,
-  clock: Clock,
-  store: Store,
-  target: Target,
+type Title = 'WhatsApp' | 'Mapa' | 'Impressões' | 'CTR';
+
+const iconMap: Record<Title, React.ComponentType<{ className?: string }>> = {
+  WhatsApp: MessageCircle,
+  Mapa: MapPin,
+  Impressões: Eye,
+  CTR: TrendingUp,
 };
 
-export const KPIs: React.FC = () => {
-  return (
-    <section className="py-16 bg-emerald-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
-            Números que comprovam nossa eficiência
-          </h2>
-        </motion.div>
+const tooltipMap: Record<Title, string> = {
+  WhatsApp: 'Quantas vezes clientes iniciaram uma conversa no WhatsApp a partir da plataforma.',
+  Mapa: 'Cliques para ver a rota até sua loja no mapa.',
+  Impressões: 'Número de vezes que sua loja ou seus produtos apareceram nos resultados de busca.',
+  CTR: 'Taxa de Cliques (Conversão): a porcentagem de impressões que resultaram em um clique (WhatsApp ou Mapa).',
+};
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {kpis.map((kpi, index) => {
-            const IconComponent = kpi.icon ? iconMap[kpi.icon as keyof typeof iconMap] : null;
-            
-            return (
-              <motion.div
-                key={kpi.id}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                {IconComponent && (
-                  <div className="bg-emerald-500 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                    <IconComponent className="w-8 h-8 text-white" />
-                  </div>
-                )}
-                <div className="text-3xl font-bold text-emerald-600 mb-2">
-                  {kpi.value}
-                </div>
-                <div className="text-gray-600 text-sm">
-                  {kpi.label}
-                </div>
-              </motion.div>
-            );
-          })}
+interface KPICardProps {
+  title: Title;
+  value: number;
+  delta?: number;
+  index?: number;
+}
+
+export const KPICard: React.FC<KPICardProps> = ({ title, value, delta = 0, index = 0 }) => {
+  const Icon = iconMap[title];
+  const tooltip = tooltipMap[title];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-5 hover:shadow-md transition-shadow relative group"
+    >
+      {/* Tooltip */}
+      <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-2 sm:px-3 py-1 sm:py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+        {tooltip}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+      </div>
+
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="bg-emerald-50 rounded-lg sm:rounded-xl p-2 sm:p-3">
+          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
+        </div>
+        <div className={`text-sm font-medium flex items-center gap-1 ${getDeltaColor(delta)}`}>
+          <span>{getDeltaIcon(delta)}</span>
+          <span>{formatPct(Math.abs(delta), false)}</span>
         </div>
       </div>
-    </section>
+
+      <div className="space-y-1">
+        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+          {title === 'CTR' ? formatPct(value, false) : formatNumber(value)}
+        </h3>
+        <p className="text-xs sm:text-sm text-gray-600">{title}</p>
+      </div>
+    </motion.div>
   );
 };
