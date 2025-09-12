@@ -50,3 +50,34 @@ export function getRedirectUrl(path: string = '/auth/callback'): string {
   const clean = path.startsWith('/') ? path : `/${path}`;
   return base ? `${base}${clean}` : clean;
 }
+
+// --- helper: normaliza mensagens de erro do Supabase para UX amigável ---
+export function getSupabaseErrorMessage(err: unknown): string {
+  const e = (err ?? {}) as any;
+  const code = e?.code ?? e?.error?.code ?? e?.name;
+  const status = e?.status ?? e?.error?.status;
+  const msg = (e?.message ?? e?.error?.message ?? '').toLowerCase();
+
+  // Casos comuns de Auth
+  if (code === 'invalid_credentials' || status === 400 || msg.includes('invalid login credentials')) {
+    return 'E-mail ou senha inválidos.';
+  }
+  if (code === 'email_not_confirmed' || msg.includes('email not confirmed')) {
+    return 'Confirme seu e-mail antes de entrar.';
+  }
+  if (code === 'otp_expired' || msg.includes('token has expired') || msg.includes('link expired')) {
+    return 'Link expirado. Solicite um novo e-mail.';
+  }
+  if (code === 'over_email_send_rate_limit' || msg.includes('rate limit')) {
+    return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+  }
+  if (status === 401 || msg.includes('not authorized') || msg.includes('jwt')) {
+    return 'Sessão expirada ou não autorizada. Faça login novamente.';
+  }
+  if (status === 403) {
+    return 'Ação não permitida para sua conta.';
+  }
+
+  // Fallback genérico
+  return e?.message || 'Algo deu errado. Tente novamente.';
+}
