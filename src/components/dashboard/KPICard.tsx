@@ -1,6 +1,4 @@
 // src/components/dashboard/KPICard.tsx
-// Single Responsibility: Componente específico para card de KPI
-// Interface Segregation: Props específicas e enxutas
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, MapPin, Eye, TrendingUp } from 'lucide-react';
@@ -16,10 +14,10 @@ const iconMap: Record<Title, React.ComponentType<{ className?: string }>> = {
 };
 
 const tooltipMap: Record<Title, string> = {
-  WhatsApp: 'Conversas iniciadas',
-  Mapa: 'Rotas abertas',
-  Impressões: 'Exibições da loja',
-  CTR: 'Taxa de conversão',
+  WhatsApp: 'Quantas vezes clientes iniciaram uma conversa no WhatsApp a partir da plataforma.',
+  Mapa: 'Cliques para ver a rota até sua loja no mapa.',
+  Impressões: 'Número de vezes que sua loja ou seus produtos apareceram nos resultados de busca.',
+  CTR: 'Taxa de Cliques (Conversão): a porcentagem de impressões que resultaram em um clique (WhatsApp ou Mapa).',
 };
 
 interface KPICardProps {
