@@ -1,8 +1,15 @@
-// src/components/dashboard/KPICard.tsx
+// src/components/dashboard/KPICard.tsx (versão aprimorada)
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, MapPin, Eye, TrendingUp } from 'lucide-react';
-import { formatNumber, formatPct, getDeltaColor, getDeltaIcon } from '../../utils/formatters';
+import { 
+  MessageCircle, 
+  MapPin, 
+  Eye, 
+  TrendingUp, 
+  TrendingDown, 
+  ArrowRight 
+} from 'lucide-react';
+import { formatNumber, formatPct, getDeltaColor } from '../../utils/formatters';
 
 type Title = 'WhatsApp' | 'Mapa' | 'Impressões' | 'CTR';
 
@@ -13,11 +20,12 @@ const iconMap: Record<Title, React.ComponentType<{ className?: string }>> = {
   CTR: TrendingUp,
 };
 
-const tooltipMap: Record<Title, string> = {
-  WhatsApp: 'Quantas vezes clientes iniciaram uma conversa no WhatsApp a partir da plataforma.',
-  Mapa: 'Cliques para ver a rota até sua loja no mapa.',
-  Impressões: 'Número de vezes que sua loja ou seus produtos apareceram nos resultados de busca.',
-  CTR: 'Taxa de Cliques (Conversão): a porcentagem de impressões que resultaram em um clique (WhatsApp ou Mapa).',
+// Nova descrição curta para cada card
+const descriptionMap: Record<Title, string> = {
+  WhatsApp: 'Conversas iniciadas',
+  Mapa: 'Cliques no mapa',
+  Impressões: 'Aparições em buscas',
+  CTR: 'Cliques por visualização',
 };
 
 interface KPICardProps {
@@ -27,38 +35,49 @@ interface KPICardProps {
   index?: number;
 }
 
+// Componente interno para o ícone de variação
+const DeltaIcon: React.FC<{ delta: number }> = ({ delta }) => {
+  const className = "w-4 h-4";
+  if (delta > 0.001) return <TrendingUp className={className} />;
+  if (delta < -0.001) return <TrendingDown className={className} />;
+  return <ArrowRight className={className} />;
+};
+
+
 export const KPICard: React.FC<KPICardProps> = ({ title, value, delta = 0, index = 0 }) => {
   const Icon = iconMap[title];
-  const tooltip = tooltipMap[title];
+  const description = descriptionMap[title];
+  const deltaColor = getDeltaColor(delta);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-5 hover:shadow-md transition-shadow relative group"
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 hover:shadow-md transition-shadow flex flex-col justify-between h-full"
     >
-      {/* Tooltip */}
-      <div className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full bg-gray-900 text-white text-xs px-2 sm:px-3 py-1 sm:py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-        {tooltip}
-        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-      </div>
-
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <div className="bg-emerald-50 rounded-lg sm:rounded-xl p-2 sm:p-3">
-          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
-        </div>
-        <div className={`text-sm font-medium flex items-center gap-1 ${getDeltaColor(delta)}`}>
-          <span>{getDeltaIcon(delta)}</span>
-          <span>{formatPct(Math.abs(delta), false)}</span>
+      {/* Seção Superior: Ícone e Título */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-emerald-50 rounded-lg p-2">
+            <Icon className="w-6 h-6 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800">{title}</h3>
+            <p className="text-xs text-gray-500">{description}</p>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-1">
-        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-          {title === 'CTR' ? formatPct(value, false) : formatNumber(value)}
-        </h3>
-        <p className="text-xs sm:text-sm text-gray-600">{title}</p>
+      {/* Seção Inferior: Valor e Variação */}
+      <div className="mt-4 flex items-end justify-between">
+        <p className="text-3xl lg:text-4xl font-bold text-gray-900">
+          {title === 'CTR' ? formatPct(value) : formatNumber(value)}
+        </p>
+        <div className={`flex items-center gap-1 text-sm font-medium ${deltaColor}`}>
+          <DeltaIcon delta={delta} />
+          <span>{formatPct(Math.abs(delta))}</span>
+        </div>
       </div>
     </motion.div>
   );
