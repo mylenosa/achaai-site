@@ -13,12 +13,11 @@ type Props = {
   onAddItem: (nome: string) => void;
 };
 
-const PriceComparison: React.FC<{ diff: number | null, media: number | null }> = ({ diff, media }) => {
+const PriceComparison: React.FC<{ diff: number | null, media: number | null, lojas: number | null }> = ({ diff, media, lojas }) => {
     if (diff === null || diff === undefined) return null;
     const color = getDeltaColor(-diff);
     const text = diff > 0 ? `acima da média` : `abaixo da média`;
-    const mediaText = media ? ` (Média: ${formatBRL(media)})` : '';
-
+    const mediaText = media ? ` (Média: ${formatBRL(media)} em ${lojas} lojas)` : '';
     if (Math.abs(diff) < 0.01) return <div className="text-xs text-gray-500 mt-0.5">Na média{mediaText}</div>;
     return (
         <div className={`text-xs font-semibold mt-0.5 ${color}`}>
@@ -33,7 +32,6 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 h-full flex flex-col">
-      {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Itens em Destaque</h3>
         <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto">
@@ -52,7 +50,6 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
         </div>
       </div>
 
-      {/* Lista */}
       <div className="flex-1 overflow-y-auto pr-2">
         <AnimatePresence mode="wait">
           <motion.ul
@@ -77,12 +74,14 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
                         {item.meuPreco != null ? (
                             <>
                                 <p className="font-semibold text-gray-800">{formatBRL(item.meuPreco)}</p>
-                                <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} />
+                                <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} lojas={item.lojas ?? null} />
                             </>
                         ) : (
                             <>
-                                <button onClick={() => onAddPrice(item.nome)} className="text-sm text-emerald-600 font-semibold hover:text-emerald-700">Adicionar preço</button>
-                                {item.mediana && <p className="text-xs text-gray-500 mt-0.5">Média: {formatBRL(item.mediana)}</p>}
+                                <button onClick={() => onAddPrice(item.nome)} className="text-sm text-emerald-600 font-semibold hover:text-emerald-700 flex items-center gap-1">
+                                    <Plus className="w-4 h-4" /> Adicionar preço
+                                </button>
+                                {(item.mediana && item.lojas) && <p className="text-xs text-gray-500 mt-0.5">Média: {formatBRL(item.mediana)} em {item.lojas} lojas</p>}
                             </>
                         )}
                     </div>
@@ -99,14 +98,14 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
                   <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{item.nome}</p>
-                    <p className="text-xs text-gray-500">Média de {formatBRL(item.mediana ?? null)} em {item.lojas} lojas</p>
+                    <p className="text-xs text-gray-500">{item.interesses} interesses na cidade</p>
                   </div>
                 </div>
                 {item.hasMine ? (
                     <div className="flex items-center gap-2">
                         <div className="text-right">
                             <p className="font-semibold text-gray-800">{formatBRL(item.meuPreco ?? null)}</p>
-                            <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} />
+                            <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} lojas={item.lojas ?? null}/>
                         </div>
                         <button onClick={() => onViewInStock(item.nome)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                             <Edit className="w-4 h-4" />

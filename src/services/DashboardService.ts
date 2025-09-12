@@ -1,22 +1,11 @@
 // src/services/DashboardService.ts
-// Single Responsibility: Serviço de dados do Dashboard (sem JSX/React)
-// Open/Closed: Fácil de trocar mocks por chamadas reais depois
-// Dependency Inversion: Página consome a interface (factory) e não detalhes
-
-// ==== Tipos expostos (usados pela página e componentes) ====
 export interface KPIData {
   whatsapp: number;
   mapa: number;
   impressoes: number;
-  ctr: number; // 0..1
-  deltaKpis: {
-    whatsapp: number;
-    mapa: number;
-    impressoes: number;
-    ctr: number;
-  };
+  ctr: number;
+  deltaKpis: { whatsapp: number; mapa: number; impressoes: number; ctr: number; };
 }
-
 export interface SerieData {
   title: string;
   labels: string[];
@@ -25,18 +14,15 @@ export interface SerieData {
   prevTotal: number;
   delta: number;
 }
-
 export interface AtividadeRecente {
-  tipo: 'WPP' | 'MAPA'; // Foco apenas em eventos de alto valor
+  tipo: 'WPP' | 'MAPA';
   ts: Date;
   termo?: string;
 }
-
 export interface TipSemResultado {
   termo: string;
   qtd: number;
 }
-
 export interface TopItemMeu {
   nome: string;
   interesses: number;
@@ -45,26 +31,22 @@ export interface TopItemMeu {
   diffPct?: number | null;
   lojas?: number;
 }
-
 export interface TopItemGeral {
   nome: string;
-  mediana: number;
+  interesses: number;
+  mediana: number | null;
   lojas: number;
   hasMine: boolean;
   meuPreco?: number | null;
   diffPct?: number | null;
 }
 
-// ==== Helpers (mock) ====
-const rndInt = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
-
+const rndInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 const calcDiffPct = (meu?: number | null, mediana?: number | null): number | null => {
   if (meu == null || mediana == null || mediana <= 0) return null;
   return (meu - mediana) / mediana;
 };
 
-// ==== Factory do service ====
 export function createDashboardService() {
   type Period = '7d' | '30d';
 
@@ -77,14 +59,14 @@ export function createDashboardService() {
     let serie: SerieData;
     if (periodo === '7d') {
       const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-      const values = Array.from({length: 7}, () => Math.floor(Math.random()*401)+50);
+      const values = Array.from({length: 7}, () => rndInt(50, 450));
       const total = values.reduce((sum, v) => sum + v, 0);
       const prevTotal = Math.floor(total * (1 - (Math.random() - 0.4) * 0.5));
       const delta = prevTotal > 0 ? (total - prevTotal) / prevTotal : 0;
       serie = { title: 'Suas Impressões na Semana', labels, values, total, prevTotal, delta };
     } else {
       const labels = ['Sem 1','Sem 2','Sem 3','Sem 4'];
-      const values = Array.from({length: 4}, () => Math.floor(Math.random()*2201)+400);
+      const values = Array.from({length: 4}, () => rndInt(400, 2201));
       const total = values.reduce((sum, v) => sum + v, 0);
       const prevTotal = Math.floor(total * (1 - (Math.random() - 0.4) * 0.5));
       const delta = prevTotal > 0 ? (total - prevTotal) / prevTotal : 0;
@@ -103,23 +85,18 @@ export function createDashboardService() {
     };
     const kpis: KPIData = { whatsapp, mapa, impressoes, ctr, deltaKpis };
 
-    const topMeus: TopItemMeu[] = [];
-    const topGeral: TopItemGeral[] = [];
-
-    termosBase.forEach(nome => {
-        const hasMeu = Math.random() < 0.6;
-        const meuPreco = hasMeu ? rndInt(10, 400) : null;
-        const mediana = Math.random() < 0.75 ? rndInt(15, 350) : null;
+    const unifiedItems = termosBase.map(nome => {
+        const hasMeu = Math.random() < 0.8;
+        const meuPreco = hasMeu && Math.random() < 0.7 ? rndInt(10, 400) : null;
         const lojas = rndInt(2, 15);
+        const mediana = lojas > 1 ? rndInt(15, 350) : null;
         const diffPct = calcDiffPct(meuPreco, mediana);
         const interesses = rndInt(3, 160);
-
-        topMeus.push({ nome, interesses, meuPreco, mediana, diffPct, lojas });
-        topGeral.push({ nome, mediana: mediana ?? rndInt(15, 350), lojas, hasMine: hasMeu, meuPreco, diffPct });
+        return { nome, interesses, meuPreco, mediana, lojas, hasMine: hasMeu, diffPct };
     });
 
-    topMeus.sort((a, b) => b.interesses - a.interesses);
-    topGeral.sort((a, b) => (b.hasMine ? -1 : 1) - (a.hasMine ? -1 : 1) || b.lojas - a.lojas); // Oportunidades primeiro
+    const topMeus = [...unifiedItems].filter(p => p.hasMine).sort((a, b) => b.interesses - a.interesses);
+    const topGeral = [...unifiedItems].sort((a, b) => b.interesses - a.interesses);
 
     const activities: AtividadeRecente[] = Array.from({ length: 8 }).map(() => ({
         tipo: ['WPP', 'MAPA'][rndInt(0, 1)] as 'WPP' | 'MAPA',
