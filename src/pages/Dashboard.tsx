@@ -10,7 +10,7 @@ import {
   TipSemResultado,
 } from '../services/DashboardService';
 import { KPICard } from '../components/dashboard/KPICard';
-import { WeekChart } from '../components/dashboard/WeekChart';
+import { WeekChart, WeekChartProps } from '../components/dashboard/WeekChart';
 import TopItems from '../components/dashboard/TopItems';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { NoResultTips } from '../components/dashboard/NoResultTips';
@@ -27,7 +27,7 @@ export const Dashboard: React.FC = () => {
 
   // Estados dos dados
   const [kpis, setKpis] = useState<KPIData | null>(null);
-  const [serie, setSerie] = useState<{ labels: string[]; values: number[] }>({ labels: [], values: [] });
+  const [serie, setSerie] = useState<WeekChartProps | null>(null);
   const [topMeus, setTopMeus] = useState<TopItemMeu[]>([]);
   const [topGeral, setTopGeral] = useState<TopItemGeral[]>([]);
   const [activities, setActivities] = useState<AtividadeRecente[]>([]);
@@ -56,7 +56,7 @@ export const Dashboard: React.FC = () => {
     { key: 'ctr', title: 'CTR' },
   ];
 
-  if (loading) {
+  if (loading || !kpis || !serie) {
     // Aqui você pode adicionar um componente de "skeleton loader" para uma UX melhor
     return <div className="text-center p-8">Carregando dados do dashboard...</div>;
   }
@@ -90,24 +90,22 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* KPIs */}
-      {kpis && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          {kpiConfigs.map((config, index) => (
-            <KPICard
-              key={config.key}
-              title={config.title}
-              value={kpis[config.key]}
-              delta={kpis.deltaKpis[config.key]}
-              index={index}
-            />
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        {kpiConfigs.map((config, index) => (
+          <KPICard
+            key={config.key}
+            title={config.title}
+            value={kpis[config.key]}
+            delta={kpis.deltaKpis[config.key]}
+            index={index}
+          />
+        ))}
+      </div>
 
       {/* Gráfico e Atividade Recente */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         <div className="xl:col-span-2">
-          <WeekChart period={periodo} labels={serie.labels} values={serie.values} />
+          <WeekChart {...serie} />
         </div>
         <div className="xl:col-span-1">
            <RecentActivity activities={activities} />

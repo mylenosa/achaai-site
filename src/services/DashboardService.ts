@@ -85,22 +85,32 @@ export function createDashboardService() {
       return { whatsapp, mapa, impressoes, ctr, deltaKpis: delta };
     },
 
-    getSerieImpressoes(periodo: '7d' | '30d'): { labels: string[]; values: number[] } {
-      void periodo;
+    getSerieImpressoes(periodo: '7d' | '30d'): {
+      title: string;
+      labels: string[];
+      values: number[];
+      total: number;
+      prevTotal: number;
+      delta: number;
+    } {
       if (periodo === '7d') {
-        const labels = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+        const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
         const values = Array.from({length: 7}, () => Math.floor(Math.random()*401)+50);
-        return { labels, values };
+        const total = values.reduce((sum, v) => sum + v, 0);
+        const prevTotal = Math.floor(total * (1 - (Math.random() - 0.4) * 0.5)); // Simula período anterior
+        const delta = prevTotal > 0 ? (total - prevTotal) / prevTotal : 0;
+        
+        return { title: 'Suas Impressões na Semana', labels, values, total, prevTotal, delta };
       }
-      const labels = ['Semana 1','Semana 2','Semana 3','Semana 4'];
-      const values = Array.from({length: 4}, () => Math.floor(Math.random()*2201)+400);
-      return { labels, values };
-    },
 
-    // Mantido para compat com componentes que ainda usam apenas um array
-    getBarrasSemana(): number[] {
-      // 7 valores DOM..SÁB
-      return Array.from({ length: 7 }, () => rndInt(50, 450));
+      // Lógica para 30 dias
+      const labels = ['Sem 1','Sem 2','Sem 3','Sem 4'];
+      const values = Array.from({length: 4}, () => Math.floor(Math.random()*2201)+400);
+      const total = values.reduce((sum, v) => sum + v, 0);
+      const prevTotal = Math.floor(total * (1 - (Math.random() - 0.4) * 0.5));
+      const delta = prevTotal > 0 ? (total - prevTotal) / prevTotal : 0;
+      
+      return { title: 'Suas Impressões no Mês', labels, values, total, prevTotal, delta };
     },
 
     getTopItensMeus(periodo: Period): TopItemMeu[] {
