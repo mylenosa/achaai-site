@@ -1,8 +1,7 @@
 // src/components/dashboard/TopItems.tsx
 import React, { useState } from 'react';
-// CORREÇÃO 1: Adicionado 'AnimatePresence' à importação
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit, Award, ShoppingBag, CheckCircle, Gift } from 'lucide-react';
+import { Plus, Edit, CheckCircle, Gift } from 'lucide-react';
 import { formatBRL, formatPct, getDeltaColor } from '../../utils/formatters';
 import { TopItemMeu, TopItemGeral } from '../../services/DashboardService';
 
@@ -15,7 +14,7 @@ type Props = {
 };
 
 const PriceComparison: React.FC<{ diff: number | null }> = ({ diff }) => {
-    if (diff === null || diff === undefined) return null; // Não renderiza se não houver dados
+    if (diff === null || diff === undefined) return null;
     const color = getDeltaColor(-diff); // Invertido: abaixo da média é bom (verde)
     const text = diff > 0 ? `acima da média` : `abaixo da média`;
     if (Math.abs(diff) < 0.01) return <div className="text-xs text-gray-500 mt-0.5">Na média</div>;
@@ -33,19 +32,19 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 h-full flex flex-col">
       {/* Cabeçalho com Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Destaques e Oportunidades</h3>
+        <h3 className="text-lg font-semibold text-gray-900">Itens em Destaque</h3>
         <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto">
           <button
             onClick={() => setTab('loja')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'loja' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
           >
-            <div className="flex items-center justify-center gap-2"><Award className="w-4 h-4" /> Seus Destaques</div>
+            Minha Loja
           </button>
           <button
             onClick={() => setTab('cidade')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'cidade' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
           >
-             <div className="flex items-center justify-center gap-2"><ShoppingBag className="w-4 h-4" /> Oportunidades</div>
+            Cidade
           </button>
         </div>
       </div>
@@ -63,8 +62,8 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
           >
             {tab === 'loja' && meus.slice(0, 5).map((item, index) => (
               <li key={index} className="py-3 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="text-gray-400 font-bold">{index + 1}</div>
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{item.nome}</p>
                     <p className="text-xs text-gray-500">{item.conversas} contatos recebidos</p>
@@ -75,7 +74,6 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInSto
                         {item.meuPreco != null ? (
                             <>
                                 <p className="font-semibold text-gray-800">{formatBRL(item.meuPreco)}</p>
-                                {/* CORREÇÃO 2: Garantimos que o valor nunca será 'undefined' */}
                                 <PriceComparison diff={item.diffPct ?? null} />
                             </>
                         ) : (
