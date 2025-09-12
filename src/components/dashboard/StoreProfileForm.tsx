@@ -134,18 +134,13 @@ export const StoreProfileForm: React.FC = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfile(prev => ({ ...prev, [name]: value }));
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Perfil da Loja</h1>
-        <p className="text-gray-600 mt-1 text-sm sm:text-base">Mantenha as informações da sua loja sempre atualizadas</p>
-      </div>
-
+    <div className="space-y-6">
       {message && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className={`p-4 rounded-lg border ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
           {message.text}
@@ -153,16 +148,17 @@ export const StoreProfileForm: React.FC = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-          <div className="flex items-center gap-3 mb-6"><Store className="w-6 h-6 text-emerald-600" /><h2 className="text-lg sm:text-xl font-semibold text-gray-900">Informações Básicas</h2></div>
+        {/* Card 1: Informações da Loja */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center gap-3 mb-6"><Store className="w-6 h-6 text-emerald-600" /><h2 className="text-xl font-semibold text-gray-900">Sua Loja</h2></div>
           <div className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Nome da Loja *</label>
               <input type="text" id="name" name="name" value={profile.name} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" placeholder="Digite o nome da sua loja"/>
             </div>
             <div>
-              <div className="flex items-center gap-2 mb-2"><Tag className="w-4 h-4 text-gray-500" /><label htmlFor="categories" className="block text-sm font-medium text-gray-700">Categorias da sua Loja*</label></div>
-              <p className="text-xs text-gray-500 mb-3">Selecione suas categorias principais. Isso ajuda a mostrar as oportunidades certas para você no dashboard.</p>
+              <div className="flex items-center gap-2 mb-2"><Tag className="w-4 h-4 text-gray-500" /><label className="block text-sm font-medium text-gray-700">Categorias da sua Loja*</label></div>
+              <p className="text-xs text-gray-500 mb-3">Selecione suas categorias. Isso ajuda a mostrar as oportunidades certas para você no dashboard.</p>
               <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {availableCategories.map(category => (
@@ -177,8 +173,9 @@ export const StoreProfileForm: React.FC = () => {
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-            <div className="flex items-center gap-3 mb-6"><MapPin className="w-6 h-6 text-emerald-600" /><h2 className="text-lg sm:text-xl font-semibold text-gray-900">Endereço</h2></div>
+        {/* Card 2: Endereço */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-3 mb-6"><MapPin className="w-6 h-6 text-emerald-600" /><h2 className="text-xl font-semibold text-gray-900">Endereço</h2></div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div>
                     <label htmlFor="cep" className="block text-sm font-medium text-gray-700 mb-2">CEP *</label>
@@ -208,8 +205,9 @@ export const StoreProfileForm: React.FC = () => {
             </div>
         </motion.div>
         
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
-            <div className="flex items-center gap-3 mb-6"><MessageCircle className="w-6 h-6 text-emerald-600" /><h2 className="text-lg sm:text-xl font-semibold text-gray-900">Contato</h2></div>
+        {/* Card 3: Contato */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-3 mb-6"><MessageCircle className="w-6 h-6 text-emerald-600" /><h2 className="text-xl font-semibold text-gray-900">Contato</h2></div>
             <div className="max-w-md">
                 <div>
                     <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-2">WhatsApp *</label>
