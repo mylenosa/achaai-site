@@ -47,7 +47,7 @@ export const StoreProfileForm: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (user && isConfigured && isSupabaseConfigured()) {
+    if (user && isConfigured && isSupabaseConfigured) {
       loadProfile();
     }
   }, [user, isConfigured]);
@@ -119,7 +119,7 @@ export const StoreProfileForm: React.FC = () => {
         address: fullAddress,
         user_id: user?.id || 'dev-user'
       };
-      if (isConfigured && user && isSupabaseConfigured()) {
+      if (user && isConfigured && isSupabaseConfigured) {
         if (profile.id) {
           await storeService.updateProfile(profile.id, profileData);
         } else {
@@ -146,6 +146,12 @@ export const StoreProfileForm: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {!isSupabaseConfigured && (
+        <div className="p-4 rounded-lg border bg-yellow-50 text-yellow-800">
+          Supabase não configurado. Defina <code>VITE_SUPABASE_URL</code> e <code>VITE_SUPABASE_ANON_KEY</code>
+          nas variáveis de ambiente. Enquanto isso, salvaremos localmente.
+        </div>
+      )}
       {message && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className={`p-4 rounded-lg border ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
           {message.text}

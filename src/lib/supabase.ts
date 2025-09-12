@@ -1,70 +1,29 @@
-// Single Responsibility: Cliente Supabase configurado
-// Dependency Inversion: Usa variáveis de ambiente
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+// src/lib/supabase.ts
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-// Verificar se as variáveis de ambiente existem
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const url =
+  (import.meta as any)?.env?.VITE_SUPABASE_URL ?? process?.env?.NEXT_PUBLIC_SUPABASE_URL;
+const anon =
+  (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY ?? process?.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Validação das variáveis de ambiente
-const isValidUrl = (url: string): boolean => {
-  try {
-    new URL(url);
-    return url.includes('supabase.co') || url.includes('localhost');
-  } catch {
-    return false;
-  }
-};
+// Exporte este flag para os componentes que precisam saber se há Supabase
+export const isSupabaseConfigured: boolean = Boolean(url && anon);
 
-const isValidKey = (key: string): boolean => {
-  return key && key.length > 20; // Chaves Supabase são longas
-};
-
-// Só criar o cliente se as variáveis existirem e forem válidas
-export const supabase: SupabaseClient | null = 
-  supabaseUrl && supabaseAnonKey && isValidUrl(supabaseUrl) && isValidKey(supabaseAnonKey)
-    ? createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          autoRefreshToken: true,
-          persistSession: true,
-          detectSessionInUrl: true,
-          flowType: 'pkce' // Mais seguro para SPAs
-        }
-      })
-    : null;
-
-// Helper para verificar se o Supabase está configurado
-export const isSupabaseConfigured = (): boolean => {
-  return supabase !== null;
-};
-
-// Helper para mostrar mensagem de erro específica
-export const getSupabaseErrorMessage = (): string => {
-  if (!supabaseUrl) {
-    return 'VITE_SUPABASE_URL não configurada no arquivo .env';
-  }
-  if (!supabaseAnonKey) {
-    return 'VITE_SUPABASE_ANON_KEY não configurada no arquivo .env';
-  }
-  if (!isValidUrl(supabaseUrl)) {
-    return 'VITE_SUPABASE_URL inválida - deve ser uma URL do Supabase';
-  }
-  if (!isValidKey(supabaseAnonKey)) {
-    return 'VITE_SUPABASE_ANON_KEY inválida - verifique a chave no painel do Supabase';
-  }
-  return 'Configuração do Supabase incompleta';
-};
-
-// Helper para obter URL de redirecionamento baseada no ambiente atual
-export const getRedirectUrl = (path: string = '/portal/dashboard'): string => {
-  return `${window.location.origin}${path}`;
-};
-
-// Log para debug (apenas em desenvolvimento)
-if (import.meta.env.DEV) {
-  console.log('🔧 Supabase Config:', {
-    url: supabaseUrl ? '✅ Configurada' : '❌ Não configurada',
-    key: supabaseAnonKey ? '✅ Configurada' : '❌ Não configurada',
-    client: supabase ? '✅ Inicializado' : '❌ Não inicializado'
+// Client que lança um erro amigável se alguém tentar usar Supabase sem configurar envs
+function createFailingClient(): SupabaseClient {
+  return new Proxy({} as SupabaseClient, {
+    get() {
+      throw new Error(
+        'Supabase não configurado. Defina VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY (ou NEXT_PUBLIC_*) no ambiente.'
+      );
+    },
   });
 }
+
+// Exporte um client **não-nulo** (evita "possibly null" no TS).
+// Se estiver configurado, cria de verdade; se não, cria um proxy que falha ao uso.
+export const supabase: SupabaseClient = isSupabaseConfigured
+  ? createClient(url as string, anon as string, {
+      auth: { persistSession: true, autoRefreshToken: true },
+    })
+  : createFailingClient();
