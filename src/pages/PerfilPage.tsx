@@ -1,42 +1,10 @@
-// Single Responsibility: Página de perfil da loja
-import React, { useState, useEffect } from 'react';
-import { StoreProfileForm, StoreProfile } from '../components/forms/StoreProfileForm';
-import { useAuthContext } from '../hooks/useAuth';
+// src/pages/PerfilPage.tsx
+// Single Responsibility: Página que renderiza o formulário de perfil da loja.
+
+import React from 'react';
+import { StoreProfileForm } from '../components/dashboard/StoreProfileForm';
 
 export const PerfilPage: React.FC = () => {
-  const [initialProfile, setInitialProfile] = useState<Partial<StoreProfile>>({});
-  const { setHasLoja } = useAuthContext();
-
-  // Load profile from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('storeProfile');
-    if (saved) {
-      try {
-        const savedProfile = JSON.parse(saved);
-        setInitialProfile(savedProfile);
-      } catch (error) {
-        console.error('Error loading profile:', error);
-      }
-    }
-  }, []);
-
-  const handleSave = async (profile: StoreProfile): Promise<void> => {
-    // Save to localStorage (in production, this would be an API call)
-    localStorage.setItem('storeProfile', JSON.stringify(profile));
-    
-    // Mark that user has a store profile
-    setHasLoja(true);
-    
-    // Update initial profile to reflect saved changes
-    setInitialProfile(profile);
-  };
-
-  const handleClear = () => {
-    localStorage.removeItem('storeProfile');
-    setHasLoja(false);
-    setInitialProfile({});
-  };
-
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
@@ -48,11 +16,7 @@ export const PerfilPage: React.FC = () => {
       </div>
 
       {/* Form */}
-      <StoreProfileForm
-        initialProfile={initialProfile}
-        onSave={handleSave}
-        onClear={handleClear}
-      />
+      <StoreProfileForm />
     </div>
   );
 };
