@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { AtividadeRecente } from '../../services/DashboardService';
 import { formatRelTime } from '../../utils/formatters';
-import { MessageCircle, MapPin, ArrowRight } from 'lucide-react';
+import { MessageCircle, MapPin } from 'lucide-react';
 
 type Props = {
   activities: AtividadeRecente[];
@@ -25,7 +25,8 @@ const activityConfig = {
 };
 
 export const RecentActivity: React.FC<Props> = ({ activities }) => {
-  const displayedActivities = activities.slice(0, 5); // Garante que no máximo 5 itens sejam exibidos
+  // Mostra sempre os 5 itens mais recentes, sem scroll.
+  const displayedActivities = activities.slice(0, 5);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 h-full flex flex-col">
@@ -34,7 +35,7 @@ export const RecentActivity: React.FC<Props> = ({ activities }) => {
         <p className="text-sm text-gray-500">Leads gerados nos últimos dias.</p>
       </div>
       
-      <div className="space-y-3 flex-1 mt-4 overflow-hidden">
+      <div className="space-y-3 flex-1 mt-4">
         {displayedActivities.length > 0 ? (
           displayedActivities.map((activity, i) => {
             const config = activityConfig[activity.tipo];
@@ -59,15 +60,9 @@ export const RecentActivity: React.FC<Props> = ({ activities }) => {
           })
         ) : (
           <div className="h-full flex items-center justify-center text-sm text-gray-500">
-            Nenhum contato recente.
+            Nenhum contato recente para exibir.
           </div>
         )}
-      </div>
-
-      <div className="mt-4 pt-3 border-t border-gray-100 text-center">
-          <a href="#" className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors flex items-center justify-center gap-1">
-            Ver histórico completo <ArrowRight className="w-4 h-4" />
-          </a>
       </div>
     </div>
   );
