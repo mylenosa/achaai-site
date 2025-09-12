@@ -1,4 +1,4 @@
-// src/services/DashboardService.ts (versão com dados consistentes)
+// src/services/DashboardService.ts
 // Single Responsibility: Serviço de dados do Dashboard (sem JSX/React)
 // Open/Closed: Fácil de trocar mocks por chamadas reais depois
 // Dependency Inversion: Página consome a interface (factory) e não detalhes
@@ -27,10 +27,9 @@ export interface SerieData {
 }
 
 export interface AtividadeRecente {
-  tipo: 'BUSCA' | 'MOSTRADO' | 'WPP' | 'MAPA' | 'BUSCA_ZERO';
-  ts: Date;             // quando ocorrer backend real, pode virar string ISO
+  tipo: 'WPP' | 'MAPA'; // Foco apenas em eventos de alto valor
+  ts: Date;
   termo?: string;
-  count?: number;       // para BUSCA_ZERO
 }
 
 export interface TipSemResultado {
@@ -42,17 +41,17 @@ export interface TopItemMeu {
   nome: string;
   exibicoes: number;
   conversas: number;
-  ctr: number;               // 0..1
-  meuPreco?: number | null;  // opcional
-  mediana?: number | null;   // mediana na cidade (pode faltar)
-  diffPct?: number | null;   // (meuPreco - mediana) / mediana
+  ctr: number;
+  meuPreco?: number | null;
+  mediana?: number | null;
+  diffPct?: number | null;
 }
 
 export interface TopItemGeral {
   nome: string;
   mediana: number;
   lojas: number;
-  hasMine: boolean;          // se eu tenho esse item no meu estoque
+  hasMine: boolean;
 }
 
 // ==== Helpers (mock) ====
@@ -73,7 +72,6 @@ export function createDashboardService() {
     'Serra Tico-Tico', 'Trena 5m', 'Broca Aço 8mm', 'WD-40 300ml',
   ];
   
-  // Função unificada para gerar todos os dados do dashboard de forma consistente
   const getDashboardData = (periodo: Period) => {
     // 1. Gera a série de impressões primeiro (Fonte da Verdade)
     let serie: SerieData;
@@ -101,41 +99,40 @@ export function createDashboardService() {
     const deltaKpis = {
       whatsapp: (Math.random() - 0.5) * 0.4,
       mapa:     (Math.random() - 0.5) * 0.4,
-      impressoes: serie.delta, // Garante que a variação seja a mesma do gráfico
+      impressoes: serie.delta,
       ctr:      (Math.random() - 0.5) * 0.2,
     };
     const kpis: KPIData = { whatsapp, mapa, impressoes, ctr, deltaKpis };
 
-    // 3. Gera o resto dos dados (eles não precisam de consistência com os KPIs)
-    const topMeus = termosBase.map((nome) => {
+    // 3. Gera o resto dos dados
+    const topMeus = termosBase.map((nome) => { // CORREÇÃO: A variável aqui se chama 'nome'
       const exibicoes = rndInt(40, 900);
       const conversas = rndInt(3, Math.max(5, Math.floor(exibicoes * 0.25)));
-      const ctr = conversas / Math.max(exibicoes, 1);
       const hasMeu = Math.random() < 0.6;
       const mediana = Math.random() < 0.75 ? rndInt(15, 350) : null;
       const meuPreco = hasMeu ? rndInt(10, 400) : null;
-      return { nome, exibicoes, conversas, ctr, meuPreco, mediana, diffPct: calcDiffPct(meuPreco, mediana) };
+      // Usamos a variável 'nome' que já existe no escopo do map.
+      const diff = calcDiffPct(meuPreco, mediana);
+
+      return { nome, exibicoes, conversas, ctr: conversas / Math.max(exibicoes, 1), meuPreco, mediana, diffPct: diff };
     }).sort((a, b) => b.conversas - a.conversas);
 
-    const topGeral = termosBase.map((nome) => {
-      const lojas = rndInt(2, 15);
-      const mediana = rndInt(15, 350);
-      const hasMine = Math.random() < 0.5;
-      return { nome, mediana, lojas, hasMine };
-    }).sort((a, b) => b.lojas - a.lojas);
+    const topGeral = termosBase.map((nome) => ({
+      nome,
+      mediana: rndInt(15, 350),
+      lojas: rndInt(2, 15),
+      hasMine: Math.random() < 0.5
+    })).sort((a, b) => b.lojas - a.lojas);
 
-    const activities = Array.from({ length: 12 }).map(() => {
-        const tipo: AtividadeRecente['tipo'] = ['BUSCA', 'MOSTRADO', 'WPP', 'MAPA'][rndInt(0, 3)] as any;
-        const termo = ['furadeira', 'wd-40', 'parafuso', 'trena', 'broca'][rndInt(0, 4)];
-        const ts = new Date(Date.now() - rndInt(1, 72) * 3600 * 1000);
-        return { tipo, termo, ts };
-    }).sort((a, b) => b.ts.getTime() - a.ts.getTime());
+    const activities: AtividadeRecente[] = Array.from({ length: 8 }).map(() => ({
+        tipo: ['WPP', 'MAPA'][rndInt(0, 1)] as 'WPP' | 'MAPA',
+        ts: new Date(Date.now() - rndInt(1, 48) * 3600 * 1000)
+    })).sort((a, b) => b.ts.getTime() - a.ts.getTime());
     
     const tips = ['furadeira de impacto', 'serrote', 'broca 12mm', 'cola epóxi', 'serra circular']
         .map((termo) => ({ termo, qtd: rndInt(2, 24) }))
         .sort((a, b) => b.qtd - a.qtd).slice(0, 5);
 
-    // 4. Retorna um único objeto com todos os dados consistentes
     return { kpis, serie, topMeus, topGeral, activities, tips };
   }
 

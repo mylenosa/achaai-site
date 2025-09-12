@@ -1,55 +1,61 @@
-// Single Responsibility: Componente específico para dicas de sem resultado
+// src/components/dashboard/NoResultTips.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Plus, AlertTriangle } from 'lucide-react';
+import { Plus, Lightbulb } from 'lucide-react';
 import { TipSemResultado } from '../../services/DashboardService';
 
 interface NoResultTipsProps {
   tips: TipSemResultado[];
   onAddItem: (itemName: string) => void;
-  limit?: number;
 }
 
-export const NoResultTips: React.FC<NoResultTipsProps> = ({ tips, onAddItem, limit = 5 }) => {
-  const displayedTips = tips.slice(0, limit);
-  
-  if (displayedTips.length === 0) return null;
+export const NoResultTips: React.FC<NoResultTipsProps> = ({ tips, onAddItem }) => {
+  if (tips.length === 0) {
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 h-full flex flex-col">
+            <div className="flex items-center gap-3 mb-2">
+                <Lightbulb className="w-6 h-6 text-yellow-500" />
+                <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Oportunidades de Estoque</h3>
+                    <p className="text-sm text-gray-500">Termos buscados por clientes que você pode vender.</p>
+                </div>
+            </div>
+            <div className="flex-1 flex items-center justify-center">
+                <p className="text-sm text-gray-500">Nenhuma oportunidade encontrada no período.</p>
+            </div>
+        </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 flex flex-col">
-      <div className="flex items-center gap-2 sm:gap-3 mb-4 relative group">
-        <AlertTriangle className="w-5 h-5 text-orange-600" />
-        <h3 className="text-base sm:text-lg font-semibold text-orange-800">
-          Sem resultado recentemente
-        </h3>
-        
-        {/* Tooltip */}
-        <div className="absolute -top-2 right-0 transform -translate-y-full bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-          Termos buscados que não encontraram itens seus.
-          <div className="absolute top-full right-4 border-4 border-transparent border-t-gray-900" />
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 h-full flex flex-col">
+      <div className="flex items-center gap-3 mb-2">
+        <Lightbulb className="w-6 h-6 text-yellow-500" />
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Oportunidades de Estoque</h3>
+          <p className="text-sm text-gray-500">Termos buscados por clientes que você pode vender.</p>
         </div>
       </div>
       
-      <div className="space-y-2 sm:space-y-3 flex-1">
-        {displayedTips.map((tip, index) => (
+      <div className="space-y-2 flex-1 mt-2 pr-2 overflow-y-auto">
+        {tips.map((tip, index) => (
           <motion.div
             key={tip.termo}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="flex items-center justify-between p-2 sm:p-3 bg-orange-50 rounded-lg border border-orange-200"
+            className="flex items-center justify-between p-3 bg-yellow-50/50 rounded-lg border border-yellow-200/60"
           >
             <div className="flex-1 min-w-0">
-              <div className="text-xs sm:text-sm text-gray-900 font-medium truncate">"{tip.termo}"</div>
-              <div className="text-gray-500 text-xs">{tip.qtd} buscas</div>
+              <div className="text-sm text-gray-900 font-medium truncate">"{tip.termo}"</div>
+              <div className="text-gray-500 text-xs">{tip.qtd} buscas este mês</div>
             </div>
             <button
               onClick={() => onAddItem(tip.termo)}
-              className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 text-xs sm:text-sm font-medium flex-shrink-0 ml-2"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0 ml-2"
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Adicionar item</span>
-              <span className="sm:hidden">Adicionar</span>
+              Adicionar
             </button>
           </motion.div>
         ))}
