@@ -1,125 +1,109 @@
-// src/components/dashboard/TopItems.tsx
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit } from 'lucide-react';
+import { Plus, ChevronDown } from 'lucide-react';
 import { formatBRL, formatPct, getDeltaColor } from '../../utils/formatters';
 import { TopItemMeu, TopItemGeral } from '../../services/DashboardService';
 
 type Props = {
   meus: TopItemMeu[];
   geral: TopItemGeral[];
-  onAddPrice: (nome: string) => void;
   onViewInStock: (nome: string) => void;
   onAddItem: (nome: string) => void;
 };
 
-const PriceComparison: React.FC<{ diff: number | null, media: number | null, lojas: number | null }> = ({ diff, media, lojas }) => {
-    if (diff === null || diff === undefined) return null;
-    const color = getDeltaColor(-diff);
-    const text = diff > 0 ? `acima da média` : `abaixo da média`;
-    const mediaText = media ? ` (Média: ${formatBRL(media)} em ${lojas} lojas)` : '';
-    if (Math.abs(diff) < 0.01) return <div className="text-xs text-gray-500 mt-0.5">Na média{mediaText}</div>;
-    return (
-        <div className={`text-xs font-semibold mt-0.5 ${color}`}>
-            {formatPct(Math.abs(diff * 100))} {text}
-            <span className="text-gray-500 font-normal">{mediaText}</span>
+// Mini-componente para a análise expandida
+const ExpandedAnalysis: React.FC<{ item: TopItemMeu | TopItemGeral }> = ({ item }) => {
+  const diff = item.diffPct ?? null;
+  const media = item.mediana ?? null;
+  const lojas = item.lojas ?? null;
+  const meuPreco = item.meuPreco ?? null;
+
+  const color = diff !== null ? getDeltaColor(-diff) : 'text-gray-600';
+  const text = diff !== null ? (diff > 0 ? `acima da média` : `abaixo da média`) : '';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="overflow-hidden"
+    >
+      <div className="mt-2 pl-10 pr-4 pt-3 pb-2 bg-slate-50 rounded-lg">
+        <h4 className="text-sm font-semibold text-gray-700">Análise de Competitividade</h4>
+        <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p className="text-gray-500">Seu Preço</p>
+            <p className="font-bold text-gray-800">{meuPreco !== null ? formatBRL(meuPreco) : '-'}</p>
+          </div>
+          <div>
+            <p className="text-gray-500">Média na Cidade</p>
+            <p className="font-bold text-gray-800">{media !== null ? `${formatBRL(media)}` : '-'}</p>
+            {lojas && <p className="text-xs text-gray-400">em {lojas} lojas</p>}
+          </div>
         </div>
-    );
+        {diff !== null && (
+          <div className="mt-3 text-center p-2 rounded-md bg-white">
+            <p className={`font-bold text-lg ${color}`}>{formatPct(Math.abs(diff * 100))}</p>
+            <p className={`text-xs font-medium ${color}`}>{text}</p>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
 };
 
-export const TopItems: React.FC<Props> = ({ meus, geral, onAddPrice, onViewInStock, onAddItem }) => {
+export const TopItems: React.FC<Props> = ({ meus, geral, onAddItem }) => {
   const [tab, setTab] = useState<'loja' | 'cidade'>('loja');
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
+  const handleToggle = (itemName: string) => {
+    setExpandedItem(expandedItem === itemName ? null : itemName);
+  };
+
+  const data = tab === 'loja' ? meus : geral;
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 h-full flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Itens em Destaque</h3>
         <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto">
-          <button
-            onClick={() => setTab('loja')}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'loja' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
-          >
-            Minha Loja
-          </button>
-          <button
-            onClick={() => setTab('cidade')}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'cidade' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
-          >
-            Cidade
-          </button>
+          <button onClick={() => setTab('loja')} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'loja' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}>Minha Loja</button>
+          <button onClick={() => setTab('cidade')} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'cidade' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}>Cidade</button>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto pr-2">
-        <AnimatePresence mode="wait">
-          <motion.ul
-            key={tab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="divide-y divide-gray-100"
-          >
-            {tab === 'loja' && meus.slice(0, 5).map((item, index) => (
-              <li key={item.nome} className="py-3.5 flex items-center justify-between gap-4">
+        <ul className="divide-y divide-gray-100">
+          {data.slice(0, 5).map((item, index) => (
+            <li key={item.nome} className="py-2">
+              <div className="flex items-center justify-between gap-4 cursor-pointer" onClick={() => handleToggle(item.nome)}>
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{item.nome}</p>
-                    <p className="text-xs text-gray-500">{item.interesses} interesses de clientes</p>
+                    <p className="text-xs text-gray-500">{item.interesses} interesses {tab === 'cidade' ? 'na cidade' : 'de clientes'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="text-right">
-                        {item.meuPreco != null ? (
-                            <>
-                                <p className="font-semibold text-gray-800">{formatBRL(item.meuPreco)}</p>
-                                <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} lojas={item.lojas ?? null} />
-                            </>
-                        ) : (
-                            <>
-                                <button onClick={() => onAddPrice(item.nome)} className="text-sm text-emerald-600 font-semibold hover:text-emerald-700 flex items-center gap-1">
-                                    <Plus className="w-4 h-4" /> Adicionar preço
-                                </button>
-                                {(item.mediana && item.lojas) && <p className="text-xs text-gray-500 mt-0.5">Média: {formatBRL(item.mediana)} em {item.lojas} lojas</p>}
-                            </>
-                        )}
-                    </div>
-                    <button onClick={() => onViewInStock(item.nome)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                        <Edit className="w-4 h-4" />
+                  {('hasMine' in item && !item.hasMine) ? (
+                     <button onClick={(e) => { e.stopPropagation(); onAddItem(item.nome); }} className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0">
+                        <Plus className="w-4 h-4" /> Adicionar
                     </button>
-                </div>
-              </li>
-            ))}
-
-            {tab === 'cidade' && geral.slice(0, 5).map((item, index) => (
-              <li key={item.nome} className="py-3.5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
-                  <div className="min-w-0">
-                    <p className="font-medium text-gray-800 truncate">{item.nome}</p>
-                    <p className="text-xs text-gray-500">{item.interesses} interesses na cidade</p>
-                  </div>
-                </div>
-                {item.hasMine ? (
-                    <div className="flex items-center gap-2">
-                        <div className="text-right">
-                            <p className="font-semibold text-gray-800">{formatBRL(item.meuPreco ?? null)}</p>
-                            <PriceComparison diff={item.diffPct ?? null} media={item.mediana ?? null} lojas={item.lojas ?? null}/>
-                        </div>
-                        <button onClick={() => onViewInStock(item.nome)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                            <Edit className="w-4 h-4" />
-                        </button>
+                  ) : (
+                    <div className="flex items-center gap-2 text-gray-400">
+                        <p className="hidden md:block text-sm font-semibold text-right">{formatBRL(item.meuPreco ?? null)}</p>
+                        <ChevronDown className={`w-5 h-5 transition-transform ${expandedItem === item.nome ? 'rotate-180' : ''}`} />
                     </div>
-                ) : (
-                    <button onClick={() => onAddItem(item.nome)} className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0">
-                        <Plus className="w-4 h-4" /> Adicionar ao Estoque
-                    </button>
-                )}
-              </li>
-            ))}
-          </motion.ul>
-        </AnimatePresence>
+                  )}
+                </div>
+              </div>
+              <AnimatePresence>
+                {expandedItem === item.nome && <ExpandedAnalysis item={item} />}
+              </AnimatePresence>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
