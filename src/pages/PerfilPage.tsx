@@ -9,7 +9,7 @@ export const PerfilPage: React.FC = () => {
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Perfil da Loja</h1>
         <p className="text-gray-600 mt-1 text-sm sm:text-base">
-          Configure as informações que seus clientes verão.
+          Mantenha as informações da sua loja sempre atualizadas.
         </p>
       </div>
 
