@@ -12,7 +12,8 @@ import {
 } from '../services/DashboardService';
 import { KPICard } from '../components/dashboard/KPICard';
 import { WeekChart } from '../components/dashboard/WeekChart';
-import TopItems from '../components/dashboard/TopItems';
+// CORREÇÃO: Mude a importação para usar chaves {}
+import { TopItems } from '../components/dashboard/TopItems';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { NoResultTips } from '../components/dashboard/NoResultTips';
 
