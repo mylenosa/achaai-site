@@ -8,14 +8,15 @@ import {
   TopItemGeral,
   AtividadeRecente,
   TipSemResultado,
+  SerieData,
 } from '../services/DashboardService';
 import { KPICard } from '../components/dashboard/KPICard';
-import { WeekChart, WeekChartProps } from '../components/dashboard/WeekChart';
+import { WeekChart } from '../components/dashboard/WeekChart';
 import TopItems from '../components/dashboard/TopItems';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { NoResultTips } from '../components/dashboard/NoResultTips';
 
-const dashboardService = createDashboardService();
+const { getDashboardData } = createDashboardService();
 
 type KPIKey = 'whatsapp' | 'mapa' | 'impressoes' | 'ctr';
 type KPITitle = 'WhatsApp' | 'Mapa' | 'Impressões' | 'CTR';
@@ -27,7 +28,7 @@ export const Dashboard: React.FC = () => {
 
   // Estados dos dados
   const [kpis, setKpis] = useState<KPIData | null>(null);
-  const [serie, setSerie] = useState<WeekChartProps | null>(null);
+  const [serie, setSerie] = useState<SerieData | null>(null);
   const [topMeus, setTopMeus] = useState<TopItemMeu[]>([]);
   const [topGeral, setTopGeral] = useState<TopItemGeral[]>([]);
   const [activities, setActivities] = useState<AtividadeRecente[]>([]);
@@ -37,12 +38,13 @@ export const Dashboard: React.FC = () => {
     setLoading(true);
     // Simula uma pequena demora, como se fosse uma chamada de API
     setTimeout(() => {
-      setKpis(dashboardService.getKPIs(periodo));
-      setSerie(dashboardService.getSerieImpressoes(periodo));
-      setTopMeus(dashboardService.getTopItensMeus(periodo));
-      setTopGeral(dashboardService.getTopItensGeral(periodo));
-      setActivities(dashboardService.getAtividadeRecente(periodo));
-      setTips(dashboardService.getTipsSemResultado(periodo));
+      const data = getDashboardData(periodo);
+      setKpis(data.kpis);
+      setSerie(data.serie);
+      setTopMeus(data.topMeus);
+      setTopGeral(data.topGeral);
+      setActivities(data.activities);
+      setTips(data.tips);
       setLoading(false);
     }, 500);
   }, [periodo]);
