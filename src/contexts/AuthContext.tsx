@@ -1,8 +1,7 @@
-// Single Responsibility: Contexto de autenticação com localStorage
-import React, { createContext, useContext, useEffect } from 'react';
-import { User } from '@supabase/supabase-js';
+// src/contexts/AuthContext.tsx
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured, getRedirectUrl } from '../lib/supabase';
-import { usePersisted } from '../hooks/usePersisted';
 
 interface AuthContextType {
   user: User | null;
@@ -26,205 +25,139 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
+  return ctx;
 };
 
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = React.useState<User | null>(null);
-  const [loading, setLoading] = React.useState(true);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const configured = isSupabaseConfigured;
 
-  // Estados persistidos no localStorage
-  const [isAuth, setIsAuth] = usePersisted<boolean>('isAuth', false);
-  const [hasLoja, setHasLoja] = usePersisted<boolean>('hasLoja', false);
-  const [dev, setDev] = usePersisted<boolean>('dev', false);
+  const [user, setUser]       = React.useState<User | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
+  const [isAuth, setIsAuth]   = React.useState(false);
+  const [hasLoja, setHasLoja] = React.useState(false);
+  const [dev, setDev]         = React.useState(false);
+
+  // habilitar modo DEV via ?dev=1
   useEffect(() => {
-    // Verificar se URL tem ?dev=1 para ativar modo DEV
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('dev') === '1') {
-      setDev(true);
-    }
-  }, [setDev]);
+    if (urlParams.get('dev') === '1') setDev(true);
+  }, []);
 
+  // helper: checa se o usuário tem loja
+  async function refreshHasLoja(u?: User | null) {
+    try {
+      const uid = (u ?? user)?.id;
+      if (!uid) { setHasLoja(false); return; }
+
+      const { data, error } = await supabase
+        .from('stores')               // <-- troque para 'lojas' se não houver view
+        .select('id')
+        .eq('owner_user_id', uid)
+        .maybeSingle();
+
+      if (error) throw error;
+      setHasLoja(!!data?.id);
+    } catch (e) {
+      console.error('Erro ao checar loja:', e);
+      setHasLoja(false);
+    }
+  }
+
+  // bootstrap + eventos de auth
   useEffect(() => {
-    if (!configured) {
-      setLoading(false);
-      return;
-    }
+    if (!configured) { setLoading(false); return; }
 
-    // Verificar sessão atual
-    const getInitialSession = async () => {
+    (async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Erro ao obter sessão:', error);
-        }
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          setIsAuth(true);
-        }
-      } catch (error) {
-        console.error('Erro ao verificar sessão:', error);
+        const { data: { session } } = await supabase.auth.getSession();
+        const u = session?.user ?? null;
+        setUser(u);
+        setIsAuth(!!u);
+        await refreshHasLoja(u);
       } finally {
         setLoading(false);
       }
-    };
+    })();
 
-    getInitialSession();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      setIsAuth(event === 'SIGNED_IN' && !!u);
+      await refreshHasLoja(u);
 
-    // Escutar mudanças de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
-        
-        setUser(session?.user ?? null);
-        setLoading(false);
-
-        if (event === 'SIGNED_IN' && session?.user) {
-          setIsAuth(true);
-          // Usuário fez login com sucesso
-          const currentPath = window.location.pathname;
-          if (currentPath === '/login' || currentPath === '/acesso') {
-            window.location.href = '/portal/dashboard';
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setIsAuth(false);
-          setHasLoja(false);
-          // Usuário fez logout
-          const currentPath = window.location.pathname;
-          if (currentPath.startsWith('/portal')) {
-            window.location.href = '/acesso';
-          }
-        }
+      if (event === 'SIGNED_IN') {
+        const path = window.location.pathname;
+        if (path === '/login' || path === '/acesso') window.location.href = '/portal/dashboard';
       }
-    );
+      if (event === 'SIGNED_OUT') {
+        setHasLoja(false);
+        const path = window.location.pathname;
+        if (path.startsWith('/portal')) window.location.href = '/acesso';
+      }
+    });
 
     return () => subscription.unsubscribe();
-  }, [configured, setIsAuth, setHasLoja]);
+  }, [configured]); // não inclua setters aqui
 
-  // Login com email e senha
+  // métodos de autenticação
   const signIn = async (email: string, password: string) => {
-    if (!configured) {
-      throw new Error('Supabase não configurado');
-    }
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      throw error;
-    }
+    if (!configured) throw new Error('Supabase não configurado');
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   };
 
-  // Login com Magic Link
   const signInWithMagicLink = async (email: string) => {
-    if (!configured) {
-      throw new Error('Supabase não configurado');
-    }
-
+    if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo: getRedirectUrl('/acesso'),
-      },
+      options: { emailRedirectTo: getRedirectUrl('/acesso') },
     });
-
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
   };
 
-  // Login com Google
   const signInWithGoogle = async () => {
-    if (!supabase) {
-      throw new Error('Supabase não configurado');
-    }
-
+    if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: getRedirectUrl('/acesso'),
-      },
+      options: { redirectTo: getRedirectUrl('/acesso') },
     });
-
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
   };
 
-  // Cadastro com email e senha
   const signUp = async (email: string, password: string) => {
-    if (!supabase) {
-      throw new Error('Supabase não configurado');
-    }
-
+    if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: getRedirectUrl('/portal/dashboard'),
-      },
+      options: { emailRedirectTo: getRedirectUrl('/portal/dashboard') },
     });
-
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
   };
 
-  // Logout
   const signOut = async () => {
-    if (!supabase) {
-      throw new Error('Supabase não configurado');
-    }
-
+    if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
   };
 
-  // Reset de senha
   const resetPassword = async (email: string) => {
-    if (!supabase) {
-      throw new Error('Supabase não configurado');
-    }
-
+    if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: getRedirectUrl('/reset-password'),
     });
-
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
   };
 
-  // Atualizar senha
   const updatePassword = async (newPassword: string) => {
-    if (!supabase) {
-      throw new Error('Supabase não configurado');
-    }
-
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
-
-    if (error) {
-      throw error;
-    }
+    if (!configured) throw new Error('Supabase não configurado');
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
   };
 
-  const value: AuthContextType = {
+  const value = useMemo<AuthContextType>(() => ({
     user,
     loading,
     isConfigured: configured,
@@ -241,11 +174,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signOut,
     resetPassword,
     updatePassword,
-  };
+  }), [user, loading, configured, isAuth, hasLoja, dev]);
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

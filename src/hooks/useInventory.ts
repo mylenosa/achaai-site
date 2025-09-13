@@ -1,21 +1,30 @@
-// Single Responsibility: Hook específico para gerenciar estado do inventário
-// Interface Segregation: Expõe apenas o que é necessário
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  InventoryService, 
-  InventoryItem, 
-  ImportResult,
-  LocalStorageInventoryRepository,
-  DefaultInventoryValidator,
-  BrazilianCurrencyParser
-} from '../services/InventoryService';
+import { useAuthContext } from '../hooks/useAuth';
+import { storeService } from '../services/StoreService';
+import {
+  listProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  type ProductRow,
+} from '../services/productService';
 
-// Dependency Inversion: Usa abstrações
-const inventoryService = new InventoryService(
-  new LocalStorageInventoryRepository(),
-  new DefaultInventoryValidator(),
-  new BrazilianCurrencyParser()
-);
+/** ===== Tipos expostos pelo hook ===== */
+export interface InventoryItem {
+  id: string;
+  title: string;
+  price: number | null;
+  available: boolean;      // mapeia 'ativo' do banco
+  verifiedAt?: string;     // mantido por compatibilidade (não usamos no banco)
+  updatedAt: string;
+}
+
+export interface ImportResult {
+  imported: number;
+  updated: number;
+  ignored: number;
+  errors: { line: number; reason: string }[];
+}
 
 export interface UseInventoryReturn {
   items: InventoryItem[];
@@ -23,81 +32,166 @@ export interface UseInventoryReturn {
   error: string | null;
   saveItem: (item: Partial<InventoryItem>) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
-  confirmAvailability: (itemIds: string[]) => Promise<number>;
-  importFromData: (data: { title: string; price: number | null }[], markAsAvailable: boolean) => Promise<ImportResult>;
+  confirmAvailability: (_itemIds: string[]) => Promise<number>; // no-op por enquanto
+  importFromData: (
+    data: { title: string; price: number | null }[],
+    markAsAvailable: boolean
+  ) => Promise<ImportResult>;
   refreshItems: () => Promise<void>;
 }
 
+/** ===== Helpers ===== */
+function toInventoryItem(p: ProductRow): InventoryItem {
+  return {
+    id: String(p.id),
+    title: p.nome ?? '',
+    price: p.preco,
+    available: p.ativo,
+    updatedAt: p.updated_at,
+  };
+}
+
+/** ===== Hook ===== */
 export const useInventory = (): UseInventoryReturn => {
+  const { user } = useAuthContext();
+  const [storeId, setStoreId] = useState<number | null>(null);
+
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  /** Descobre a loja do usuário logado */
+  const ensureStoreId = useCallback(async (): Promise<number | null> => {
+    if (storeId) return storeId;
+    if (!user) return null;
+
+    const prof = await storeService.getProfile(user.id);
+    const id = prof?.id ? Number(prof.id) : null;
+    setStoreId(id);
+    return id;
+  }, [storeId, user]);
+
+  /** Carrega itens do Supabase */
   const refreshItems = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const allItems = await inventoryService.getAllItems();
-      setItems(allItems);
+
+      const id = await ensureStoreId();
+      if (!id) {
+        setItems([]);
+        return;
+      }
+
+      const rows = await listProducts(id); // ProductRow[]
+      const mapped = rows.map(toInventoryItem).sort(
+        (a, b) => b.updatedAt.localeCompare(a.updatedAt)
+      );
+      setItems(mapped);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar itens');
     } finally {
       setLoading(false);
     }
+  }, [ensureStoreId]);
+
+  /** Cria/atualiza item */
+  const saveItem = useCallback(
+    async (item: Partial<InventoryItem>) => {
+      const id = await ensureStoreId();
+      if (!id) throw new Error('Crie o perfil da loja antes de cadastrar produtos.');
+
+      const title = (item.title ?? '').trim();
+      if (title.length < 2) throw new Error('Nome deve ter pelo menos 2 caracteres');
+      if (item.price != null && item.price < 0) {
+        throw new Error('Preço deve ser maior ou igual a zero');
+      }
+
+      if (item.id) {
+        await updateProduct(Number(item.id), title, item.price ?? null);
+      } else {
+        await createProduct(id, title, item.price ?? null);
+      }
+      await refreshItems();
+    },
+    [ensureStoreId, refreshItems]
+  );
+
+  /** Excluir item */
+  const deleteItemFn = useCallback(
+    async (id: string) => {
+      await deleteProduct(Number(id));
+      await refreshItems();
+    },
+    [refreshItems]
+  );
+
+  /** Confirmar disponibilidade — no-op no seu modelo atual */
+  const confirmAvailability = useCallback(async (_itemIds: string[]) => {
+    return 0;
   }, []);
 
-  const saveItem = useCallback(async (item: Partial<InventoryItem>) => {
-    try {
-      setError(null);
-      await inventoryService.saveItem(item);
-      await refreshItems();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao salvar item';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-  }, [refreshItems]);
+  /** Importação simples via CRUD */
+  const importFromData = useCallback(
+    async (
+      data: { title: string; price: number | null }[],
+      _markAsAvailable: boolean
+    ) => {
+      const id = await ensureStoreId();
+      if (!id) throw new Error('Crie o perfil da loja antes de importar produtos.');
 
-  const deleteItem = useCallback(async (id: string) => {
-    try {
-      setError(null);
-      await inventoryService.deleteItem(id);
-      await refreshItems();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao excluir item';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-  }, [refreshItems]);
+      const current = await listProducts(id);
+      const byName = new Map<string, ProductRow>();
+      current.forEach((p) =>
+        byName.set((p.nome ?? '').trim().toLowerCase(), p)
+      );
 
-  const confirmAvailability = useCallback(async (itemIds: string[]) => {
-    try {
-      setError(null);
-      const updated = await inventoryService.confirmAvailability(itemIds);
-      await refreshItems();
-      return updated;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao confirmar disponibilidade';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-  }, [refreshItems]);
+      let imported = 0,
+        updated = 0,
+        ignored = 0;
+      const errors: { line: number; reason: string }[] = [];
 
-  const importFromData = useCallback(async (
-    data: { title: string; price: number | null }[], 
-    markAsAvailable: boolean
-  ) => {
-    try {
-      setError(null);
-      const result = await inventoryService.importFromData(data, markAsAvailable);
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        const line = i + 2; // linha no Excel (considera cabeçalho)
+
+        try {
+          const name = (row.title ?? '').trim();
+          if (name.length < 2) {
+            ignored++;
+            errors.push({ line, reason: 'Nome muito curto' });
+            continue;
+          }
+          if (row.price != null && row.price < 0) {
+            ignored++;
+            errors.push({ line, reason: 'Preço inválido' });
+            continue;
+          }
+
+          const key = name.toLowerCase();
+          const existing = byName.get(key);
+
+          if (existing) {
+            await updateProduct(existing.id, name, row.price ?? null);
+            updated++;
+          } else {
+            await createProduct(id, name, row.price ?? null);
+            imported++;
+          }
+        } catch (e) {
+          ignored++;
+          errors.push({
+            line,
+            reason: e instanceof Error ? e.message : 'Erro ao processar linha',
+          });
+        }
+      }
+
       await refreshItems();
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao importar dados';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-  }, [refreshItems]);
+      return { imported, updated, ignored, errors };
+    },
+    [ensureStoreId, refreshItems]
+  );
 
   useEffect(() => {
     refreshItems();
@@ -108,9 +202,9 @@ export const useInventory = (): UseInventoryReturn => {
     loading,
     error,
     saveItem,
-    deleteItem,
+    deleteItem: deleteItemFn,
     confirmAvailability,
     importFromData,
-    refreshItems
+    refreshItems,
   };
 };

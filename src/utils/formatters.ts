@@ -1,4 +1,4 @@
-// Single Responsibility: Utilitários de formatação
+// Single Responsibility: Utilitários de formatação 
 // Pure functions para formatação de dados
 
 export const formatBRL = (value: number | null): string => {
@@ -63,3 +63,22 @@ export const getDeltaIcon = (value: number): string => {
   if (value < 0) return '↘';
   return '→';
 };
+
+// --------------------- Moeda (BRL): parse / normalize ---------------------
+
+/**
+ * Converte string "15,90" / "1.234,56" / "25.50" em number (reais).
+ * Retorna null quando vazio/indefinido.
+ */
+export const parseBRL = (str: string): number | null => {
+  if (!str || str.trim() === '') return null
+  const cleaned = str.replace(/[R$\s]/g, '')
+  let normalized = cleaned
+  if (cleaned.includes(',') && cleaned.includes('.')) {
+    normalized = cleaned.replace(/\./g, '').replace(',', '.')
+  } else if (cleaned.includes(',') && !cleaned.includes('.')) {
+    normalized = cleaned.replace(',', '.')
+  }
+  const parsed = parseFloat(normalized)
+  return isNaN(parsed) ? null : Math.max(0, parsed)
+}

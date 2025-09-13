@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import { useState, type FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, ChevronDown } from 'lucide-react';
 import { formatBRL, formatPct, getDeltaColor } from '../../utils/formatters';
-import { TopItemMeu, TopItemGeral } from '../../services/DashboardService';
+import type { TopItemMeu, TopItemGeral } from '../../services/DashboardService';
 
 type Props = {
   meus: TopItemMeu[];
   geral: TopItemGeral[];
-  onAddItem: (nome: string) => void;
+  onAddPrice?: (name: string) => void | Promise<void>;
+  onViewInStock?: (name: string) => void | Promise<void>;
+  onAddItem?: (itemName: string) => void | Promise<void>;
 };
 
 // Mini-componente para a análise expandida
-const ExpandedAnalysis: React.FC<{ item: TopItemMeu | TopItemGeral }> = ({ item }) => {
+const ExpandedAnalysis: FC<{ item: TopItemMeu | TopItemGeral }> = ({ item }) => {
   const diff = item.diffPct ?? null;
   const media = item.mediana ?? null;
   const lojas = item.lojas ?? null;
@@ -52,7 +54,15 @@ const ExpandedAnalysis: React.FC<{ item: TopItemMeu | TopItemGeral }> = ({ item 
   );
 };
 
-export const TopItems: React.FC<Props> = ({ meus, geral, onAddItem }) => {
+export const TopItems: FC<Props> = ({
+  meus,
+  geral,
+  onAddItem,
+  onAddPrice,
+  onViewInStock,
+}) => {
+  const addItem = onAddItem ?? (() => {});
+
   const [tab, setTab] = useState<'loja' | 'cidade'>('loja');
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
@@ -67,8 +77,22 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddItem }) => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Itens em Destaque</h3>
         <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto">
-          <button onClick={() => setTab('loja')} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'loja' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}>Minha Loja</button>
-          <button onClick={() => setTab('cidade')} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${tab === 'cidade' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}>Cidade</button>
+          <button
+            onClick={() => setTab('loja')}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${
+              tab === 'loja' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Minha Loja
+          </button>
+          <button
+            onClick={() => setTab('cidade')}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors w-1/2 sm:w-auto ${
+              tab === 'cidade' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Cidade
+          </button>
         </div>
       </div>
 
@@ -76,30 +100,59 @@ export const TopItems: React.FC<Props> = ({ meus, geral, onAddItem }) => {
         <ul className="divide-y divide-gray-100">
           {data.slice(0, 5).map((item, index) => (
             <li key={item.nome} className="py-2">
-              <div className="flex items-center justify-between gap-4 cursor-pointer" onClick={() => handleToggle(item.nome)}>
+              <div
+                className="flex items-center justify-between gap-4 cursor-pointer"
+                onClick={() => handleToggle(item.nome)}
+              >
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="text-lg font-bold text-gray-400 w-4 text-center">{index + 1}</div>
                   <div className="min-w-0">
                     <p className="font-medium text-gray-800 truncate">{item.nome}</p>
-                    {/* Linha Modificada: "interesses" -> "buscas" */}
                     <p className="text-xs text-gray-500">
                       {item.interesses} {tab === 'cidade' ? 'buscas na cidade' : 'buscas de clientes'}
                     </p>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-2">
                   {('hasMine' in item && !item.hasMine) ? (
-                     <button onClick={(e) => { e.stopPropagation(); onAddItem(item.nome); }} className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0">
-                        <Plus className="w-4 h-4" /> Adicionar
+                    // Ainda não é seu -> botão "Adicionar"
+                    <button
+                      onClick={(e) => { e.stopPropagation(); addItem(item.nome); }}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                    >
+                      <Plus className="w-4 h-4" /> Adicionar
                     </button>
                   ) : (
-                    <div className="flex items-center gap-2 text-gray-400">
-                        <p className="hidden md:block text-sm font-semibold text-right">{formatBRL(item.meuPreco ?? null)}</p>
-                        <ChevronDown className={`w-5 h-5 transition-transform ${expandedItem === item.nome ? 'rotate-180' : ''}`} />
+                    // Já é seu -> mostrar preço + botões "Ver" e "Preço"
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onViewInStock?.(item.nome); }}
+                        className="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200 text-gray-800"
+                        title="Ver no estoque"
+                      >
+                        Ver
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onAddPrice?.(item.nome); }}
+                        className="px-2 py-1 text-xs rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                        title="Atualizar preço"
+                      >
+                        Preço
+                      </button>
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <p className="hidden md:block text-sm font-semibold text-right">
+                          {formatBRL(item.meuPreco ?? null)}
+                        </p>
+                        <ChevronDown
+                          className={`w-5 h-5 transition-transform ${expandedItem === item.nome ? 'rotate-180' : ''}`}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
+
               <AnimatePresence>
                 {expandedItem === item.nome && <ExpandedAnalysis item={item} />}
               </AnimatePresence>

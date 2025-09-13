@@ -1,5 +1,5 @@
 // src/pages/Dashboard.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   createDashboardService,
@@ -7,7 +7,6 @@ import {
   TopItemMeu,
   TopItemGeral,
   AtividadeRecente,
-  TipSemResultado,
   SerieData,
 } from '../services/DashboardService';
 import { KPICard } from '../components/dashboard/KPICard';
@@ -16,11 +15,13 @@ import { TopItems } from '../components/dashboard/TopItems';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { NoResultTips } from '../components/dashboard/NoResultTips';
 
-// Importamos a instância do serviço e o perfil mockado
-const { getDashboardData, mockStoreProfile } = createDashboardService();
+const { getDashboardData } = createDashboardService();
 
 type KPIKey = 'whatsapp' | 'mapa' | 'impressoes' | 'ctr';
 type KPITitle = 'WhatsApp' | 'Mapa' | 'Impressões' | 'CTR';
+
+// tipo local para “tips” (buscas sem resultado)
+type Tip = { termo: string; qtd: number };
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -33,28 +34,35 @@ export const Dashboard: React.FC = () => {
   const [topMeus, setTopMeus] = useState<TopItemMeu[]>([]);
   const [topGeral, setTopGeral] = useState<TopItemGeral[]>([]);
   const [activities, setActivities] = useState<AtividadeRecente[]>([]);
-  const [tips, setTips] = useState<TipSemResultado[]>([]);
-  // Usamos o perfil mockado como estado inicial. A função de set não é necessária por enquanto.
-  const [storeProfile] = useState(mockStoreProfile);
+  const [tips, setTips] = useState<Tip[]>([]);
 
   useEffect(() => {
-    setLoading(true);
-    // Simula uma pequena demora, como se fosse uma chamada de API
-    setTimeout(() => {
-      // Passa o objeto de perfil completo para o serviço
-      const data = getDashboardData(periodo, storeProfile);
-      setKpis(data.kpis);
-      setSerie(data.serie);
-      setTopMeus(data.topMeus);
-      setTopGeral(data.topGeral);
-      setActivities(data.activities);
-      setTips(data.tips);
-      
-      setLoading(false);
-    }, 500);
-  }, [periodo, storeProfile]); // Depende do perfil para recarregar se ele mudar
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await getDashboardData(periodo); // agora é assíncrono (sem mock)
+        if (!mounted) return;
+        setKpis(data.kpis);
+        setSerie(data.serie);
+        setTopMeus(data.topMeus);
+        setTopGeral(data.topGeral);
+        setActivities(data.activities);
+        setTips(data.tips as Tip[]);
+      } catch (e) {
+        // opcional: exibir toast/erro
+        console.error(e);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [periodo]);
 
-  const handleAddItem = (itemName: string) => navigate(`/portal/estoque?add=${encodeURIComponent(itemName)}`);
+  const handleAddItem = (itemName: string) =>
+    navigate(`/portal/estoque?add=${encodeURIComponent(itemName)}`);
 
   const kpiConfigs: { key: KPIKey; title: KPITitle }[] = [
     { key: 'whatsapp', title: 'WhatsApp' },
@@ -73,13 +81,17 @@ export const Dashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1 text-sm sm:text-base">Acompanhe o desempenho da sua loja.</p>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">
+            Acompanhe o desempenho da sua loja.
+          </p>
         </div>
         <div className="bg-gray-100 rounded-xl p-1 flex self-start sm:self-auto flex-shrink-0">
           <button
             onClick={() => setPeriodo('7d')}
             className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
-              periodo === '7d' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              periodo === '7d'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             Últimos 7 dias
@@ -87,7 +99,9 @@ export const Dashboard: React.FC = () => {
           <button
             onClick={() => setPeriodo('30d')}
             className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
-              periodo === '30d' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              periodo === '30d'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             Últimos 30 dias
@@ -114,17 +128,23 @@ export const Dashboard: React.FC = () => {
           <WeekChart {...serie} />
         </div>
         <div className="xl:col-span-1">
-           <RecentActivity activities={activities} />
+          <RecentActivity activities={activities} />
         </div>
       </div>
 
       {/* Insights e Oportunidades */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-         <TopItems
-            meus={topMeus}
-            geral={topGeral}
-            onAddItem={handleAddItem}
-          />
+        <TopItems
+          meus={topMeus}
+          geral={topGeral}
+          onAddPrice={(name: string) =>
+            navigate(`/portal/estoque?search=${encodeURIComponent(name)}`)
+          }
+          onViewInStock={(name: string) =>
+            navigate(`/portal/estoque?search=${encodeURIComponent(name)}`)
+          }
+          onAddItem={handleAddItem}
+        />
         <NoResultTips tips={tips} onAddItem={handleAddItem} />
       </div>
     </div>
