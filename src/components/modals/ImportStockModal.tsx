@@ -3,7 +3,7 @@ import { FileText, Upload } from 'lucide-react'
 import { useState } from 'react'
 import * as XLSX from 'xlsx'
 import { parseBRL } from '../../utils/formatters'
-import { createProduct, updateProduct } from '../../services/StoreService'
+import { createProduct, updateProduct } from '../../services/productService'
 
 export function ImportStockModal({
   isOpen, storeId, existingTitles, onClose, onResult
