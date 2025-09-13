@@ -39,28 +39,25 @@ export const Dashboard: React.FC = () => {
   const [tips, setTips] = useState<Tip[]>([]);
 
   useEffect(() => {
-    let mounted = true;
+    let alive = true;
     (async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        const data = await getDashboardData(periodo); // agora é assíncrono (sem mock)
-        if (!mounted) return;
+        const data = await getDashboardData(periodo);
+        if (!alive) return;
         setKpis(data.kpis);
         setSerie(data.serie);
         setTopMeus(data.topMeus);
         setTopGeral(data.topGeral);
         setActivities(data.activities);
-        setTips(data.tips as Tip[]);
+        setTips(data.tips);
       } catch (e) {
-        // opcional: exibir toast/erro
-        console.error(e);
+        console.error('Dashboard page error:', e);
       } finally {
-        if (mounted) setLoading(false);
+        if (alive) setLoading(false);
       }
     })();
-    return () => {
-      mounted = false;
-    };
+    return () => { alive = false; };
   }, [periodo]);
 
   const handleAddItem = (itemName: string) =>
