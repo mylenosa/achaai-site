@@ -60,6 +60,7 @@ export const Dashboard: React.FC = () => {
     return () => { alive = false; };
   }, [periodo]);
 
+
   const handleAddItem = (itemName: string) =>
     navigate(`/portal/estoque?add=${encodeURIComponent(itemName)}`);
 
