@@ -1,6 +1,5 @@
-// src/pages/PortalLayout.tsx
 import { useState } from 'react';
-import { Outlet, Navigate, NavLink } from 'react-router-dom';
+import { Outlet, NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BarChart3, 
@@ -21,7 +20,7 @@ import { Helmet } from 'react-helmet-async';
 export function PortalLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { user, signOut, isConfigured, dev, setDev } = useAuthContext();
+  const { user, signOut, dev, setDev } = useAuthContext();
 
   const handleSignOut = async () => {
     try {
@@ -39,11 +38,6 @@ export function PortalLayout() {
   ];
 
   const storeName = 'Minha Loja'; // TODO: trazer do perfil real
-
-  // Se você ainda estiver usando o ProtectedRoute em App.tsx, pode remover este redirect.
-  if (!isConfigured) {
-    return <Navigate to="/login" replace />;
-  }
 
   return (
     <>
