@@ -1,5 +1,7 @@
+// src/components/LandingPage.tsx
 // Single Responsibility: Página principal (landing page)
-import React, { useEffect } from 'react';
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Header } from './Header';
 import { Hero } from './Hero';
 import { HowItWorks } from './HowItWorks';
@@ -12,56 +14,39 @@ import { FinalCTA } from './FinalCTA';
 import { Footer } from './Footer';
 import { config } from '../lib/config';
 
+// Use window.location.origin como siteUrl local
+const siteUrl = window.location.origin;
+
 export const LandingPage: React.FC = () => {
-  useEffect(() => {
-    // SEO Meta Tags
-    document.title = config.seo.title;
-    
-    // Meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', config.seo.description);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = config.seo.description;
-      document.head.appendChild(meta);
-    }
-
-    // Open Graph tags
-    const ogTags = [
-      { property: 'og:title', content: config.seo.title },
-      { property: 'og:description', content: config.seo.description },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:locale', content: 'pt_BR' },
-    ];
-
-    ogTags.forEach(tag => {
-      const existing = document.querySelector(`meta[property="${tag.property}"]`);
-      if (existing) {
-        existing.setAttribute('content', tag.content);
-      } else {
-        const meta = document.createElement('meta');
-        meta.setAttribute('property', tag.property);
-        meta.content = tag.content;
-        document.head.appendChild(meta);
-      }
-    });
-
-    // Keywords
-    const metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (metaKeywords) {
-      metaKeywords.setAttribute('content', config.seo.keywords);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'keywords';
-      meta.content = config.seo.keywords;
-      document.head.appendChild(meta);
-    }
-  }, []);
+  // constrói canonical usando siteUrl local
+  const canonical = `${siteUrl.replace(/\/$/, '')}/`;
 
   return (
     <div className="min-h-screen">
+      <Helmet prioritizeSeoTags>
+        {/* Title & Description */}
+        <title>{config.seo.title}</title>
+        <meta name="description" content={config.seo.description} />
+        {config.seo.keywords && (
+          <meta name="keywords" content={config.seo.keywords} />
+        )}
+
+        {/* Canonical */}
+        <link rel="canonical" href={canonical} />
+
+        {/* Open Graph */}
+        <meta property="og:title" content={config.seo.title} />
+        <meta property="og:description" content={config.seo.description} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:locale" content="pt_BR" />
+
+        {/* (Opcional) Twitter cards, se quiser */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={config.seo.title} />
+        <meta name="twitter:description" content={config.seo.description} />
+      </Helmet>
+
       <Header />
       <main>
         <Hero />

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../../hooks/useAuth';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 interface RequireLojaProps {
   children: React.ReactNode;
@@ -8,21 +9,21 @@ interface RequireLojaProps {
 
 export const RequireLoja: React.FC<RequireLojaProps> = ({ children }) => {
   const { loading, hasLoja, dev } = useAuthContext();
+  const location = useLocation();
 
-  // Mostrar loading enquanto verifica
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      <div className="flex items-center justify-center min-h-[200px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500" />
       </div>
     );
   }
 
-  // Se modo DEV ativo ou tem loja, permitir acesso
-  if (dev || hasLoja) {
+  // Se Supabase não está configurado (ou DEV on), não bloqueie
+  if (!isSupabaseConfigured || dev || hasLoja) {
     return <>{children}</>;
   }
 
-  // Se não tem loja, redirecionar para perfil
-  return <Navigate to="/portal/perfil" replace />;
+  // Sem loja → vai para o perfil, guardando origem
+  return <Navigate to="/portal/perfil" replace state={{ from: location }} />;
 };

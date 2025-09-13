@@ -1,129 +1,67 @@
-// Single Responsibility: Componente principal da aplicação com roteamento
-import React, { useEffect } from 'react';
+// src/App.tsx
 import { Routes, Route, Navigate } from 'react-router-dom';
+
 import { LandingPage } from './components/LandingPage';
 import { Login } from './pages/Login';
 import { ResetPassword } from './pages/ResetPassword';
+
 import { PortalLayout } from './pages/PortalLayout';
 import { Dashboard } from './pages/Dashboard';
 import { EstoquePage } from './pages/EstoquePage';
 import { PerfilPage } from './pages/PerfilPage';
-import { NotFound } from './components/NotFound';
+
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { RequireLoja } from './components/auth/RequireLoja';
-import { config } from './lib/config';
-
-// Declaração global para analytics
-declare global {
-  interface Window {
-    gtag: (...args: any[]) => void;
-    fbq: (...args: any[]) => void;
-  }
-}
 
 function App() {
-  useEffect(() => {
-    // SEO Meta Tags globais
-    document.title = config.seo.title;
-    
-    // Meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', config.seo.description);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = config.seo.description;
-      document.head.appendChild(meta);
-    }
-
-    // Open Graph tags
-    const ogTags = [
-      { property: 'og:title', content: config.seo.title },
-      { property: 'og:description', content: config.seo.description },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:locale', content: 'pt_BR' },
-    ];
-
-    ogTags.forEach(tag => {
-      const existing = document.querySelector(`meta[property="${tag.property}"]`);
-      if (existing) {
-        existing.setAttribute('content', tag.content);
-      } else {
-        const meta = document.createElement('meta');
-        meta.setAttribute('property', tag.property);
-        meta.content = tag.content;
-        document.head.appendChild(meta);
-      }
-    });
-
-    // Keywords
-    const metaKeywords = document.querySelector('meta[name="keywords"]');
-    if (metaKeywords) {
-      metaKeywords.setAttribute('content', config.seo.keywords);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'keywords';
-      meta.content = config.seo.keywords;
-      document.head.appendChild(meta);
-    }
-  }, []);
-
   return (
     <Routes>
-      {/* Página principal */}
+      {/* Público */}
       <Route path="/" element={<LandingPage />} />
-      
-      {/* Login */}
       <Route path="/acesso" element={<Login />} />
-      
-      {/* Reset Password */}
       <Route path="/reset-password" element={<ResetPassword />} />
-      
-      {/* Alias /login → /acesso */}
+      {/* Alias antigo */}
       <Route path="/login" element={<Navigate to="/acesso" replace />} />
-      
-      {/* Portal protegido */}
-      <Route 
-        path="/portal" 
+
+      {/* Portal (área autenticada) */}
+      <Route
+        path="/portal"
         element={
           <ProtectedRoute>
             <PortalLayout />
           </ProtectedRoute>
-        } 
+        }
       >
-        {/* Redirecionar /portal para /portal/dashboard */}
+        {/* /portal → /portal/dashboard */}
         <Route index element={<Navigate to="/portal/dashboard" replace />} />
-        
-        {/* Dashboard - requer loja */}
-        <Route 
-          path="dashboard" 
+
+        {/* Dashboard e Estoque exigem loja criada */}
+        <Route
+          path="dashboard"
           element={
             <RequireLoja>
               <Dashboard />
             </RequireLoja>
-          } 
+          }
         />
-        
-        {/* Estoque - requer loja */}
-        <Route 
-          path="estoque" 
+        <Route
+          path="estoque"
           element={
             <RequireLoja>
               <EstoquePage />
             </RequireLoja>
-          } 
+          }
         />
-        
-        {/* Perfil da Loja - sempre acessível */}
+
+        {/* Perfil sempre acessível dentro do portal */}
         <Route path="perfil" element={<PerfilPage />} />
       </Route>
-      
-      {/* Redirect antigo /dashboard para /portal/dashboard */}
+
+      {/* Compat: antigo /dashboard → novo /portal/dashboard */}
       <Route path="/dashboard" element={<Navigate to="/portal/dashboard" replace />} />
-      
-      {/* Página 404 */}
-      <Route path="*" element={<NotFound />} />
+
+      {/* 404 */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
