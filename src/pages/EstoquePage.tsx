@@ -10,13 +10,8 @@ import { EditProductModal, type ProductUI } from '../components/modals/EditProdu
 import { ConfirmDeleteModal } from '../components/modals/ConfirmDeleteModal'
 import { ImportStockModal } from '../components/modals/ImportStockModal'
 
-import {
-  getMyStoreId,
-  listProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct
-} from '../services/productService'
+import { listProducts, createProduct, updateProduct, deleteProduct } from '../services/productService';
+import { getMyStoreId } from '../services/StoreService';
 
 type SortField = 'title' | 'price'
 type SortDirection = 'asc' | 'desc'

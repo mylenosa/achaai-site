@@ -150,4 +150,13 @@ class StoreService {
   }
 }
 
+export async function getMyStoreId(): Promise<number | null> {
+  const { data: s } = await supabase.auth.getSession();
+  const userId = s?.session?.user?.id;
+  if (!userId) return null;
+
+  const prof = await storeService.getProfile(userId);
+  return prof?.id ? Number(prof.id) : null;
+}
+
 export const storeService = new StoreService();
