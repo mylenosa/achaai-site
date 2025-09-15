@@ -20,7 +20,7 @@ export const StoreProfileForm: React.FC = () => {
   });
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isCepLoading, setIsCepLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -126,7 +126,7 @@ export const StoreProfileForm: React.FC = () => {
     }
 
     console.log('StoreProfileForm.handleSubmit: Validações passaram, iniciando salvamento...');
-    setIsLoading(true);
+    setIsSaving(true);
     try {
       const formPayload = {
         name: profile.name,
@@ -161,7 +161,7 @@ export const StoreProfileForm: React.FC = () => {
       console.error('StoreProfileForm.handleSubmit: ERRO NO SUBMIT:', err);
       setMessage({ type: 'error', text: 'Erro ao salvar perfil. Tente novamente.' });
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -333,10 +333,10 @@ export const StoreProfileForm: React.FC = () => {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex justify-end">
-          <button type="submit" disabled={isLoading}
+          <button type="submit" disabled={isSaving}
                   className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold py-3 px-8 rounded-lg transition-all flex items-center justify-center gap-3 text-lg shadow-lg">
-            {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6" />}
-            {isLoading ? 'Salvando...' : 'Salvar Perfil'}
+            {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6" />}
+            {isSaving ? 'Salvando...' : 'Salvar Perfil'}
           </button>
         </motion.div>
       </form>

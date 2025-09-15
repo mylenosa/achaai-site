@@ -238,10 +238,13 @@ export async function saveStoreProfile(form: {
 }) {
   console.log('saveStoreProfile: INICIANDO SALVAMENTO', form);
   
+  console.log('saveStoreProfile: ANTES - Chamando supabase.auth.getSession()...');
   const { data: { session } } = await supabase.auth.getSession();
+  console.log('saveStoreProfile: DEPOIS - getSession() concluído, session:', !!session);
+  
   const userId = session?.user?.id;
   if (!userId) {
-    console.error('saveStoreProfile: Sem sessão de usuário');
+    console.error('saveStoreProfile: Sem sessão de usuário - userId vazio');
     return { ok: false, error: "sem_sessao" };
   }
 
@@ -253,15 +256,20 @@ export async function saveStoreProfile(form: {
   });
 
   try {
-    console.log('saveStoreProfile: Buscando loja existente...');
+    console.log('saveStoreProfile: ANTES - Buscando loja existente (SELECT)...');
     const lojaPromise = supabase
       .from("lojas")
       .select("id, attrs")
       .eq("owner_user_id", userId)
       .maybeSingle();
 
-    const { data: loja } = await Promise.race([lojaPromise, timeoutPromise]);
-    console.log('saveStoreProfile: Loja encontrada:', loja);
+    const { data: loja, error: selectError } = await Promise.race([lojaPromise, timeoutPromise]);
+    console.log('saveStoreProfile: DEPOIS - SELECT concluído, loja:', loja, 'selectError:', selectError);
+    
+    if (selectError) {
+      console.error('saveStoreProfile: Erro no SELECT:', selectError);
+      return { ok: false, error: selectError.message };
+    }
 
     const attrsAtual = (loja?.attrs ?? {}) as Record<string, any>;
 
@@ -285,7 +293,7 @@ export async function saveStoreProfile(form: {
 
     console.log('saveStoreProfile: Payload preparado:', payload);
 
-    console.log('saveStoreProfile: Executando UPSERT no Supabase...');
+    console.log('saveStoreProfile: ANTES - Executando UPSERT no Supabase (UPDATE/INSERT)...');
     const upsertPromise = supabase
       .from("lojas")
       .upsert(payload, { onConflict: "owner_user_id" })
@@ -293,6 +301,7 @@ export async function saveStoreProfile(form: {
       .single();
 
     const { data, error } = await Promise.race([upsertPromise, timeoutPromise]);
+    console.log('saveStoreProfile: DEPOIS - UPSERT concluído, data:', data, 'error:', error);
 
     if (error) {
       console.error('saveStoreProfile: Erro no UPSERT:', error);

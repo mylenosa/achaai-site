@@ -24,6 +24,11 @@ export const supabase: SupabaseClient = isSupabaseConfigured
   ? createClient(url!, anon!, { auth: { persistSession: true, autoRefreshToken: true } })
   : createFailingClient();
 
+// Debug: expor supabase no window em desenvolvimento
+if (import.meta.env.DEV) {
+  (window as any).supabase = supabase;
+}
+
 // --------- Helpers ---------
 const siteUrl = (import.meta.env.VITE_SITE_URL as string | undefined) ?? '';
 
