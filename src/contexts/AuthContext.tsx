@@ -68,38 +68,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // bootstrap + eventos de auth
   useEffect(() => {
-    if (!configured) { setLoading(false); return; }
+    if (!configured) { 
+      setLoading(false); 
+      return; 
+    }
+
+    let mounted = true;
 
     (async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted) return;
+        
         const u = session?.user ?? null;
         setUser(u);
         setIsAuth(!!u);
         await refreshHasLoja(u);
+      } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+        if (mounted) {
+          setUser(null);
+          setIsAuth(false);
+          setHasLoja(false);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     })();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      
       const u = session?.user ?? null;
       setUser(u);
       setIsAuth(event === 'SIGNED_IN' && !!u);
       await refreshHasLoja(u);
 
+      // Redirecionamentos mais suaves
       if (event === 'SIGNED_IN') {
         const path = window.location.pathname;
-        if (path === '/login' || path === '/acesso') window.location.href = '/portal/dashboard';
+        if (path === '/login' || path === '/acesso') {
+          // Usar navigate ao invés de window.location.href para evitar reload
+          setTimeout(() => {
+            if (mounted) window.location.href = '/portal/dashboard';
+          }, 100);
+        }
       }
       if (event === 'SIGNED_OUT') {
         setHasLoja(false);
         const path = window.location.pathname;
-        if (path.startsWith('/portal')) window.location.href = '/acesso';
+        if (path.startsWith('/portal')) {
+          setTimeout(() => {
+            if (mounted) window.location.href = '/acesso';
+          }, 100);
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [configured]); // não inclua setters aqui
 
   // métodos de autenticação
