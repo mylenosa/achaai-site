@@ -89,14 +89,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let mounted = true;
     console.log('AuthContext: Iniciando verificação de sessão...');
 
-    // Timeout de segurança para garantir que loading seja definido como false
-    const safetyTimeout = setTimeout(() => {
-      if (mounted) {
-        console.log('AuthContext: Timeout de segurança - setando loading=false');
-        setLoading(false);
-      }
-    }, 5000); // 5 segundos
-
     (async () => {
       try {
         console.log('AuthContext: Chamando supabase.auth.getSession()...');
@@ -111,20 +103,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(u);
         setIsAuth(!!u);
         
-        console.log('AuthContext: Verificando loja...');
-        await refreshHasLoja(u);
-        console.log('AuthContext: Verificação de loja concluída');
+        // loading=false assim que getSession() resolver
+        console.log('AuthContext: Setando loading=false');
+        setLoading(false);
+        
+        // refreshHasLoja roda em paralelo (não bloqueia loading)
+        console.log('AuthContext: Verificando loja em paralelo...');
+        refreshHasLoja(u).then(() => {
+          console.log('AuthContext: Verificação de loja concluída');
+        }).catch((error) => {
+          console.error('AuthContext: Erro ao verificar loja:', error);
+        });
       } catch (error) {
         console.error('AuthContext: Erro ao verificar sessão:', error);
         if (mounted) {
           setUser(null);
           setIsAuth(false);
           setHasLoja(false);
-        }
-      } finally {
-        if (mounted) {
-          console.log('AuthContext: Setando loading=false');
-          clearTimeout(safetyTimeout);
           setLoading(false);
         }
       }
@@ -134,9 +129,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!mounted) return;
       
       const u = session?.user ?? null;
+      const prevUserId = user?.id;
       setUser(u);
       setIsAuth(event === 'SIGNED_IN' && !!u);
-      await refreshHasLoja(u);
+      
+      // refreshHasLoja só roda quando user?.id mudar
+      if (u?.id !== prevUserId) {
+        console.log('AuthContext: User ID mudou, verificando loja...');
+        refreshHasLoja(u).catch((error) => {
+          console.error('AuthContext: Erro ao verificar loja no onAuthStateChange:', error);
+        });
+      }
 
       // Redirecionamentos mais suaves
       if (event === 'SIGNED_IN') {
@@ -161,7 +164,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       mounted = false;
-      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
   }, [configured]); // não inclua setters aqui

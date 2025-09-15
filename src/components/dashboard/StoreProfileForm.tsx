@@ -196,8 +196,16 @@ export const StoreProfileForm: React.FC = () => {
           <div className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Nome da Loja *</label>
-              <input id="name" name="name" value={profile.name ?? ''} onChange={handleChange} required
-                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+              <input 
+                id="name" 
+                name="name" 
+                type="text"
+                value={profile.name ?? ''} 
+                onChange={handleChange} 
+                required
+                autoComplete="organization"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" 
+              />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-2">
@@ -231,32 +239,73 @@ export const StoreProfileForm: React.FC = () => {
             <div>
               <label htmlFor="cep" className="block text-sm font-medium text-gray-700 mb-2">CEP *</label>
               <div className="relative">
-                <input id="cep" name="cep" value={profile.cep ?? ''} onChange={handleCepChange} maxLength={8} required
-                       className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+                <input 
+                  id="cep" 
+                  name="cep" 
+                  type="text"
+                  value={profile.cep ?? ''} 
+                  onChange={handleCepChange} 
+                  maxLength={8} 
+                  required
+                  autoComplete="postal-code"
+                  placeholder="00000-000"
+                  className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" 
+                />
                 {isCepLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />}
               </div>
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-2">Rua/Avenida *</label>
-              <input id="street" name="street" value={profile.street ?? ''} onChange={handleChange} required
-                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+              <input 
+                id="street" 
+                name="street" 
+                type="text"
+                value={profile.street ?? ''} 
+                onChange={handleChange} 
+                required
+                autoComplete="address-line1"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" 
+              />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
             <div>
               <label htmlFor="number" className="block text-sm font-medium text-gray-700 mb-2">Número *</label>
-              <input id="number" name="number" value={profile.number ?? ''} onChange={handleChange} required
-                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+              <input 
+                id="number" 
+                name="number" 
+                type="text"
+                value={profile.number ?? ''} 
+                onChange={handleChange} 
+                required
+                autoComplete="address-line2"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" 
+              />
             </div>
             <div className="sm:col-span-1 lg:col-span-2">
               <label htmlFor="neighborhood" className="block text-sm font-medium text-gray-700 mb-2">Bairro *</label>
-              <input id="neighborhood" name="neighborhood" value={profile.neighborhood ?? ''} onChange={handleChange} required
-                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+              <input 
+                id="neighborhood" 
+                name="neighborhood" 
+                type="text"
+                value={profile.neighborhood ?? ''} 
+                onChange={handleChange} 
+                required
+                autoComplete="address-level2"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" 
+              />
             </div>
             <div>
               <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">Cidade</label>
-              <input id="city" name="city" value={profile.city ?? 'Ariquemes'}
-                     className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50" readOnly />
+              <input 
+                id="city" 
+                name="city" 
+                type="text"
+                value={profile.city ?? 'Ariquemes'}
+                autoComplete="address-level1"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50" 
+                readOnly 
+              />
             </div>
           </div>
         </motion.div>
@@ -268,9 +317,17 @@ export const StoreProfileForm: React.FC = () => {
           </div>
           <div className="max-w-md">
             <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-2">WhatsApp *</label>
-            <input id="whatsapp" name="whatsapp" value={profile.whatsapp ?? ''} onChange={handleWhatsAppChange} required
-                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                   placeholder="(69) 99999-9999" />
+            <input 
+              id="whatsapp" 
+              name="whatsapp" 
+              type="tel"
+              value={profile.whatsapp ?? ''} 
+              onChange={handleWhatsAppChange} 
+              required
+              autoComplete="tel"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+              placeholder="(69) 99999-9999" 
+            />
             <p className="text-xs text-gray-500 mt-1">Número usado pelos clientes para contato.</p>
           </div>
         </motion.div>

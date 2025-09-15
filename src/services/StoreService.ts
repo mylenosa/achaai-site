@@ -247,51 +247,64 @@ export async function saveStoreProfile(form: {
 
   console.log('saveStoreProfile: Usuário autenticado:', userId);
 
-  console.log('saveStoreProfile: Buscando loja existente...');
-  const { data: loja } = await supabase
-    .from("lojas")
-    .select("id, attrs")
-    .eq("owner_user_id", userId)
-    .maybeSingle();
+  // Timeout de 12 segundos
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('Timeout: operação demorou mais de 12 segundos')), 12000);
+  });
 
-  console.log('saveStoreProfile: Loja encontrada:', loja);
+  try {
+    console.log('saveStoreProfile: Buscando loja existente...');
+    const lojaPromise = supabase
+      .from("lojas")
+      .select("id, attrs")
+      .eq("owner_user_id", userId)
+      .maybeSingle();
 
-  const attrsAtual = (loja?.attrs ?? {}) as Record<string, any>;
+    const { data: loja } = await Promise.race([lojaPromise, timeoutPromise]);
+    console.log('saveStoreProfile: Loja encontrada:', loja);
 
-  const payload = {
-    owner_user_id: userId,
-    nome: form.name?.trim() || null,
-    attrs: {
-      ...attrsAtual,
-      categories: Array.isArray(form.categories) ? form.categories : [],
-      address: {
-        cep: form.cep ?? null, 
-        street: form.street ?? null, 
-        number: form.number ?? null,
-        bairro: form.bairro ?? null, 
-        cidade: form.cidade ?? null, 
-        uf: form.uf ?? null,
-        complemento: form.complemento ?? null,
+    const attrsAtual = (loja?.attrs ?? {}) as Record<string, any>;
+
+    const payload = {
+      owner_user_id: userId,
+      nome: form.name?.trim() || null,
+      attrs: {
+        ...attrsAtual,
+        categories: Array.isArray(form.categories) ? form.categories : [],
+        address: {
+          cep: form.cep ?? null, 
+          street: form.street ?? null, 
+          number: form.number ?? null,
+          bairro: form.bairro ?? null, 
+          cidade: form.cidade ?? null, 
+          uf: form.uf ?? null,
+          complemento: form.complemento ?? null,
+        },
       },
-    },
-  };
+    };
 
-  console.log('saveStoreProfile: Payload preparado:', payload);
+    console.log('saveStoreProfile: Payload preparado:', payload);
 
-  console.log('saveStoreProfile: Executando UPSERT no Supabase...');
-  const { data, error } = await supabase
-    .from("lojas")
-    .upsert(payload, { onConflict: "owner_user_id" })
-    .select("id, nome, attrs")
-    .single();
+    console.log('saveStoreProfile: Executando UPSERT no Supabase...');
+    const upsertPromise = supabase
+      .from("lojas")
+      .upsert(payload, { onConflict: "owner_user_id" })
+      .select("id, nome, attrs, created_at, updated_at")
+      .single();
 
-  if (error) {
-    console.error('saveStoreProfile: Erro no UPSERT:', error);
-    return { ok: false, error: error.message };
+    const { data, error } = await Promise.race([upsertPromise, timeoutPromise]);
+
+    if (error) {
+      console.error('saveStoreProfile: Erro no UPSERT:', error);
+      return { ok: false, error: error.message };
+    }
+
+    console.log('saveStoreProfile: UPSERT CONCLUÍDO COM SUCESSO:', data);
+    return { ok: true, data };
+  } catch (error) {
+    console.error('saveStoreProfile: Erro ou timeout:', error);
+    return { ok: false, error: error instanceof Error ? error.message : 'Erro desconhecido' };
   }
-
-  console.log('saveStoreProfile: UPSERT CONCLUÍDO COM SUCESSO:', data);
-  return { ok: true, data };
 }
 
 export async function loadStoreProfile() {
@@ -306,29 +319,41 @@ export async function loadStoreProfile() {
 
   console.log('loadStoreProfile: Usuário autenticado:', userId);
 
-  console.log('loadStoreProfile: Buscando perfil da loja...');
-  const { data, error } = await supabase
-    .from("lojas")
-    .select("nome, attrs")
-    .eq("owner_user_id", userId)
-    .maybeSingle();
+  // Timeout de 10 segundos
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('Timeout: operação demorou mais de 10 segundos')), 10000);
+  });
 
-  if (error) {
-    console.error('loadStoreProfile: Erro na consulta:', error);
-    return { ok: false, error: error.message };
-  }
+  try {
+    console.log('loadStoreProfile: Buscando perfil da loja...');
+    const queryPromise = supabase
+      .from("lojas")
+      .select("nome, attrs")
+      .eq("owner_user_id", userId)
+      .maybeSingle();
 
-  console.log('loadStoreProfile: Dados recebidos:', data);
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
-  const result = {
-    ok: true,
-    data: {
-      name: data?.nome ?? "",
-      categories: Array.isArray(data?.attrs?.categories) ? data!.attrs.categories : [],
-      ...(data?.attrs?.address ?? {}) // cep, street, number, bairro, cidade, uf, complemento
+    if (error) {
+      console.error('loadStoreProfile: Erro na consulta:', error);
+      return { ok: false, error: error.message };
     }
-  };
 
-  console.log('loadStoreProfile: Dados processados:', result);
-  return result;
+    console.log('loadStoreProfile: Dados recebidos:', data);
+
+    const result = {
+      ok: true,
+      data: {
+        name: data?.nome ?? "",
+        categories: Array.isArray(data?.attrs?.categories) ? data!.attrs.categories : [],
+        ...(data?.attrs?.address ?? {}) // cep, street, number, bairro, cidade, uf, complemento
+      }
+    };
+
+    console.log('loadStoreProfile: Dados processados:', result);
+    return result;
+  } catch (error) {
+    console.error('loadStoreProfile: Erro ou timeout:', error);
+    return { ok: false, error: error instanceof Error ? error.message : 'Erro desconhecido' };
+  }
 }
