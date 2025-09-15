@@ -71,8 +71,22 @@ export const Dashboard: React.FC = () => {
     { key: 'ctr', title: 'CTR' },
   ];
 
-  if (loading || !kpis || !serie) {
+  if (loading) {
     return <div className="text-center p-8">Carregando dados do dashboard...</div>;
+  }
+
+  if (!kpis || !serie) {
+    return (
+      <div className="text-center p-8">
+        <div className="text-gray-500 mb-4">Erro ao carregar dados do dashboard</div>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
+        >
+          Tentar novamente
+        </button>
+      </div>
+    );
   }
 
   return (

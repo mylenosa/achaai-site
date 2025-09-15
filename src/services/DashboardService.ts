@@ -206,18 +206,24 @@ export function createDashboardService() {
       getClicksInRange({ start, end }) // mercado geral
     ])
 
+    // Guards defensivos
+    const safeMyProducts = Array.isArray(myProducts) ? myProducts : []
+    const safeMyClicks = Array.isArray(myClicks) ? myClicks : []
+    const safeMyClicksPrev = Array.isArray(myClicksPrev) ? myClicksPrev : []
+    const safeGlobalClicks = Array.isArray(globalClicks) ? globalClicks : []
+
     const isWpp  = (t: string) => (t || '').toLowerCase().includes('wpp')   || (t || '').toLowerCase().includes('whats')
     const isMapa = (t: string) => (t || '').toLowerCase().includes('map')   || (t || '').toLowerCase().includes('maps')
 
     /* ---------------- KPIs ---------------- */
-    const wppNow   = myClicks.filter(c => isWpp(c.tipo_clique)).length
-    const mapaNow  = myClicks.filter(c => isMapa(c.tipo_clique)).length
-    const totalNow = myClicks.length // MVP: cliques como “impressões”
+    const wppNow   = safeMyClicks.filter(c => isWpp(c.tipo_clique)).length
+    const mapaNow  = safeMyClicks.filter(c => isMapa(c.tipo_clique)).length
+    const totalNow = safeMyClicks.length // MVP: cliques como "impressões"
     const ctrNow   = totalNow > 0 ? (wppNow + mapaNow) / totalNow : 0
 
-    const wppPrev   = myClicksPrev.filter(c => isWpp(c.tipo_clique)).length
-    const mapaPrev  = myClicksPrev.filter(c => isMapa(c.tipo_clique)).length
-    const totalPrev = myClicksPrev.length
+    const wppPrev   = safeMyClicksPrev.filter(c => isWpp(c.tipo_clique)).length
+    const mapaPrev  = safeMyClicksPrev.filter(c => isMapa(c.tipo_clique)).length
+    const totalPrev = safeMyClicksPrev.length
     const ctrPrev   = totalPrev > 0 ? (wppPrev + mapaPrev) / totalPrev : 0
 
     const kpis: KPIData = {
@@ -235,8 +241,8 @@ export function createDashboardService() {
 
     /* ---------------- Série (gráfico) ---------------- */
     const series = periodo === '7d'
-      ? bucketDaily({ start, end }, myClicks)
-      : bucketWeekly({ start, end }, myClicks)
+      ? bucketDaily({ start, end }, safeMyClicks)
+      : bucketWeekly({ start, end }, safeMyClicks)
 
     const totalSeries = series.values.reduce((s, v) => s + v, 0)
     const serie: SerieData = {
@@ -250,7 +256,7 @@ export function createDashboardService() {
 
     /* ---------------- Activities ---------------- */
     const activities: AtividadeRecente[] =
-      myClicks
+      safeMyClicks
         .slice()
         .sort((a,b) => new Date(b.clicked_at).getTime() - new Date(a.clicked_at).getTime())
         .slice(0, 8)
@@ -263,7 +269,7 @@ export function createDashboardService() {
     type AggGeral = { interesses: number; lojas: Set<number>; precos: number[] }
     const aggGeral = new Map<string, AggGeral>()
 
-    for (const ev of globalClicks) {
+    for (const ev of safeGlobalClicks) {
       const nome = ev.produtos?.nome?.trim() || '—'
       const loja = ev.produtos?.loja_id ?? -1
       const preco = ev.produtos?.preco ?? null
@@ -281,9 +287,9 @@ export function createDashboardService() {
       if (typeof preco === 'number') g.precos.push(preco)
     }
 
-    const myNames = new Set(myProducts.map(p => (p.nome ?? '').trim()))
+    const myNames = new Set(safeMyProducts.map(p => (p.nome ?? '').trim()))
     const myPricesByName = new Map<string, number | null>()
-    for (const p of myProducts) myPricesByName.set((p.nome ?? '').trim(), p.preco ?? null)
+    for (const p of safeMyProducts) myPricesByName.set((p.nome ?? '').trim(), p.preco ?? null)
 
     const topGeral: TopItemGeral[] =
       Array.from(aggGeral.entries())
@@ -314,7 +320,7 @@ export function createDashboardService() {
     for (const [nome, g] of aggGeral) medianaPorNome.set(nome, median(g.precos))
 
     const topMeus: TopItemMeu[] =
-      myProducts
+      safeMyProducts
         .map(p => {
           const nome = (p.nome ?? '').trim()
           const interesses = clicksByProduct.get(p.id) ?? 0
