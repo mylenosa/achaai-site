@@ -226,3 +226,109 @@ export async function getMyStoreId(): Promise<number | null> {
 }
 
 export const storeService = new StoreService();
+
+// ===================== Novas funções simplificadas =====================
+
+// lê/salva perfil da LOJA do usuário logado
+export async function saveStoreProfile(form: {
+  name: string;
+  categories: string[];
+  cep?: string; street?: string; number?: string;
+  bairro?: string; cidade?: string; uf?: string; complemento?: string;
+}) {
+  console.log('saveStoreProfile: INICIANDO SALVAMENTO', form);
+  
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
+  if (!userId) {
+    console.error('saveStoreProfile: Sem sessão de usuário');
+    return { ok: false, error: "sem_sessao" };
+  }
+
+  console.log('saveStoreProfile: Usuário autenticado:', userId);
+
+  console.log('saveStoreProfile: Buscando loja existente...');
+  const { data: loja } = await supabase
+    .from("lojas")
+    .select("id, attrs")
+    .eq("owner_user_id", userId)
+    .maybeSingle();
+
+  console.log('saveStoreProfile: Loja encontrada:', loja);
+
+  const attrsAtual = (loja?.attrs ?? {}) as Record<string, any>;
+
+  const payload = {
+    owner_user_id: userId,
+    nome: form.name?.trim() || null,
+    attrs: {
+      ...attrsAtual,
+      categories: Array.isArray(form.categories) ? form.categories : [],
+      address: {
+        cep: form.cep ?? null, 
+        street: form.street ?? null, 
+        number: form.number ?? null,
+        bairro: form.bairro ?? null, 
+        cidade: form.cidade ?? null, 
+        uf: form.uf ?? null,
+        complemento: form.complemento ?? null,
+      },
+    },
+  };
+
+  console.log('saveStoreProfile: Payload preparado:', payload);
+
+  console.log('saveStoreProfile: Executando UPSERT no Supabase...');
+  const { data, error } = await supabase
+    .from("lojas")
+    .upsert(payload, { onConflict: "owner_user_id" })
+    .select("id, nome, attrs")
+    .single();
+
+  if (error) {
+    console.error('saveStoreProfile: Erro no UPSERT:', error);
+    return { ok: false, error: error.message };
+  }
+
+  console.log('saveStoreProfile: UPSERT CONCLUÍDO COM SUCESSO:', data);
+  return { ok: true, data };
+}
+
+export async function loadStoreProfile() {
+  console.log('loadStoreProfile: INICIANDO CARREGAMENTO');
+  
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
+  if (!userId) {
+    console.error('loadStoreProfile: Sem sessão de usuário');
+    return { ok: false, error: "sem_sessao" };
+  }
+
+  console.log('loadStoreProfile: Usuário autenticado:', userId);
+
+  console.log('loadStoreProfile: Buscando perfil da loja...');
+  const { data, error } = await supabase
+    .from("lojas")
+    .select("nome, attrs")
+    .eq("owner_user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('loadStoreProfile: Erro na consulta:', error);
+    return { ok: false, error: error.message };
+  }
+
+  console.log('loadStoreProfile: Dados recebidos:', data);
+
+  const result = {
+    ok: true,
+    data: {
+      name: data?.nome ?? "",
+      categories: Array.isArray(data?.attrs?.categories) ? data!.attrs.categories : [],
+      ...(data?.attrs?.address ?? {}) // cep, street, number, bairro, cidade, uf, complemento
+    }
+  };
+
+  console.log('loadStoreProfile: Dados processados:', result);
+  return result;
+}

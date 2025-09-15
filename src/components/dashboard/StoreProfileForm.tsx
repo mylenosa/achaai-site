@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Store, MapPin, MessageCircle, Loader2, Tag } from 'lucide-react';
-import { storeService } from '../../services/StoreService';
-import type { StoreProfile } from '../../services/StoreService';
+import { saveStoreProfile, loadStoreProfile } from '../../services/StoreService';
 import { useAuthContext } from '../../hooks/useAuth'; // alias de useAuth
 
 export const StoreProfileForm: React.FC = () => {
   const { user, isConfigured, setHasLoja } = useAuthContext();
 
-  const [profile, setProfile] = useState<Partial<StoreProfile>>({
+  const [profile, setProfile] = useState({
     name: '',
-    categories: [],
+    categories: [] as string[],
     cep: '',
     street: '',
     number: '',
@@ -43,10 +42,22 @@ export const StoreProfileForm: React.FC = () => {
     
     console.log('StoreProfileForm.loadProfile: Carregando perfil para user:', user.id);
     try {
-      const data = await storeService.getProfile(user.id);
-      console.log('StoreProfileForm.loadProfile: Dados recebidos:', data);
-      if (data) {
-        setProfile(data);
+      const result = await loadStoreProfile();
+      console.log('StoreProfileForm.loadProfile: Resultado recebido:', result);
+      
+      if (result.ok && 'data' in result) {
+        const data = result.data;
+        setProfile({
+          name: data.name || '',
+          categories: data.categories || [],
+          cep: data.cep || '',
+          street: data.street || '',
+          number: data.number || '',
+          neighborhood: data.bairro || '',
+          city: data.cidade || 'Ariquemes',
+          state: data.uf || 'RO',
+          whatsapp: '', // whatsapp não está sendo salvo ainda
+        });
         setSelectedCategories(data.categories || []);
         console.log('StoreProfileForm.loadProfile: Perfil carregado com sucesso');
       } else {
@@ -64,7 +75,7 @@ export const StoreProfileForm: React.FC = () => {
       const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
       const data = await resp.json();
       if (!data.erro) {
-        setProfile((prev: Partial<StoreProfile>) => ({
+        setProfile((prev) => ({
           ...prev,
           street: data.logradouro || '',
           neighborhood: data.bairro || '',
@@ -88,7 +99,7 @@ export const StoreProfileForm: React.FC = () => {
   const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const phone = e.target.value.replace(/\D/g, '');
     const formatted = phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    setProfile((prev: Partial<StoreProfile>) => ({ ...prev, whatsapp: formatted }));
+    setProfile((prev) => ({ ...prev, whatsapp: formatted }));
   };
 
   const handleCategoryToggle = (category: string) => {
@@ -99,7 +110,7 @@ export const StoreProfileForm: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setProfile((prev: Partial<StoreProfile>) => ({ ...prev, [name]: value }));
+    setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,27 +128,28 @@ export const StoreProfileForm: React.FC = () => {
     console.log('StoreProfileForm.handleSubmit: Validações passaram, iniciando salvamento...');
     setIsLoading(true);
     try {
-      const fullAddress =
-        `${profile.street}, ${profile.number} - ${profile.neighborhood}, ${profile.city}/${profile.state}`;
-
-      const payload: Partial<StoreProfile> = {
-        ...profile,
+      const formPayload = {
+        name: profile.name,
         categories: selectedCategories,
-        address: fullAddress,
+        cep: profile.cep,
+        street: profile.street,
+        number: profile.number,
+        bairro: profile.neighborhood,
+        cidade: profile.city,
+        uf: profile.state,
+        complemento: '', // não temos campo para complemento ainda
       };
 
-      console.log('StoreProfileForm.handleSubmit: Payload preparado:', payload);
-      console.log('StoreProfileForm.handleSubmit: Profile ID:', profile.id);
+      console.log('StoreProfileForm.handleSubmit: Payload preparado:', formPayload);
 
-      if (profile.id) {
-        console.log('StoreProfileForm.handleSubmit: Chamando updateProfile...');
-        await storeService.updateProfile(profile.id, payload);
-        console.log('StoreProfileForm.handleSubmit: updateProfile concluído');
-      } else {
-        console.log('StoreProfileForm.handleSubmit: Chamando createProfile...');
-        const created = await storeService.createProfile(payload);
-        console.log('StoreProfileForm.handleSubmit: createProfile concluído:', created);
-        setProfile(created);
+      console.log('StoreProfileForm.handleSubmit: Chamando saveStoreProfile...');
+      const res = await saveStoreProfile(formPayload);
+      console.log('StoreProfileForm.handleSubmit: Resultado do saveStoreProfile:', res);
+
+      if (!res.ok) {
+        console.error('StoreProfileForm.handleSubmit: Erro ao salvar:', res.error);
+        setMessage({ type: 'error', text: `Erro ao salvar: ${res.error}` });
+        return;
       }
 
       console.log('StoreProfileForm.handleSubmit: Salvamento concluído, atualizando estado...');
