@@ -233,6 +233,7 @@ export const storeService = new StoreService();
 export async function saveStoreProfile(form: {
   name: string;
   categories: string[];
+  whatsapp?: string;
   cep?: string; street?: string; number?: string;
   bairro?: string; cidade?: string; uf?: string; complemento?: string;
 }) {
@@ -259,7 +260,7 @@ export async function saveStoreProfile(form: {
     console.log('saveStoreProfile: ANTES - Buscando loja existente (SELECT)...');
     const lojaPromise = supabase
       .from("lojas")
-      .select("id, attrs")
+      .select("id, nome, whatsapp, attrs")
       .eq("owner_user_id", userId)
       .maybeSingle();
 
@@ -273,9 +274,13 @@ export async function saveStoreProfile(form: {
 
     const attrsAtual = (loja?.attrs ?? {}) as Record<string, any>;
 
+    // Normalizar whatsapp (apenas dígitos)
+    const whatsappNormalizado = form.whatsapp?.replace(/\D/g, '') || null;
+
     const payload = {
       owner_user_id: userId,
       nome: form.name?.trim() || null,
+      whatsapp: whatsappNormalizado,
       attrs: {
         ...attrsAtual,
         categories: Array.isArray(form.categories) ? form.categories : [],
@@ -297,7 +302,7 @@ export async function saveStoreProfile(form: {
     const upsertPromise = supabase
       .from("lojas")
       .upsert(payload, { onConflict: "owner_user_id" })
-      .select("id, nome, attrs, created_at, updated_at")
+      .select("id, nome, whatsapp, attrs, created_at, updated_at")
       .single();
 
     const { data, error } = await Promise.race([upsertPromise, timeoutPromise]);
@@ -337,7 +342,7 @@ export async function loadStoreProfile() {
     console.log('loadStoreProfile: Buscando perfil da loja...');
     const queryPromise = supabase
       .from("lojas")
-      .select("nome, attrs")
+      .select("id, nome, whatsapp, attrs")
       .eq("owner_user_id", userId)
       .maybeSingle();
 
@@ -354,6 +359,7 @@ export async function loadStoreProfile() {
       ok: true,
       data: {
         name: data?.nome ?? "",
+        whatsapp: data?.whatsapp ?? "",
         categories: Array.isArray(data?.attrs?.categories) ? data!.attrs.categories : [],
         ...(data?.attrs?.address ?? {}) // cep, street, number, bairro, cidade, uf, complemento
       }

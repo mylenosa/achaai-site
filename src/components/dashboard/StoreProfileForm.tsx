@@ -56,7 +56,7 @@ export const StoreProfileForm: React.FC = () => {
           neighborhood: data.bairro || '',
           city: data.cidade || 'Ariquemes',
           state: data.uf || 'RO',
-          whatsapp: '', // whatsapp não está sendo salvo ainda
+          whatsapp: data.whatsapp || '',
         });
         setSelectedCategories(data.categories || []);
         console.log('StoreProfileForm.loadProfile: Perfil carregado com sucesso');
@@ -98,7 +98,19 @@ export const StoreProfileForm: React.FC = () => {
 
   const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const phone = e.target.value.replace(/\D/g, '');
-    const formatted = phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    let formatted = phone;
+    
+    // Aplicar máscara apenas se tiver dígitos suficientes
+    if (phone.length >= 2) {
+      formatted = `(${phone.slice(0, 2)}`;
+      if (phone.length > 2) {
+        formatted += `) ${phone.slice(2, 7)}`;
+        if (phone.length > 7) {
+          formatted += `-${phone.slice(7, 11)}`;
+        }
+      }
+    }
+    
     setProfile((prev) => ({ ...prev, whatsapp: formatted }));
   };
 
@@ -131,6 +143,7 @@ export const StoreProfileForm: React.FC = () => {
       const formPayload = {
         name: profile.name,
         categories: selectedCategories,
+        whatsapp: profile.whatsapp,
         cep: profile.cep,
         street: profile.street,
         number: profile.number,
