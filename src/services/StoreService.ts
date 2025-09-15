@@ -88,8 +88,28 @@ class StoreService {
   }
 
   async createProfile(profile: Partial<StoreProfile>): Promise<StoreProfile> {
+    console.log('StoreService.createProfile: INICIANDO CRIAÇÃO', {
+      profile: {
+        name: profile.name,
+        whatsapp: profile.whatsapp,
+        categories: profile.categories,
+        address: profile.address,
+        cep: profile.cep,
+        street: profile.street,
+        number: profile.number,
+        neighborhood: profile.neighborhood,
+        city: profile.city,
+        state: profile.state
+      }
+    });
+
     const { data: s } = await supabase.auth.getSession();
-    if (!s?.session?.user) throw new Error('Usuário não autenticado');
+    if (!s?.session?.user) {
+      console.error('StoreService.createProfile: Usuário não autenticado');
+      throw new Error('Usuário não autenticado');
+    }
+
+    console.log('StoreService.createProfile: Usuário autenticado:', s.session.user.id);
 
     const attrs = mergeAttrs(null, profile);
     const nome = profile.name?.trim() || '';
@@ -104,25 +124,61 @@ class StoreService {
       attrs,
     };
 
+    console.log('StoreService.createProfile: Dados para inserir:', payload);
+
+    console.log('StoreService.createProfile: Executando INSERT no Supabase...');
     const { data, error } = await supabase
       .from('lojas')
       .insert([payload])
       .select('id, owner_user_id, nome, whatsapp, googlemapslink, attrs, created_at, updated_at')
       .single();
 
-    if (error) throw error;
-    return dbToProfile(data as LojaRow);
+    if (error) {
+      console.error('StoreService.createProfile: Erro no INSERT:', error);
+      throw error;
+    }
+
+    console.log('StoreService.createProfile: INSERT CONCLUÍDO COM SUCESSO:', data);
+    const result = dbToProfile(data as LojaRow);
+    console.log('StoreService.createProfile: Perfil convertido:', result);
+    return result;
   }
 
   async updateProfile(profileId: string, updates: Partial<StoreProfile>): Promise<StoreProfile> {
+    console.log('StoreService.updateProfile: INICIANDO UPDATE', {
+      profileId,
+      updates: {
+        name: updates.name,
+        whatsapp: updates.whatsapp,
+        categories: updates.categories,
+        address: updates.address,
+        cep: updates.cep,
+        street: updates.street,
+        number: updates.number,
+        neighborhood: updates.neighborhood,
+        city: updates.city,
+        state: updates.state
+      }
+    });
+
+    console.log('StoreService.updateProfile: Buscando perfil atual...');
     const cur = await supabase
       .from('lojas')
       .select('id, owner_user_id, nome, whatsapp, googlemapslink, attrs, created_at, updated_at')
       .eq('id', Number(profileId))
       .single();
 
-    if (cur.error) throw cur.error;
+    if (cur.error) {
+      console.error('StoreService.updateProfile: Erro ao buscar perfil atual:', cur.error);
+      throw cur.error;
+    }
     const row = cur.data as LojaRow;
+    console.log('StoreService.updateProfile: Perfil atual encontrado:', {
+      id: row.id,
+      nome: row.nome,
+      whatsapp: row.whatsapp,
+      attrs: row.attrs
+    });
 
     const mergedAttrs = mergeAttrs(row.attrs, updates);
     const nextNome = updates.name !== undefined ? (updates.name?.trim() || '') : row.nome;
@@ -138,6 +194,9 @@ class StoreService {
       attrs: mergedAttrs,
     };
 
+    console.log('StoreService.updateProfile: Dados para atualizar:', patch);
+
+    console.log('StoreService.updateProfile: Executando UPDATE no Supabase...');
     const { data, error } = await supabase
       .from('lojas')
       .update(patch)
@@ -145,8 +204,15 @@ class StoreService {
       .select('id, owner_user_id, nome, whatsapp, googlemapslink, attrs, created_at, updated_at')
       .single();
 
-    if (error) throw error;
-    return dbToProfile(data as LojaRow);
+    if (error) {
+      console.error('StoreService.updateProfile: Erro no UPDATE:', error);
+      throw error;
+    }
+
+    console.log('StoreService.updateProfile: UPDATE CONCLUÍDO COM SUCESSO:', data);
+    const result = dbToProfile(data as LojaRow);
+    console.log('StoreService.updateProfile: Perfil convertido:', result);
+    return result;
   }
 }
 

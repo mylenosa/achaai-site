@@ -36,15 +36,24 @@ export const StoreProfileForm: React.FC = () => {
   }, [user, isConfigured]);
 
   async function loadProfile() {
-    if (!user) return;
+    if (!user) {
+      console.log('StoreProfileForm.loadProfile: Sem usuário, cancelando...');
+      return;
+    }
+    
+    console.log('StoreProfileForm.loadProfile: Carregando perfil para user:', user.id);
     try {
       const data = await storeService.getProfile(user.id);
+      console.log('StoreProfileForm.loadProfile: Dados recebidos:', data);
       if (data) {
         setProfile(data);
         setSelectedCategories(data.categories || []);
+        console.log('StoreProfileForm.loadProfile: Perfil carregado com sucesso');
+      } else {
+        console.log('StoreProfileForm.loadProfile: Nenhum perfil encontrado (primeira vez)');
       }
     } catch (err) {
-      console.error('Erro ao carregar perfil:', err);
+      console.error('StoreProfileForm.loadProfile: Erro ao carregar perfil:', err);
     }
   }
 
@@ -95,14 +104,17 @@ export const StoreProfileForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('StoreProfileForm.handleSubmit: INICIANDO SUBMIT');
     setMessage(null);
 
     // bloqueia se não estiver configurado ou sem usuário
     if (!isConfigured || !user) {
+      console.error('StoreProfileForm.handleSubmit: Não configurado ou sem usuário', { isConfigured, user: !!user });
       setMessage({ type: 'error', text: 'Autenticação/Supabase não configurado. Faça login e tente novamente.' });
       return;
     }
 
+    console.log('StoreProfileForm.handleSubmit: Validações passaram, iniciando salvamento...');
     setIsLoading(true);
     try {
       const fullAddress =
@@ -114,18 +126,27 @@ export const StoreProfileForm: React.FC = () => {
         address: fullAddress,
       };
 
+      console.log('StoreProfileForm.handleSubmit: Payload preparado:', payload);
+      console.log('StoreProfileForm.handleSubmit: Profile ID:', profile.id);
+
       if (profile.id) {
+        console.log('StoreProfileForm.handleSubmit: Chamando updateProfile...');
         await storeService.updateProfile(profile.id, payload);
+        console.log('StoreProfileForm.handleSubmit: updateProfile concluído');
       } else {
+        console.log('StoreProfileForm.handleSubmit: Chamando createProfile...');
         const created = await storeService.createProfile(payload);
+        console.log('StoreProfileForm.handleSubmit: createProfile concluído:', created);
         setProfile(created);
       }
 
+      console.log('StoreProfileForm.handleSubmit: Salvamento concluído, atualizando estado...');
       setHasLoja(true);
       setMessage({ type: 'success', text: 'Perfil salvo com sucesso!' });
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      console.log('StoreProfileForm.handleSubmit: SUBMIT CONCLUÍDO COM SUCESSO');
     } catch (err) {
-      console.error(err);
+      console.error('StoreProfileForm.handleSubmit: ERRO NO SUBMIT:', err);
       setMessage({ type: 'error', text: 'Erro ao salvar perfil. Tente novamente.' });
     } finally {
       setIsLoading(false);
