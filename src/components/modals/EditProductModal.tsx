@@ -36,8 +36,11 @@ export function EditProductModal({
             <input
               ref={first}
               type="text"
+              id="product-title"
+              name="product-title"
               value={title}
               onChange={e => setTitle(e.target.value)}
+              autoComplete="off"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               placeholder="Nome do produto"
             />
@@ -46,8 +49,12 @@ export function EditProductModal({
             <label className="block text-sm font-medium text-gray-700 mb-1">Preço (opcional)</label>
             <input
               type="text"
+              id="product-price"
+              name="product-price"
+              inputMode="decimal"
               value={price != null ? formatBRL(price).replace('R$', '').trim() : ''}
               onChange={(e) => setPrice(parseBRL(e.target.value))}
+              autoComplete="off"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               placeholder="0,00"
             />

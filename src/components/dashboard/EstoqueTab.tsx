@@ -343,9 +343,11 @@ export const EstoqueTab: React.FC<EstoqueTabProps> = ({ lojaId }) => {
               <input
                 type="text"
                 id="titulo"
+                name="titulo"
                 value={manualForm.titulo}
                 onChange={(e) => setManualForm(prev => ({ ...prev, titulo: e.target.value }))}
                 required
+                autoComplete="off"
                 className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="Ex: Tinta Spray Vermelha 400ml"
               />
@@ -359,9 +361,12 @@ export const EstoqueTab: React.FC<EstoqueTabProps> = ({ lojaId }) => {
               <input
                 type="number"
                 id="quantidade"
+                name="quantidade"
                 value={manualForm.quantidade}
                 onChange={(e) => setManualForm(prev => ({ ...prev, quantidade: e.target.value }))}
                 min="0"
+                step="1"
+                autoComplete="off"
                 className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="0"
               />
@@ -377,8 +382,11 @@ export const EstoqueTab: React.FC<EstoqueTabProps> = ({ lojaId }) => {
               <input
                 type="text"
                 id="valor"
+                name="valor"
+                inputMode="decimal"
                 value={manualForm.valor}
                 onChange={(e) => setManualForm(prev => ({ ...prev, valor: e.target.value }))}
+                autoComplete="off"
                 className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
                 placeholder="0,00"
               />

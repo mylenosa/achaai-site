@@ -92,21 +92,33 @@ export const StoreProfileForm: React.FC = () => {
 
   const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const cep = e.target.value.replace(/\D/g, '');
-    setProfile(prev => ({ ...prev, cep }));
-    if (cep.length === 8) searchCep(cep);
+    const limitedCep = cep.slice(0, 8); // Limitar a 8 dígitos
+    
+    // Aplicar máscara visual: 00000-000
+    let formatted = limitedCep;
+    if (limitedCep.length > 5) {
+      formatted = `${limitedCep.slice(0, 5)}-${limitedCep.slice(5)}`;
+    }
+    
+    setProfile(prev => ({ ...prev, cep: formatted }));
+    if (limitedCep.length === 8) searchCep(limitedCep);
   };
 
   const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const phone = e.target.value.replace(/\D/g, '');
-    let formatted = phone;
     
-    // Aplicar máscara apenas se tiver dígitos suficientes
-    if (phone.length >= 2) {
-      formatted = `(${phone.slice(0, 2)}`;
-      if (phone.length > 2) {
-        formatted += `) ${phone.slice(2, 7)}`;
-        if (phone.length > 7) {
-          formatted += `-${phone.slice(7, 11)}`;
+    // Limitar a 11 dígitos
+    const limitedPhone = phone.slice(0, 11);
+    
+    let formatted = limitedPhone;
+    
+    // Aplicar máscara visual: (  )      -    
+    if (limitedPhone.length >= 2) {
+      formatted = `(${limitedPhone.slice(0, 2)}`;
+      if (limitedPhone.length > 2) {
+        formatted += `) ${limitedPhone.slice(2, 7)}`;
+        if (limitedPhone.length > 7) {
+          formatted += `-${limitedPhone.slice(7, 11)}`;
         }
       }
     }
@@ -137,13 +149,20 @@ export const StoreProfileForm: React.FC = () => {
       return;
     }
 
+    // Validar WhatsApp (11 dígitos)
+    const whatsappDigits = profile.whatsapp?.replace(/\D/g, '') || '';
+    if (whatsappDigits && !/^\d{11}$/.test(whatsappDigits)) {
+      setMessage({ type: 'error', text: 'Informe DDD + número com 11 dígitos' });
+      return;
+    }
+
     console.log('StoreProfileForm.handleSubmit: Validações passaram, iniciando salvamento...');
     setIsSaving(true);
     try {
       const formPayload = {
         name: profile.name,
         categories: selectedCategories,
-        whatsapp: profile.whatsapp,
+        whatsapp: whatsappDigits || undefined, // Enviar apenas dígitos ou undefined
         cep: profile.cep,
         street: profile.street,
         number: profile.number,
@@ -256,9 +275,10 @@ export const StoreProfileForm: React.FC = () => {
                   id="cep" 
                   name="cep" 
                   type="text"
+                  inputMode="numeric"
                   value={profile.cep ?? ''} 
                   onChange={handleCepChange} 
-                  maxLength={8} 
+                  maxLength={9} 
                   required
                   autoComplete="postal-code"
                   placeholder="00000-000"
@@ -288,6 +308,7 @@ export const StoreProfileForm: React.FC = () => {
                 id="number" 
                 name="number" 
                 type="text"
+                inputMode="numeric"
                 value={profile.number ?? ''} 
                 onChange={handleChange} 
                 required
@@ -334,10 +355,12 @@ export const StoreProfileForm: React.FC = () => {
               id="whatsapp" 
               name="whatsapp" 
               type="tel"
+              inputMode="numeric"
               value={profile.whatsapp ?? ''} 
               onChange={handleWhatsAppChange} 
               required
               autoComplete="tel"
+              maxLength={15}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
               placeholder="(69) 99999-9999" 
             />
