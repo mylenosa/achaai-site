@@ -50,18 +50,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   async function refreshHasLoja(u?: User | null) {
     try {
       const uid = (u ?? user)?.id;
-      if (!uid) { setHasLoja(false); return; }
+      console.log('refreshHasLoja: Verificando loja para user ID:', uid);
+      if (!uid) { 
+        console.log('refreshHasLoja: Sem user ID, setando hasLoja=false');
+        setHasLoja(false); 
+        return; 
+      }
 
+      console.log('refreshHasLoja: Consultando tabela lojas...');
       const { data, error } = await supabase
-        .from('stores')               // <-- troque para 'lojas' se não houver view
+        .from('lojas')               // <-- corrigido para 'lojas'
         .select('id')
         .eq('owner_user_id', uid)
         .maybeSingle();
 
-      if (error) throw error;
-      setHasLoja(!!data?.id);
+      if (error) {
+        console.error('refreshHasLoja: Erro na consulta:', error);
+        throw error;
+      }
+      
+      const hasLoja = !!data?.id;
+      console.log('refreshHasLoja: Resultado:', hasLoja, 'data:', data);
+      setHasLoja(hasLoja);
     } catch (e) {
-      console.error('Erro ao checar loja:', e);
+      console.error('refreshHasLoja: Erro ao checar loja:', e);
       setHasLoja(false);
     }
   }
@@ -69,30 +81,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // bootstrap + eventos de auth
   useEffect(() => {
     if (!configured) { 
+      console.log('AuthContext: Supabase não configurado, setando loading=false');
       setLoading(false); 
       return; 
     }
 
     let mounted = true;
+    console.log('AuthContext: Iniciando verificação de sessão...');
+
+    // Timeout de segurança para garantir que loading seja definido como false
+    const safetyTimeout = setTimeout(() => {
+      if (mounted) {
+        console.log('AuthContext: Timeout de segurança - setando loading=false');
+        setLoading(false);
+      }
+    }, 5000); // 5 segundos
 
     (async () => {
       try {
+        console.log('AuthContext: Chamando supabase.auth.getSession()...');
         const { data: { session } } = await supabase.auth.getSession();
-        if (!mounted) return;
+        if (!mounted) {
+          console.log('AuthContext: Componente desmontado, cancelando...');
+          return;
+        }
         
+        console.log('AuthContext: Sessão obtida:', !!session?.user);
         const u = session?.user ?? null;
         setUser(u);
         setIsAuth(!!u);
+        
+        console.log('AuthContext: Verificando loja...');
         await refreshHasLoja(u);
+        console.log('AuthContext: Verificação de loja concluída');
       } catch (error) {
-        console.error('Erro ao verificar sessão:', error);
+        console.error('AuthContext: Erro ao verificar sessão:', error);
         if (mounted) {
           setUser(null);
           setIsAuth(false);
           setHasLoja(false);
         }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          console.log('AuthContext: Setando loading=false');
+          clearTimeout(safetyTimeout);
+          setLoading(false);
+        }
       }
     })();
 
@@ -127,6 +161,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       mounted = false;
+      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
   }, [configured]); // não inclua setters aqui
