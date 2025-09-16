@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Save } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { parseBRL, formatBRL } from '../../utils/formatters'
+import { PriceInput } from '../ui'
 
 export type ProductUI = { id: string; title: string; price: number|null; updatedAt: string }
 
@@ -46,17 +46,13 @@ export function EditProductModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Preço (opcional)</label>
-            <input
-              type="text"
+            <PriceInput
+              value={price}
+              onChange={setPrice}
+              placeholder="0,00"
+              label="Preço (opcional)"
               id="product-price"
               name="product-price"
-              inputMode="decimal"
-              value={price != null ? formatBRL(price).replace('R$', '').trim() : ''}
-              onChange={(e) => setPrice(parseBRL(e.target.value))}
-              autoComplete="off"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              placeholder="0,00"
             />
           </div>
         </div>

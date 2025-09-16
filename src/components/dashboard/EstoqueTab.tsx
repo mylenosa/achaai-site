@@ -5,7 +5,6 @@ import {
   Upload, 
   Download, 
   Package, 
-  DollarSign, 
   Hash,
   FileText,
   CheckCircle,
@@ -13,6 +12,7 @@ import {
   Loader2,
   X
 } from 'lucide-react';
+import { PriceInput } from '../ui';
 import * as Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 
@@ -375,24 +375,17 @@ export const EstoqueTab: React.FC<EstoqueTabProps> = ({ lojaId }) => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label htmlFor="valor" className="block text-sm font-medium text-gray-700 mb-2">
-                <DollarSign className="w-4 h-4 inline mr-1" />
-                Valor (R$)
-              </label>
-              <input
-                type="text"
+              <PriceInput
+                value={manualForm.valor ? parseFloat(manualForm.valor.replace(',', '.')) : null}
+                onChange={(value) => setManualForm(prev => ({ 
+                  ...prev, 
+                  valor: value ? value.toString().replace('.', ',') : '' 
+                }))}
+                placeholder="0,00"
+                label="Valor (R$)"
                 id="valor"
                 name="valor"
-                inputMode="decimal"
-                value={manualForm.valor}
-                onChange={(e) => setManualForm(prev => ({ ...prev, valor: e.target.value }))}
-                autoComplete="off"
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors text-sm sm:text-base"
-                placeholder="0,00"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Use vírgula ou ponto para decimais (ex: 15,90 ou 15.90)
-              </p>
             </div>
 
             <div className="flex items-end">

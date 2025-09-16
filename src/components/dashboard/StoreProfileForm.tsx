@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Store, MapPin, MessageCircle, Loader2, Tag } from 'lucide-react';
+import { PhoneInput } from '../ui';
 import { saveStoreProfile, loadStoreProfile } from '../../services/StoreService';
 import { useAuthContext } from '../../hooks/useAuth'; // alias de useAuth
 
@@ -104,27 +105,6 @@ export const StoreProfileForm: React.FC = () => {
     if (limitedCep.length === 8) searchCep(limitedCep);
   };
 
-  const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const phone = e.target.value.replace(/\D/g, '');
-    
-    // Limitar a 11 dígitos
-    const limitedPhone = phone.slice(0, 11);
-    
-    let formatted = limitedPhone;
-    
-    // Aplicar máscara visual: (  )      -    
-    if (limitedPhone.length >= 2) {
-      formatted = `(${limitedPhone.slice(0, 2)}`;
-      if (limitedPhone.length > 2) {
-        formatted += `) ${limitedPhone.slice(2, 7)}`;
-        if (limitedPhone.length > 7) {
-          formatted += `-${limitedPhone.slice(7, 11)}`;
-        }
-      }
-    }
-    
-    setProfile((prev) => ({ ...prev, whatsapp: formatted }));
-  };
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev: string[]) =>
@@ -350,21 +330,15 @@ export const StoreProfileForm: React.FC = () => {
             <MessageCircle className="w-6 h-6 text-emerald-600" /><h2 className="text-xl font-semibold text-gray-900">Contato</h2>
           </div>
           <div className="max-w-md">
-            <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 mb-2">WhatsApp *</label>
-            <input 
-              id="whatsapp" 
-              name="whatsapp" 
-              type="tel"
-              inputMode="numeric"
-              value={profile.whatsapp ?? ''} 
-              onChange={handleWhatsAppChange} 
+            <PhoneInput
+              value={profile.whatsapp ?? ''}
+              onChange={(value) => setProfile(prev => ({ ...prev, whatsapp: value }))}
+              placeholder="(69) 99999-9999"
+              label="WhatsApp"
               required
-              autoComplete="tel"
-              maxLength={15}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-              placeholder="(69) 99999-9999" 
+              id="whatsapp"
+              name="whatsapp"
             />
-            <p className="text-xs text-gray-500 mt-1">Número usado pelos clientes para contato.</p>
           </div>
         </motion.div>
 
