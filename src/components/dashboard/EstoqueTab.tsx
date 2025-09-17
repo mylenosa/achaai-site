@@ -376,10 +376,10 @@ export const EstoqueTab: React.FC<EstoqueTabProps> = ({ lojaId }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <PriceInput
-                value={manualForm.valor ? parseFloat(manualForm.valor.replace(',', '.')) : null}
-                onChange={(value) => setManualForm(prev => ({ 
+                value={manualForm.valor}
+                onChange={(formattedValue, numericValue) => setManualForm(prev => ({ 
                   ...prev, 
-                  valor: value ? value.toString().replace('.', ',') : '' 
+                  valor: formattedValue
                 }))}
                 placeholder="0,00"
                 label="Valor (R$)"

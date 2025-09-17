@@ -286,7 +286,7 @@ export const StoreProfileForm: React.FC = () => {
               <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {availableCategories.map(category => (
-                    <label key={category} className="flex items-center space-x-2 cursor-pointer p-1.5 rounded-md hover:bg-gray-50">
+                    <label key={category} htmlFor={`category-${category}`} className="flex items-center space-x-2 cursor-pointer p-1.5 rounded-md hover:bg-gray-50">
                       <input 
                         type="checkbox"
                         id={`category-${category}`}

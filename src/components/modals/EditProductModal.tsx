@@ -32,7 +32,7 @@ export function EditProductModal({
         <h3 className="text-lg font-semibold text-gray-900 mb-4">{creating ? 'Novo Item' : 'Editar Item'}</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome do produto *</label>
+            <label htmlFor="product-title" className="block text-sm font-medium text-gray-700 mb-1">Nome do produto *</label>
             <input
               ref={first}
               type="text"
