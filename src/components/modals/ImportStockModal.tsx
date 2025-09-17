@@ -75,9 +75,15 @@ export function ImportStockModal({
             </button>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Selecionar arquivo</label>
-            <input type="file" accept=".xlsx" onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
+            <label htmlFor="import-file" className="block text-sm font-medium text-gray-700 mb-2">Selecionar arquivo</label>
+            <input 
+              type="file" 
+              id="import-file"
+              name="import-file"
+              accept=".xlsx" 
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" 
+            />
           </div>
           <p className="text-xs text-gray-500">Use colunas: Item e Preço (opcional).</p>
         </div>

@@ -168,9 +168,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (event === 'SIGNED_IN') {
         const path = window.location.pathname;
         if (path === '/login' || path === '/acesso') {
-          // Usar navigate ao invés de window.location.href para evitar reload
+          // Usar replace para evitar throttling de navegação
           setTimeout(() => {
-            if (mounted) window.location.href = '/portal/dashboard';
+            if (mounted) window.location.replace('/portal/dashboard');
           }, 100);
         }
       }
@@ -179,7 +179,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const path = window.location.pathname;
         if (path.startsWith('/portal')) {
           setTimeout(() => {
-            if (mounted) window.location.href = '/acesso';
+            if (mounted) window.location.replace('/acesso');
           }, 100);
         }
       }

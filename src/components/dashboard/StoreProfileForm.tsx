@@ -267,17 +267,21 @@ export const StoreProfileForm: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Tag className="w-4 h-4 text-gray-500" />
-                <label className="block text-sm font-medium text-gray-700">Categorias da sua Loja*</label>
+                <label htmlFor="categories" className="block text-sm font-medium text-gray-700">Categorias da sua Loja*</label>
               </div>
               <p className="text-xs text-gray-500 mb-3">Selecione suas categorias. Isso melhora seus insights no dashboard.</p>
               <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {availableCategories.map(category => (
                     <label key={category} className="flex items-center space-x-2 cursor-pointer p-1.5 rounded-md hover:bg-gray-50">
-                      <input type="checkbox"
-                             checked={selectedCategories.includes(category)}
-                             onChange={() => handleCategoryToggle(category)}
-                             className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
+                      <input 
+                        type="checkbox"
+                        id={`category-${category}`}
+                        name={`category-${category}`}
+                        checked={selectedCategories.includes(category)}
+                        onChange={() => handleCategoryToggle(category)}
+                        className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" 
+                      />
                       <span className="text-sm text-gray-700">{category}</span>
                     </label>
                   ))}
