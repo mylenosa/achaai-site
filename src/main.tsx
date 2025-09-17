@@ -17,13 +17,11 @@ const LoadingFallback = () => (
 );
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <AuthProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <RouterProvider router={router} />
-        </Suspense>
-      </AuthProvider>
-    </HelmetProvider>
-  </React.StrictMode>
+  <HelmetProvider>
+    <AuthProvider>
+      <Suspense fallback={<LoadingFallback />}>
+        <RouterProvider router={router} />
+      </Suspense>
+    </AuthProvider>
+  </HelmetProvider>
 );

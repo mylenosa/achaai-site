@@ -47,7 +47,7 @@ export const StoreProfileForm: React.FC = () => {
       }
       loadInFlight.current = false;
     };
-  }, [user?.id, isConfigured]);
+  }, [user?.id, isConfigured]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadProfile() {
     if (!user) {

@@ -25,7 +25,7 @@ export function PortalLayout() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      window.location.href = '/acesso';
+      // O redirecionamento será gerenciado pelo AuthContext
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
     }

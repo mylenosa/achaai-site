@@ -1,5 +1,5 @@
 // src/contexts/AuthContext.tsx
-import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useCallback } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured, getRedirectUrl } from '../lib/supabase';
 
@@ -164,59 +164,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       }
 
-      // Redirecionamentos mais suaves
-      if (event === 'SIGNED_IN') {
-        const path = window.location.pathname;
-        if (path === '/login' || path === '/acesso') {
-          // Usar replace para evitar throttling de navegação
-          setTimeout(() => {
-            if (mounted) window.location.replace('/portal/dashboard');
-          }, 100);
-        }
-      }
-      if (event === 'SIGNED_OUT') {
-        setHasLoja(false);
-        const path = window.location.pathname;
-        if (path.startsWith('/portal')) {
-          setTimeout(() => {
-            if (mounted) window.location.replace('/acesso');
-          }, 100);
-        }
-      }
+      // Redirecionamentos mais suaves - removidos para evitar throttling
+      // O roteamento será gerenciado pelos componentes ProtectedRoute e RequireLoja
     });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [configured]); // não inclua setters aqui
+  }, [configured, user?.id]); // incluir user?.id para detectar mudanças de usuário
 
   // métodos de autenticação
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-  };
+  }, [configured]);
 
-  const signInWithMagicLink = async (email: string) => {
+  const signInWithMagicLink = useCallback(async (email: string) => {
     if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: getRedirectUrl('/acesso') },
     });
     if (error) throw error;
-  };
+  }, [configured]);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: getRedirectUrl('/acesso') },
     });
     if (error) throw error;
-  };
+  }, [configured]);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string) => {
     if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.signUp({
       email,
@@ -224,27 +207,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       options: { emailRedirectTo: getRedirectUrl('/portal/dashboard') },
     });
     if (error) throw error;
-  };
+  }, [configured]);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-  };
+  }, [configured]);
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = useCallback(async (email: string) => {
     if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: getRedirectUrl('/reset-password'),
     });
     if (error) throw error;
-  };
+  }, [configured]);
 
-  const updatePassword = async (newPassword: string) => {
+  const updatePassword = useCallback(async (newPassword: string) => {
     if (!configured) throw new Error('Supabase não configurado');
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) throw error;
-  };
+  }, [configured]);
 
   const value = useMemo<AuthContextType>(() => ({
     user,
@@ -263,7 +246,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     resetPassword,
     updatePassword,
-  }), [user, loading, configured, isAuth, hasLoja, dev]);
+  }), [user, loading, configured, isAuth, hasLoja, dev, setIsAuth, setHasLoja, setDev, signIn, signInWithMagicLink, signInWithGoogle, signUp, signOut, resetPassword, updatePassword]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
