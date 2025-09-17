@@ -45,7 +45,6 @@ export const router = createBrowserRouter([
           </RequireLoja>
         ),
       },
-
       { path: 'perfil', element: <PerfilPage /> },
     ],
   },

@@ -31,10 +31,31 @@ export function PortalLayout() {
     }
   };
 
+  const { hasLoja } = useAuthContext();
+  
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, path: '/portal/dashboard' },
-    { id: 'estoque', label: 'Estoque', icon: Package, path: '/portal/estoque' },
-    { id: 'perfil', label: 'Perfil da Loja', icon: Store, path: '/portal/perfil' },
+    { 
+      id: 'dashboard', 
+      label: 'Dashboard', 
+      icon: BarChart3, 
+      path: '/portal/dashboard',
+      required: true
+    },
+    { 
+      id: 'estoque', 
+      label: 'Estoque', 
+      icon: Package, 
+      path: '/portal/estoque',
+      required: true
+    },
+    { 
+      id: 'perfil', 
+      label: 'Perfil da Loja', 
+      icon: Store, 
+      path: '/portal/perfil',
+      required: false,
+      badge: !hasLoja ? 'Obrigatório' : undefined
+    },
   ];
 
   const storeName = 'Minha Loja'; // TODO: trazer do perfil real
@@ -166,15 +187,24 @@ export function PortalLayout() {
                       to={item.path}
                       onClick={() => setSidebarOpen(false)}
                       className={({ isActive }) =>
-                        `w-full flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                        `w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${
                           isActive
                             ? 'bg-emerald-50 text-emerald-700 shadow-sm font-medium'
+                            : item.required && !hasLoja
+                            ? 'text-gray-400 cursor-not-allowed'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                         }`
                       }
                     >
-                      <item.icon className="w-5 h-5 mr-3" />
-                      <span className="text-sm sm:text-base">{item.label}</span>
+                      <div className="flex items-center">
+                        <item.icon className="w-5 h-5 mr-3" />
+                        <span className="text-sm sm:text-base">{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span className="bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full font-medium">
+                          {item.badge}
+                        </span>
+                      )}
                     </NavLink>
                   </li>
                 ))}

@@ -16,5 +16,6 @@ export const RequireLoja: React.FC<{ children: React.ReactNode }> = ({ children 
 
   if (hasLoja) return <>{children}</>;
 
+  // Redirecionar diretamente para configuração (mais eficiente)
   return <Navigate to="/portal/perfil" replace />;
 };
