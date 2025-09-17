@@ -131,6 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         console.log('AuthContext: Sessão obtida:', !!session?.user);
+        console.log('AuthContext: Dados da sessão:', session);
         const u = session?.user ?? null;
         setUser(u);
         setIsAuth(!!u);
@@ -171,7 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const u = session?.user ?? null;
       const prevUserId = user?.id;
       setUser(u);
-      setIsAuth(event === 'SIGNED_IN' && !!u);
+      setIsAuth(!!u); // Sempre definir baseado na presença do usuário
       
       // refreshHasLoja só roda quando user?.id mudar E não estiver em execução
       if (u?.id !== prevUserId && !refreshInFlight.current) {

@@ -21,7 +21,14 @@ function createFailingClient(): SupabaseClient {
 }
 
 export const supabase: SupabaseClient = isSupabaseConfigured
-  ? createClient(url!, anon!, { auth: { persistSession: true, autoRefreshToken: true } })
+  ? createClient(url!, anon!, { 
+      auth: { 
+        persistSession: true, 
+        autoRefreshToken: true,
+        storage: window.localStorage,
+        storageKey: 'supabase.auth.token'
+      } 
+    })
   : createFailingClient();
 
 // Debug: expor supabase no window em desenvolvimento
