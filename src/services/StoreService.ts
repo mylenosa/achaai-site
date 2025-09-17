@@ -344,86 +344,95 @@ export async function saveStoreProfile(form: {
       return { ok: false, error: enderecoError.message };
     }
 
-    // 3. Sincronizar categorias
+    // 3. Sincronizar categorias (apenas relacionar, não criar)
     console.log('saveStoreProfile: ANTES - Sincronizando categorias...');
     
-    // Buscar categorias atuais
+    let categoriasExistentes: any[] = [];
+    
+    // Validar se todas as categorias existem
+    if (form.categories.length > 0) {
+      console.log('saveStoreProfile: Validando categorias existentes...');
+      const categoriasExistentesPromise = supabase
+        .from("categories")
+        .select("id, name")
+        .in("name", form.categories);
+
+      const { data: categoriasExistentesData, error: categoriasExistentesError } = await Promise.race([categoriasExistentesPromise, timeoutPromise]);
+      console.log('saveStoreProfile: Categorias existentes encontradas:', categoriasExistentesData, 'error:', categoriasExistentesError);
+
+      if (categoriasExistentesError) {
+        console.error('saveStoreProfile: Erro ao validar categorias:', categoriasExistentesError);
+        return { ok: false, error: categoriasExistentesError.message };
+      }
+
+      categoriasExistentes = categoriasExistentesData || [];
+
+      // Verificar se todas as categorias solicitadas existem
+      const nomesExistentes = categoriasExistentes?.map((cat: any) => cat.name) || [];
+      const categoriasInvalidas = form.categories.filter(nome => !nomesExistentes.includes(nome));
+      
+      if (categoriasInvalidas.length > 0) {
+        console.error('saveStoreProfile: Categorias inválidas:', categoriasInvalidas);
+        return { ok: false, error: "Categoria inválida" };
+      }
+    }
+
+    // Buscar categorias atuais da loja
+    console.log('saveStoreProfile: Buscando categorias atuais da loja...');
     const categoriasAtuaisPromise = supabase
       .from("loja_categories")
-      .select(`
-        category_id,
-        categories (
-          name
-        )
-      `)
+      .select("category_id")
       .eq("loja_id", lojaId);
 
     const { data: categoriasAtuais, error: categoriasAtuaisError } = await Promise.race([categoriasAtuaisPromise, timeoutPromise]);
-    console.log('saveStoreProfile: DEPOIS - Categorias atuais carregadas:', categoriasAtuais, 'error:', categoriasAtuaisError);
+    console.log('saveStoreProfile: Categorias atuais da loja:', categoriasAtuais, 'error:', categoriasAtuaisError);
 
     if (categoriasAtuaisError) {
       console.error('saveStoreProfile: Erro ao carregar categorias atuais:', categoriasAtuaisError);
       return { ok: false, error: categoriasAtuaisError.message };
     }
 
-    const categoriasAtuaisNomes = categoriasAtuais?.map((item: any) => item.categories?.name).filter(Boolean) || [];
-    const categoriasNovas = form.categories.filter(cat => !categoriasAtuaisNomes.includes(cat));
-    const categoriasParaRemover = categoriasAtuaisNomes.filter((cat: string) => !form.categories.includes(cat));
+    // Calcular toAdd/toRemove
+    const categoriasAtuaisIds = categoriasAtuais?.map((item: any) => item.category_id) || [];
+    const categoriasSolicitadasIds = categoriasExistentes?.map((cat: any) => cat.id) || [];
+    
+    const toAdd = categoriasSolicitadasIds.filter((id: any) => !categoriasAtuaisIds.includes(id));
+    const toRemove = categoriasAtuaisIds.filter((id: any) => !categoriasSolicitadasIds.includes(id));
 
-    console.log('saveStoreProfile: Categorias atuais:', categoriasAtuaisNomes);
-    console.log('saveStoreProfile: Categorias novas:', categoriasNovas);
-    console.log('saveStoreProfile: Categorias para remover:', categoriasParaRemover);
+    console.log('saveStoreProfile: Categorias para adicionar:', toAdd);
+    console.log('saveStoreProfile: Categorias para remover:', toRemove);
 
-    // Adicionar novas categorias
-    for (const categoriaNome of categoriasNovas) {
-      const slug = categoriaNome.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    // Adicionar novas relações
+    if (toAdd.length > 0) {
+      console.log('saveStoreProfile: Adicionando novas relações...');
+      const toAddData = toAdd.map((categoryId: any) => ({ loja_id: lojaId, category_id: categoryId }));
       
-      // Upsert categoria
-      const categoriaUpsertPromise = supabase
-        .from("categories")
-        .upsert({ name: categoriaNome, slug }, { onConflict: "slug" })
-        .select("id")
-      .single();
-
-      const { data: categoriaData, error: categoriaError } = await Promise.race([categoriaUpsertPromise, timeoutPromise]);
-      
-      if (categoriaError) {
-        console.error('saveStoreProfile: Erro ao upsert categoria:', categoriaError);
-        return { ok: false, error: categoriaError.message };
-      }
-
-      // Inserir relação loja_categories
-      const relacaoInsertPromise = supabase
+      const insertPromise = supabase
         .from("loja_categories")
-        .insert({ loja_id: lojaId, category_id: categoriaData.id });
+        .insert(toAddData);
 
-      const { error: relacaoError } = await Promise.race([relacaoInsertPromise, timeoutPromise]);
+      const { error: insertError } = await Promise.race([insertPromise, timeoutPromise]);
       
-      if (relacaoError) {
-        console.error('saveStoreProfile: Erro ao inserir relação categoria:', relacaoError);
-        return { ok: false, error: relacaoError.message };
+      if (insertError) {
+        console.error('saveStoreProfile: Erro ao adicionar relações:', insertError);
+        return { ok: false, error: insertError.message };
       }
     }
 
-    // Remover categorias que saíram
-    if (categoriasParaRemover.length > 0) {
-      const categoriasParaRemoverIds = categoriasAtuais
-        ?.filter((item: any) => categoriasParaRemover.includes(item.categories?.name))
-        ?.map((item: any) => item.category_id) || [];
+    // Remover relações desnecessárias
+    if (toRemove.length > 0) {
+      console.log('saveStoreProfile: Removendo relações desnecessárias...');
+      const deletePromise = supabase
+        .from("loja_categories")
+        .delete()
+        .eq("loja_id", lojaId)
+        .in("category_id", toRemove);
 
-      if (categoriasParaRemoverIds.length > 0) {
-        const deletePromise = supabase
-          .from("loja_categories")
-          .delete()
-          .eq("loja_id", lojaId)
-          .in("category_id", categoriasParaRemoverIds);
-
-        const { error: deleteError } = await Promise.race([deletePromise, timeoutPromise]);
-        
-        if (deleteError) {
-          console.error('saveStoreProfile: Erro ao remover categorias:', deleteError);
-          return { ok: false, error: deleteError.message };
-        }
+      const { error: deleteError } = await Promise.race([deletePromise, timeoutPromise]);
+      
+      if (deleteError) {
+        console.error('saveStoreProfile: Erro ao remover relações:', deleteError);
+        return { ok: false, error: deleteError.message };
       }
     }
 
