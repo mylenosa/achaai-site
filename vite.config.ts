@@ -8,5 +8,11 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react', 'xlsx'],
   },
+  server: {
+    // Configurações para evitar problemas de desenvolvimento
+    hmr: {
+      overlay: false, // Desabilitar overlay de erros para evitar interferência
+    },
+  },
   // sem resolve.alias
 })

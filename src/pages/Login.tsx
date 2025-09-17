@@ -53,8 +53,8 @@ export const Login: React.FC = () => {
     if (redirect) setRedirectPath(redirect);
   }, []);
 
-  // Se já está logado, redireciona
-  if (user) return <Navigate to={redirectPath} replace />;
+  // Se já está logado, redireciona (usar isAuth para evitar loops)
+  if (user && isAuth) return <Navigate to={redirectPath} replace />;
 
   // Aviso quando Supabase não está configurado
   if (!isConfigured) {

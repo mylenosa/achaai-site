@@ -35,7 +35,10 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
   // Autenticado → ok
   if (isAuth) return <>{children}</>;
 
-  // Senão, manda pro login com redirect de volta
+  // Senão, manda pro login com redirect de volta (só se não estiver já na página de login)
+  if (location.pathname === '/acesso') {
+    return null; // Evitar loop infinito
+  }
   const redirectUrl = `/acesso?redirect=${encodeURIComponent(location.pathname)}`;
   return <Navigate to={redirectUrl} replace />;
 };

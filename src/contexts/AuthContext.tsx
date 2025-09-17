@@ -263,7 +263,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     resetPassword,
     updatePassword,
-  }), [user, loading, configured, isAuth, hasLoja, dev, setIsAuth, setHasLoja, setDev, signIn, signInWithMagicLink, signInWithGoogle, signUp, signOut, resetPassword, updatePassword]);
+  }), [user, loading, configured, isAuth, hasLoja, dev, signIn, signInWithMagicLink, signInWithGoogle, signUp, signOut, resetPassword, updatePassword]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

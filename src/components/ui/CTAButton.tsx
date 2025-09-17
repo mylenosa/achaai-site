@@ -27,12 +27,16 @@ export const CTAButton: React.FC<CTAButtonProps> = ({
   };
 
   const handleClick = () => {
-    // Analytics tracking
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'click', {
-        event_category: 'CTA',
-        event_label: dataCta || 'cta-button',
-      });
+    // Analytics tracking - só se GA estiver configurado
+    if (typeof window !== 'undefined' && window.gtag && typeof window.gtag === 'function') {
+      try {
+        window.gtag('event', 'click', {
+          event_category: 'CTA',
+          event_label: dataCta || 'cta-button',
+        });
+      } catch (error) {
+        console.warn('Erro ao enviar evento para GA:', error);
+      }
     }
     
     if (onClick) {
