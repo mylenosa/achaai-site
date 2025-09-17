@@ -47,8 +47,8 @@ export function EditProductModal({
           </div>
           <div>
             <PriceInput
-              value={price}
-              onChange={setPrice}
+              value={price ? price.toString() : ""}
+              onChange={(_, numericValue) => setPrice(numericValue)}
               placeholder="0,00"
               label="Preço (opcional)"
               id="product-price"

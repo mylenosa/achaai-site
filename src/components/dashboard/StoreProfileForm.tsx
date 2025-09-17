@@ -280,8 +280,7 @@ export const StoreProfileForm: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Tag className="w-4 h-4 text-gray-500" />
-                <label htmlFor="categories" className="block text-sm font-medium text-gray-700">Categorias da sua Loja*</label>
-              </div>
+                <label className="block text-sm font-medium text-gray-700">Categorias da sua Loja*</label>              </div>
               <p className="text-xs text-gray-500 mb-3">Selecione suas categorias. Isso melhora seus insights no dashboard.</p>
               <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
