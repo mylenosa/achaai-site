@@ -508,7 +508,7 @@ export async function loadStoreProfile(): Promise<{ ok: true; data: StoreProfile
     }
 
     // Extrair dados das relações
-    const endereco = loja.lojas_endereco?.[0] || null;
+    const endereco = loja.lojas_endereco || null;
     const categorias = loja.loja_categories || [];
     
     console.log('loadStoreProfile: Endereço extraído:', endereco);
@@ -524,13 +524,13 @@ export async function loadStoreProfile(): Promise<{ ok: true; data: StoreProfile
         whatsapp: loja.whatsapp || '',
         categories: categoryNames,
         address: {
-          cep: endereco?.cep || '',
-          street: endereco?.street || '',
-          number: endereco?.number || '',
-          bairro: endereco?.bairro || '',
-          cidade: endereco?.cidade || '',
-          uf: endereco?.uf || '',
-          complemento: endereco?.complemento || '',
+          cep: (endereco as any)?.cep || '',
+          street: (endereco as any)?.street || '',
+          number: (endereco as any)?.number || '',
+          bairro: (endereco as any)?.bairro || '',
+          cidade: (endereco as any)?.cidade || '',
+          uf: (endereco as any)?.uf || '',
+          complemento: (endereco as any)?.complemento || '',
         }
       }
     };
