@@ -270,9 +270,9 @@ export async function saveStoreProfile(form: {
 
   console.log('saveStoreProfile: Usuário autenticado:', userId);
 
-  // Timeout de 12 segundos
+  // Timeout aumentado para 20 segundos para evitar throttling
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error('Timeout: operação demorou mais de 12 segundos')), 12000);
+    setTimeout(() => reject(new Error('Timeout: operação demorou mais de 20 segundos')), 20000);
   });
 
   try {
@@ -461,21 +461,41 @@ export async function loadStoreProfile(): Promise<{ ok: true; data: StoreProfile
     return { ok: true, data: cachedData };
   }
 
-  // Timeout reduzido para 6 segundos (mais agressivo)
+  // Timeout aumentado para 15 segundos para evitar throttling
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error('Timeout: operação demorou mais de 6 segundos')), 6000);
+    setTimeout(() => reject(new Error('Timeout: operação demorou mais de 15 segundos')), 15000);
   });
 
   try {
-    console.log('loadStoreProfile: ANTES - Buscando loja...');
+    console.log('loadStoreProfile: ANTES - Buscando dados completos da loja...');
+    
+    // Consulta otimizada: buscar tudo em uma única query com joins
     const lojaPromise = supabase
       .from("lojas")
-      .select("id, nome, whatsapp")
+      .select(`
+        id, 
+        nome, 
+        whatsapp,
+        lojas_endereco (
+          cep, 
+          street, 
+          number, 
+          bairro, 
+          cidade, 
+          uf, 
+          complemento
+        ),
+        loja_categories (
+          categories (
+            name
+          )
+        )
+      `)
       .eq("owner_user_id", userId)
       .maybeSingle();
 
     const { data: loja, error: lojaError } = await Promise.race([lojaPromise, timeoutPromise]);
-    console.log('loadStoreProfile: DEPOIS - Busca da loja concluída, loja:', loja, 'error:', lojaError);
+    console.log('loadStoreProfile: DEPOIS - Busca completa concluída, loja:', loja, 'error:', lojaError);
 
     if (lojaError) {
       console.error('loadStoreProfile: Erro na busca da loja:', lojaError);
@@ -487,43 +507,12 @@ export async function loadStoreProfile(): Promise<{ ok: true; data: StoreProfile
       return { ok: false, error: "loja_nao_encontrada" };
     }
 
-    // Buscar endereço e categorias em paralelo (otimizado)
-    console.log('loadStoreProfile: ANTES - Buscando endereço e categorias em paralelo...');
-    const enderecoPromise = supabase
-      .from("lojas_endereco")
-      .select("cep, street, number, bairro, cidade, uf, complemento")
-      .eq("loja_id", loja.id)
-      .maybeSingle();
-
-    const categoriasPromise = supabase
-      .from("loja_categories")
-      .select(`
-        categories (
-          name
-        )
-      `)
-      .eq("loja_id", loja.id);
-
-    const [
-      { data: endereco, error: enderecoError },
-      { data: categorias, error: categoriasError }
-    ] = await Promise.race([
-      Promise.all([enderecoPromise, categoriasPromise]),
-      timeoutPromise
-    ]);
-
-    console.log('loadStoreProfile: DEPOIS - Busca do endereço e categorias concluída');
-    console.log('loadStoreProfile: Endereço:', endereco, 'error:', enderecoError);
-    console.log('loadStoreProfile: Categorias:', categorias, 'error:', categoriasError);
-
-    // Tratar erros de endereço e categorias (não críticos)
-    if (enderecoError) {
-      console.warn('loadStoreProfile: Erro na busca do endereço (não crítico):', enderecoError);
-    }
-
-    if (categoriasError) {
-      console.warn('loadStoreProfile: Erro na busca das categorias (não crítico):', categoriasError);
-    }
+    // Extrair dados das relações
+    const endereco = loja.lojas_endereco?.[0] || null;
+    const categorias = loja.loja_categories || [];
+    
+    console.log('loadStoreProfile: Endereço extraído:', endereco);
+    console.log('loadStoreProfile: Categorias extraídas:', categorias);
 
     // Extrair nomes das categorias
     const categoryNames = categorias?.map((item: any) => item.categories?.name).filter(Boolean) || [];

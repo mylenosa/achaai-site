@@ -38,7 +38,20 @@ export const StoreProfileForm: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (user?.id && isConfigured) loadProfile();
+    if (user?.id && isConfigured) {
+      // Debounce para evitar múltiplas chamadas
+      const timeoutId = setTimeout(() => {
+        loadProfile();
+      }, 100);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        if (abortController.current) {
+          abortController.current.abort();
+        }
+        loadInFlight.current = false;
+      };
+    }
     
     // Cleanup: cancelar requisição se componente for desmontado
     return () => {
