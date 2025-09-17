@@ -4,9 +4,16 @@ import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import './lib/supabase'; // força executar e povoar window.supabase
+import { loadFBPixel } from './lib/fbpixel';
 import { router } from './router';
 import { AuthProvider } from './contexts/AuthContext';
 import './index.css';
+
+// Carregar Facebook Pixel se ID estiver configurado
+const FB_PIXEL_ID = import.meta.env.VITE_FB_PIXEL_ID as string | undefined;
+if (FB_PIXEL_ID && FB_PIXEL_ID.trim() !== '') {
+  loadFBPixel(FB_PIXEL_ID);
+}
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center">
