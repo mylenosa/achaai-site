@@ -40,6 +40,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hasLoja, setHasLoja] = React.useState(false);
   const [dev, setDev]         = React.useState(false);
 
+  // Controle de chamadas duplicadas
+  const lastCheckedUserId = React.useRef<string | null>(null);
+  const refreshInFlight = React.useRef<boolean>(false);
+
   // habilitar modo DEV via ?dev=1
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -48,18 +52,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // helper: checa se o usuário tem loja
   async function refreshHasLoja(u?: User | null) {
+    // Evitar chamadas concorrentes
+    if (refreshInFlight.current) {
+      console.log('refreshHasLoja: Já em execução, ignorando chamada duplicada');
+      return;
+    }
+
     try {
+      refreshInFlight.current = true;
       const uid = (u ?? user)?.id;
+      
+      // Só verifica se o user ID mudou
+      if (uid === lastCheckedUserId.current) {
+        console.log('refreshHasLoja: User ID não mudou, ignorando:', uid);
+        return;
+      }
+
       console.log('refreshHasLoja: Verificando loja para user ID:', uid);
       if (!uid) { 
         console.log('refreshHasLoja: Sem user ID, setando hasLoja=false');
-        setHasLoja(false); 
+        setHasLoja(false);
+        lastCheckedUserId.current = null;
         return; 
       }
 
+      lastCheckedUserId.current = uid;
+
       console.log('refreshHasLoja: Consultando tabela lojas...');
       const { data, error } = await supabase
-        .from('lojas')               // <-- corrigido para 'lojas'
+        .from('lojas')
         .select('id')
         .eq('owner_user_id', uid)
         .maybeSingle();
@@ -75,6 +96,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       console.error('refreshHasLoja: Erro ao checar loja:', e);
       setHasLoja(false);
+    } finally {
+      refreshInFlight.current = false;
     }
   }
 

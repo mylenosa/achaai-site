@@ -1,9 +1,11 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../hooks/useAuth';
+import { useEffect } from 'react';
 
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { loading, isAuth, dev, isConfigured } = useAuthContext();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // DEV libera tudo
   if (dev) return <>{children}</>;

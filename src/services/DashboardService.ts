@@ -1,5 +1,6 @@
 // src/services/DashboardService.ts
 import { supabase } from '../lib/supabase'
+import { cacheService, CACHE_KEYS } from './CacheService'
 
 /* ===================== Tipos públicos ===================== */
 export interface KPIData {
@@ -38,6 +39,16 @@ export interface TopItemGeral {
   hasMine: boolean;
   meuPreco?: number | null;
   diffPct?: number | null;
+}
+
+export interface DashboardData {
+  kpis: KPIData;
+  serie: SerieData;
+  topMeus: TopItemMeu[];
+  topGeral: TopItemGeral[];
+  activities: AtividadeRecente[];
+  tips: Array<{ termo: string; qtd: number }>;
+  storeProfile: { id: number } | null;
 }
 
 /* ===================== Helpers de tempo ===================== */
@@ -108,13 +119,26 @@ async function getMyStoreId(): Promise<number | null> {
 }
 
 async function getMyProducts(storeId: number): Promise<ProductRow[]> {
+  // Verificar cache primeiro
+  const cacheKey = CACHE_KEYS.MY_PRODUCTS(storeId);
+  const cachedData = cacheService.get<ProductRow[]>(cacheKey);
+  if (cachedData) {
+    return cachedData;
+  }
+
   const { data, error } = await supabase
     .from('produtos')
     .select('id, nome, preco, loja_id, updated_at')
     .eq('loja_id', storeId)
 
   if (error) throw error
-  return (data ?? []) as ProductRow[]
+  
+  const result = (data ?? []) as ProductRow[];
+  
+  // Salvar no cache (TTL de 10 minutos)
+  cacheService.set(cacheKey, result, 10 * 60 * 1000);
+  
+  return result;
 }
 
 async function getClicksInRange(range: { start: Date, end: Date }, lojaId?: number): Promise<ClickRow[]> {
@@ -189,8 +213,13 @@ function bucketWeekly(range: { start: Date, end: Date }, clicks: ClickRow[]) {
 
 /* ===================== Serviço principal ===================== */
 export function createDashboardService() {
-  async function getDashboardData(periodo: Period) {
+  async function getDashboardData(periodo: Period): Promise<DashboardData> {
     const { start, end, prevStart, prevEnd } = rangeFor(periodo)
+
+    // Timeout de 8 segundos para o dashboard
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Timeout: dashboard demorou mais de 8 segundos')), 8000);
+    });
 
     const storeId = await getMyStoreId()
     if (!storeId) {
@@ -199,12 +228,25 @@ export function createDashboardService() {
       return { kpis: empty, serie, topMeus: [], topGeral: [], activities: [], tips: [], storeProfile: null }
     }
 
-    const [myProducts, myClicks, myClicksPrev, globalClicks] = await Promise.all([
-      getMyProducts(storeId),
-      getClicksInRange({ start, end }, storeId),
-      getClicksInRange({ start: prevStart, end: prevEnd }, storeId),
-      getClicksInRange({ start, end }) // mercado geral
-    ])
+    // Verificar cache primeiro (TTL de 2 minutos para dashboard)
+    const cacheKey = CACHE_KEYS.DASHBOARD_DATA(storeId.toString(), periodo);
+    const cachedData = cacheService.get<DashboardData>(cacheKey);
+    if (cachedData) {
+      console.log('DashboardService: Dados encontrados no cache');
+      return cachedData;
+    }
+
+    console.log('DashboardService: Carregando dados em paralelo...');
+    const [myProducts, myClicks, myClicksPrev, globalClicks] = await Promise.race([
+      Promise.all([
+        getMyProducts(storeId),
+        getClicksInRange({ start, end }, storeId),
+        getClicksInRange({ start: prevStart, end: prevEnd }, storeId),
+        getClicksInRange({ start, end }) // mercado geral
+      ]),
+      timeoutPromise
+    ]);
+    console.log('DashboardService: Dados carregados com sucesso');
 
     // Guards defensivos
     const safeMyProducts = Array.isArray(myProducts) ? myProducts : []
@@ -340,7 +382,13 @@ export function createDashboardService() {
     /* ---------------- Tips ---------------- */
     const tips: Array<{ termo: string; qtd: number }> = []
 
-    return { kpis, serie, topMeus, topGeral, activities, tips, storeProfile: { id: storeId } }
+    const result = { kpis, serie, topMeus, topGeral, activities, tips, storeProfile: { id: storeId } };
+    
+    // Salvar no cache (TTL de 2 minutos)
+    cacheService.set(cacheKey, result, 2 * 60 * 1000);
+    console.log('DashboardService: Dados salvos no cache');
+    
+    return result;
   }
 
   return { getDashboardData }

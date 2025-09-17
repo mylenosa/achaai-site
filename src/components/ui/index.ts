@@ -3,6 +3,7 @@
 
 export { PriceInput } from './PriceInput';
 export { PhoneInput } from './PhoneInput';
+export { LoadingSpinner } from './LoadingSpinner';
 
 // Re-export types for convenience
 export type { 

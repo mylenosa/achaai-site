@@ -1,5 +1,6 @@
 // src/services/StoreService.ts
 import { supabase } from '../lib/supabase';
+import { cacheService, CACHE_KEYS } from './CacheService';
 
 /** Modelo usado pelo app */
 export interface StoreProfile {
@@ -17,6 +18,22 @@ export interface StoreProfile {
   address: string;
   created_at: string;
   updated_at: string;
+}
+
+/** Tipo de retorno do loadStoreProfile */
+export interface StoreProfileData {
+  name: string;
+  whatsapp: string;
+  categories: string[];
+  address: {
+    cep: string;
+    street: string;
+    number: string;
+    bairro: string;
+    cidade: string;
+    uf: string;
+    complemento: string;
+  };
 }
 
 // Linha física (tabela `lojas`)
@@ -235,8 +252,8 @@ export async function saveStoreProfile(form: {
   categories: string[];
   whatsapp?: string;
   address: {
-    cep?: string; street?: string; number?: string;
-    bairro?: string; cidade?: string; uf?: string; complemento?: string;
+  cep?: string; street?: string; number?: string;
+  bairro?: string; cidade?: string; uf?: string; complemento?: string;
   };
 }) {
   console.log('saveStoreProfile: INICIANDO SALVAMENTO', form);
@@ -366,7 +383,7 @@ export async function saveStoreProfile(form: {
         .from("categories")
         .upsert({ name: categoriaNome, slug }, { onConflict: "slug" })
         .select("id")
-        .single();
+      .single();
 
       const { data: categoriaData, error: categoriaError } = await Promise.race([categoriaUpsertPromise, timeoutPromise]);
       
@@ -411,6 +428,12 @@ export async function saveStoreProfile(form: {
     }
 
     console.log('saveStoreProfile: SALVAMENTO CONCLUÍDO COM SUCESSO');
+    
+    // Invalidar cache do perfil
+    const cacheKey = CACHE_KEYS.STORE_PROFILE(userId);
+    cacheService.delete(cacheKey);
+    console.log('saveStoreProfile: Cache invalidado');
+    
     return { ok: true, data: lojaData };
   } catch (error) {
     console.error('saveStoreProfile: Erro ou timeout:', error);
@@ -418,7 +441,7 @@ export async function saveStoreProfile(form: {
   }
 }
 
-export async function loadStoreProfile() {
+export async function loadStoreProfile(): Promise<{ ok: true; data: StoreProfileData } | { ok: false; error: string }> {
   console.log('loadStoreProfile: INICIANDO CARREGAMENTO');
   
   const { data: { session } } = await supabase.auth.getSession();
@@ -430,9 +453,17 @@ export async function loadStoreProfile() {
 
   console.log('loadStoreProfile: Usuário autenticado:', userId);
 
-  // Timeout de 12 segundos
+  // Verificar cache primeiro
+  const cacheKey = CACHE_KEYS.STORE_PROFILE(userId);
+  const cachedData = cacheService.get<StoreProfileData>(cacheKey);
+  if (cachedData) {
+    console.log('loadStoreProfile: Dados encontrados no cache');
+    return { ok: true, data: cachedData };
+  }
+
+  // Timeout reduzido para 6 segundos (mais agressivo)
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error('Timeout: operação demorou mais de 12 segundos')), 12000);
+    setTimeout(() => reject(new Error('Timeout: operação demorou mais de 6 segundos')), 6000);
   });
 
   try {
@@ -456,16 +487,14 @@ export async function loadStoreProfile() {
       return { ok: false, error: "loja_nao_encontrada" };
     }
 
-    // Buscar endereço em paralelo
-    console.log('loadStoreProfile: ANTES - Buscando endereço...');
+    // Buscar endereço e categorias em paralelo (otimizado)
+    console.log('loadStoreProfile: ANTES - Buscando endereço e categorias em paralelo...');
     const enderecoPromise = supabase
       .from("lojas_endereco")
       .select("cep, street, number, bairro, cidade, uf, complemento")
       .eq("loja_id", loja.id)
       .maybeSingle();
 
-    // Buscar categorias em paralelo
-    console.log('loadStoreProfile: ANTES - Buscando categorias...');
     const categoriasPromise = supabase
       .from("loja_categories")
       .select(`
@@ -483,23 +512,23 @@ export async function loadStoreProfile() {
       timeoutPromise
     ]);
 
-    console.log('loadStoreProfile: DEPOIS - Busca do endereço concluída, endereco:', endereco, 'error:', enderecoError);
-    console.log('loadStoreProfile: DEPOIS - Busca das categorias concluída, categorias:', categorias, 'error:', categoriasError);
+    console.log('loadStoreProfile: DEPOIS - Busca do endereço e categorias concluída');
+    console.log('loadStoreProfile: Endereço:', endereco, 'error:', enderecoError);
+    console.log('loadStoreProfile: Categorias:', categorias, 'error:', categoriasError);
 
+    // Tratar erros de endereço e categorias (não críticos)
     if (enderecoError) {
-      console.error('loadStoreProfile: Erro na busca do endereço:', enderecoError);
-      return { ok: false, error: enderecoError.message };
+      console.warn('loadStoreProfile: Erro na busca do endereço (não crítico):', enderecoError);
     }
 
     if (categoriasError) {
-      console.error('loadStoreProfile: Erro na busca das categorias:', categoriasError);
-      return { ok: false, error: categoriasError.message };
+      console.warn('loadStoreProfile: Erro na busca das categorias (não crítico):', categoriasError);
     }
 
     // Extrair nomes das categorias
     const categoryNames = categorias?.map((item: any) => item.categories?.name).filter(Boolean) || [];
 
-    const result = {
+    const result: { ok: true; data: StoreProfileData } = {
       ok: true,
       data: {
         name: loja.nome || '',
@@ -518,6 +547,13 @@ export async function loadStoreProfile() {
     };
 
     console.log('loadStoreProfile: Resultado final:', result);
+    
+    // Salvar no cache (TTL de 5 minutos)
+    if (result.ok && 'data' in result) {
+      cacheService.set(cacheKey, result.data, 5 * 60 * 1000);
+      console.log('loadStoreProfile: Dados salvos no cache');
+    }
+    
     return result;
   } catch (error) {
     console.error('loadStoreProfile: Erro ou timeout:', error);

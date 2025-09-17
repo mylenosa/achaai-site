@@ -16,6 +16,7 @@ import { WeekChart } from '../components/dashboard/WeekChart';
 import { TopItems } from '../components/dashboard/TopItems';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { NoResultTips } from '../components/dashboard/NoResultTips';
+import { LoadingSpinner } from '../components/ui';
 
 const { getDashboardData } = createDashboardService();
 
@@ -72,7 +73,13 @@ export const Dashboard: React.FC = () => {
   ];
 
   if (loading) {
-    return <div className="text-center p-8">Carregando dados do dashboard...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner size="lg" text="Carregando dados do dashboard..." />
+        </div>
+      </div>
+    );
   }
 
   if (!kpis || !serie) {

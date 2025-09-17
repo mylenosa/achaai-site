@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Store, MapPin, MessageCircle, Loader2, Tag } from 'lucide-react';
 import { PhoneInput } from '../ui';
 import { saveStoreProfile, loadStoreProfile } from '../../services/StoreService';
 import { useAuthContext } from '../../hooks/useAuth'; // alias de useAuth
+import { useCache } from '../../hooks/useCache';
 
 export const StoreProfileForm: React.FC = () => {
   const { user, isConfigured, setHasLoja } = useAuthContext();
+  const { invalidateStoreProfile, invalidateDashboard } = useCache();
 
   const [profile, setProfile] = useState({
     name: '',
@@ -25,6 +27,10 @@ export const StoreProfileForm: React.FC = () => {
   const [isCepLoading, setIsCepLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Controle de chamadas duplicadas
+  const loadInFlight = useRef<boolean>(false);
+  const abortController = useRef<AbortController | null>(null);
+
   // categorias
   const availableCategories = [
     'Casa e Construção','Automotivo','Moda e Vestuário','Eletrônicos e Informática',
@@ -32,14 +38,36 @@ export const StoreProfileForm: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (user && isConfigured) loadProfile();
-  }, [user, isConfigured]);
+    if (user?.id && isConfigured) loadProfile();
+    
+    // Cleanup: cancelar requisição se componente for desmontado
+    return () => {
+      if (abortController.current) {
+        abortController.current.abort();
+      }
+      loadInFlight.current = false;
+    };
+  }, [user?.id, isConfigured]);
 
   async function loadProfile() {
     if (!user) {
       console.log('StoreProfileForm.loadProfile: Sem usuário, cancelando...');
       return;
     }
+
+    // Evitar chamadas duplicadas
+    if (loadInFlight.current) {
+      console.log('StoreProfileForm.loadProfile: Já carregando, ignorando chamada duplicada');
+      return;
+    }
+
+    // Cancelar requisição anterior se existir
+    if (abortController.current) {
+      abortController.current.abort();
+    }
+
+    loadInFlight.current = true;
+    abortController.current = new AbortController();
     
     console.log('StoreProfileForm.loadProfile: Carregando perfil para user:', user.id);
     try {
@@ -65,7 +93,14 @@ export const StoreProfileForm: React.FC = () => {
         console.log('StoreProfileForm.loadProfile: Nenhum perfil encontrado (primeira vez)');
       }
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log('StoreProfileForm.loadProfile: Requisição cancelada');
+        return;
+      }
       console.error('StoreProfileForm.loadProfile: Erro ao carregar perfil:', err);
+    } finally {
+      loadInFlight.current = false;
+      abortController.current = null;
     }
   }
 
@@ -168,6 +203,14 @@ export const StoreProfileForm: React.FC = () => {
 
       console.log('StoreProfileForm.handleSubmit: Salvamento concluído, atualizando estado...');
       setHasLoja(true);
+      
+      // Invalidar caches relacionados
+      if (user?.id) {
+        invalidateStoreProfile(user.id);
+        invalidateDashboard(user.id, '7d');
+        invalidateDashboard(user.id, '30d');
+      }
+      
       setMessage({ type: 'success', text: 'Perfil salvo com sucesso!' });
       window.scrollTo({ top: 0, behavior: 'smooth' });
       console.log('StoreProfileForm.handleSubmit: SUBMIT CONCLUÍDO COM SUCESSO');
