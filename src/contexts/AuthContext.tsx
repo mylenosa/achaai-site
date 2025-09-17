@@ -43,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Controle de chamadas duplicadas
   const lastCheckedUserId = React.useRef<string | null>(null);
   const refreshInFlight = React.useRef<boolean>(false);
+  const lastAuthEvent = React.useRef<string | null>(null);
 
   // habilitar modo DEV via ?dev=1
   useEffect(() => {
@@ -79,11 +80,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       lastCheckedUserId.current = uid;
 
       console.log('refreshHasLoja: Consultando tabela lojas...');
-      const { data, error } = await supabase
+      
+      // Adicionar timeout para evitar travamento
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout na consulta de loja')), 10000);
+      });
+      
+      const queryPromise = supabase
         .from('lojas')
         .select('id')
         .eq('owner_user_id', uid)
         .maybeSingle();
+
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (error) {
         console.error('refreshHasLoja: Erro na consulta:', error);
@@ -151,13 +160,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       
+      // Evitar processamento de eventos duplicados
+      const eventKey = `${event}-${session?.user?.id || 'null'}`;
+      if (eventKey === lastAuthEvent.current) {
+        console.log('AuthContext: Evento duplicado ignorado:', eventKey);
+        return;
+      }
+      lastAuthEvent.current = eventKey;
+      
       const u = session?.user ?? null;
       const prevUserId = user?.id;
       setUser(u);
       setIsAuth(event === 'SIGNED_IN' && !!u);
       
-      // refreshHasLoja só roda quando user?.id mudar
-      if (u?.id !== prevUserId) {
+      // refreshHasLoja só roda quando user?.id mudar E não estiver em execução
+      if (u?.id !== prevUserId && !refreshInFlight.current) {
         console.log('AuthContext: User ID mudou, verificando loja...');
         refreshHasLoja(u).catch((error) => {
           console.error('AuthContext: Erro ao verificar loja no onAuthStateChange:', error);
@@ -172,7 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [configured, user?.id]); // incluir user?.id para detectar mudanças de usuário
+  }, [configured]); // remover user?.id para evitar loops infinitos
 
   // métodos de autenticação
   const signIn = useCallback(async (email: string, password: string) => {
