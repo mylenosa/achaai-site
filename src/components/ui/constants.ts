@@ -3,7 +3,7 @@
 
 export const PHONE_CONSTANTS = {
   MAX_DIGITS: 11,
-  MIN_DIGITS: 10,
+  MIN_DIGITS: 11, // Exigir exatamente 11 dígitos
   MAX_LENGTH: 15,
   FORMAT_PATTERNS: {
     EMPTY: '',
@@ -21,8 +21,7 @@ export const PRICE_CONSTANTS = {
 
 export const VALIDATION_MESSAGES = {
   PHONE: {
-    INVALID: 'Número deve ter pelo menos 10 dígitos',
-    VALID: '✓ Número válido',
+    INVALID: 'Número deve ter exatamente 11 dígitos',
     HELPER: 'Número usado pelos clientes para contato'
   },
   PRICE: {

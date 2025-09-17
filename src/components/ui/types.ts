@@ -12,8 +12,8 @@ export interface BaseInputProps {
 }
 
 export interface PriceInputProps extends BaseInputProps {
-  value: number | null;
-  onChange: (value: number | null) => void;
+  value: string;
+  onChange: (formattedValue: string, numericValue: number | null) => void;
 }
 
 export interface PhoneInputProps extends BaseInputProps {

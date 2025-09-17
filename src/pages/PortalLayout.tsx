@@ -10,8 +10,7 @@ import {
   Search,
   ChevronDown,
   User,
-  Package,
-  Code
+  Package
 } from 'lucide-react';
 import { useAuthContext } from '../hooks/useAuth';
 import { config } from '../lib/config';
@@ -20,7 +19,7 @@ import { Helmet } from 'react-helmet-async';
 export function PortalLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { user, signOut, dev, setDev } = useAuthContext();
+  const { user, signOut } = useAuthContext();
 
   const handleSignOut = async () => {
     try {
@@ -90,26 +89,7 @@ export function PortalLayout() {
                 </div>
               </div>
 
-              {/* DEV Toggle + Menu do Usuário */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setDev(!dev)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                    dev 
-                      ? 'bg-red-500 text-white hover:bg-red-600' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                  title={dev ? 'Desativar modo DEV' : 'Ativar modo DEV'}
-                >
-                  <Code className="w-4 h-4" />
-                </button>
-                {dev && (
-                  <span className="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded-full">
-                    DEV
-                  </span>
-                )}
-
-                {/* Menu do Usuário */}
+              {/* Menu do Usuário */}
                 <div className="relative">
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}

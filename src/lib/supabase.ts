@@ -25,15 +25,19 @@ export const supabase: SupabaseClient = isSupabaseConfigured
       auth: { 
         persistSession: true, 
         autoRefreshToken: true,
-        storage: window.localStorage,
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
         storageKey: 'supabase.auth.token'
       } 
     })
   : createFailingClient();
 
-// Debug: expor supabase no window em desenvolvimento
-if (import.meta.env.DEV) {
+// Expor supabase no window para debug e testes
+if (typeof window !== 'undefined') {
   (window as any).supabase = supabase;
+  (window as any).__supabaseInfo = {
+    url: import.meta.env.VITE_SUPABASE_URL,
+    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+  };
 }
 
 // --------- Helpers ---------

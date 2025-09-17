@@ -1,8 +1,9 @@
 // src/main.tsx
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import './lib/supabase'; // força executar e povoar window.supabase
 import { router } from './router';
 import { AuthProvider } from './contexts/AuthContext';
 import './index.css';

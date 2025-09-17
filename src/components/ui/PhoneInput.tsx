@@ -128,11 +128,6 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
           {VALIDATION_MESSAGES.PHONE.INVALID}
         </p>
       )}
-      {value && isValidPhone() && (
-        <p className="text-xs text-green-600 mt-1">
-          {VALIDATION_MESSAGES.PHONE.VALID}
-        </p>
-      )}
       {!value && (
         <p className="text-xs text-gray-500 mt-1">
           {VALIDATION_MESSAGES.PHONE.HELPER}
