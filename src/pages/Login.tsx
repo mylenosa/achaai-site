@@ -39,6 +39,7 @@ export const Login: React.FC = () => {
 
   const {
     user,
+    isAuth,
     setIsAuth,
     signIn,
     signInWithMagicLink,
