@@ -51,12 +51,12 @@ export const StoreProfileForm: React.FC = () => {
         setProfile({
           name: data.name || '',
           categories: data.categories || [],
-          cep: data.cep || '',
-          street: data.street || '',
-          number: data.number || '',
-          neighborhood: data.bairro || '',
-          city: data.cidade || 'Ariquemes',
-          state: data.uf || 'RO',
+          cep: data.address?.cep || '',
+          street: data.address?.street || '',
+          number: data.address?.number || '',
+          neighborhood: data.address?.bairro || '',
+          city: data.address?.cidade || 'Ariquemes',
+          state: data.address?.uf || 'RO',
           whatsapp: data.whatsapp || '',
         });
         setSelectedCategories(data.categories || []);
@@ -143,13 +143,15 @@ export const StoreProfileForm: React.FC = () => {
         name: profile.name,
         categories: selectedCategories,
         whatsapp: whatsappDigits || undefined, // Enviar apenas dígitos ou undefined
-        cep: profile.cep,
-        street: profile.street,
-        number: profile.number,
-        bairro: profile.neighborhood,
-        cidade: profile.city,
-        uf: profile.state,
-        complemento: '', // não temos campo para complemento ainda
+        address: {
+          cep: profile.cep,
+          street: profile.street,
+          number: profile.number,
+          bairro: profile.neighborhood,
+          cidade: profile.city,
+          uf: profile.state,
+          complemento: '', // não temos campo para complemento ainda
+        }
       };
 
       console.log('StoreProfileForm.handleSubmit: Payload preparado:', formPayload);
