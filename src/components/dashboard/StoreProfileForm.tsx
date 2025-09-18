@@ -14,8 +14,8 @@ export const StoreProfileForm: React.FC = () => {
     name: '',
     categories: [] as string[],
     cep: '',
-    street: '',
-    number: '',
+    logradouro: '',
+    numero: '',
     neighborhood: '',
     city: 'Ariquemes',
     state: 'RO',
@@ -93,8 +93,8 @@ export const StoreProfileForm: React.FC = () => {
           name: data.name || '',
           categories: data.categories || [],
           cep: data.address?.cep || '',
-          street: data.address?.street || '',
-          number: data.address?.number || '',
+          logradouro: data.address?.logradouro || '',
+          numero: data.address?.numero || '',
           neighborhood: data.address?.bairro || '',
           city: data.address?.cidade || 'Ariquemes',
           state: data.address?.uf || 'RO',
@@ -126,7 +126,7 @@ export const StoreProfileForm: React.FC = () => {
       if (!data.erro) {
         setProfile((prev) => ({
           ...prev,
-          street: data.logradouro || '',
+          logradouro: data.logradouro || '',
           neighborhood: data.bairro || '',
           city: data.localidade || 'Ariquemes',
           state: data.uf || 'RO',
@@ -184,6 +184,13 @@ export const StoreProfileForm: React.FC = () => {
       return;
     }
 
+    // Validar CEP (8 dígitos)
+    const cepDigits = profile.cep?.replace(/\D/g, '') || '';
+    if (cepDigits && !/^\d{8}$/.test(cepDigits)) {
+      setMessage({ type: 'error', text: 'Informe um CEP válido com 8 dígitos' });
+      return;
+    }
+
     console.log('StoreProfileForm.handleSubmit: Validações passaram, iniciando salvamento...');
     setIsSaving(true);
     try {
@@ -192,9 +199,9 @@ export const StoreProfileForm: React.FC = () => {
         categories: selectedCategories,
         whatsapp: whatsappDigits || undefined, // Enviar apenas dígitos ou undefined
         address: {
-          cep: profile.cep,
-          street: profile.street,
-          number: profile.number,
+          cep: cepDigits || undefined, // Enviar apenas dígitos ou undefined
+          logradouro: profile.logradouro,
+          numero: profile.numero,
           bairro: profile.neighborhood,
           cidade: profile.city,
           uf: profile.state,
@@ -329,12 +336,12 @@ export const StoreProfileForm: React.FC = () => {
               </div>
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-2">Rua/Avenida *</label>
+              <label htmlFor="logradouro" className="block text-sm font-medium text-gray-700 mb-2">Rua/Avenida *</label>
               <input 
-                id="street" 
-                name="street" 
+                id="logradouro" 
+                name="logradouro" 
                 type="text"
-                value={profile.street ?? ''} 
+                value={profile.logradouro ?? ''} 
                 onChange={handleChange} 
                 required
                 autoComplete="address-line1"
@@ -344,13 +351,13 @@ export const StoreProfileForm: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
             <div>
-              <label htmlFor="number" className="block text-sm font-medium text-gray-700 mb-2">Número *</label>
+              <label htmlFor="numero" className="block text-sm font-medium text-gray-700 mb-2">Número *</label>
               <input 
-                id="number" 
-                name="number" 
+                id="numero" 
+                name="numero" 
                 type="text"
                 inputMode="numeric"
-                value={profile.number ?? ''} 
+                value={profile.numero ?? ''} 
                 onChange={handleChange} 
                 required
                 autoComplete="address-line2"

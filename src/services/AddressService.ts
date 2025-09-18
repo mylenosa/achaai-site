@@ -1,7 +1,7 @@
 // Single Responsibility: Serviço dedicado para operações de endereço
 // Open/Closed: Extensível para outros provedores de CEP
 export interface AddressData {
-  street: string;
+  logradouro: string;
   neighborhood: string;
   city: string;
   state: string;
@@ -34,7 +34,7 @@ export class ViaCepProvider implements AddressProvider {
       }
 
       return {
-        street: data.logradouro || '',
+        logradouro: data.logradouro || '',
         neighborhood: data.bairro || '',
         city: data.localidade || '',
         state: data.uf || ''

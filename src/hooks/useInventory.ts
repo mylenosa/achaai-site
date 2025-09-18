@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthContext } from '../hooks/useAuth';
-import { storeService } from '../services/StoreService';
+import { getMyStoreId } from '../services/StoreService';
 import {
   listProducts,
   createProduct,
@@ -65,8 +65,7 @@ export const useInventory = (): UseInventoryReturn => {
     if (storeId) return storeId;
     if (!user) return null;
 
-    const prof = await storeService.getProfile(user.id);
-    const id = prof?.id ? Number(prof.id) : null;
+    const id = await getMyStoreId();
     setStoreId(id);
     return id;
   }, [storeId, user]);
