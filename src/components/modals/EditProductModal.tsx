@@ -47,7 +47,10 @@ export function EditProductModal({
           </div>
           <div>
             <PriceInput
-              value={price ? price.toString() : ""}
+              value={price ? new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+              }).format(price) : ""}
               onChange={(_, numericValue) => setPrice(numericValue)}
               placeholder="0,00"
               label="Preço (opcional)"
