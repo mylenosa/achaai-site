@@ -2,7 +2,7 @@
 // Single Responsibility: Pure utility functions for UI components
 
 import { formatBRL } from '../../utils/formatters';
-import { PRICE_CONSTANTS } from './constants';
+import { PRICE_CONSTANTS, KEYBOARD_KEYS } from './constants';
 
 /**
  * Formats a price value for display in input fields
@@ -47,7 +47,6 @@ export const limitString = (input: string, maxLength: number): string => {
  * Checks if a key is allowed for navigation
  */
 export const isNavigationKey = (key: string): boolean => {
-  const { KEYBOARD_KEYS } = require('./constants');
   return KEYBOARD_KEYS.ALLOWED_NAVIGATION.includes(key);
 };
 
@@ -55,7 +54,6 @@ export const isNavigationKey = (key: string): boolean => {
  * Checks if a key combination is allowed (Ctrl+A, Ctrl+C, etc.)
  */
 export const isAllowedModifierKey = (key: string, ctrlKey: boolean): boolean => {
-  const { KEYBOARD_KEYS } = require('./constants');
   return ctrlKey && KEYBOARD_KEYS.ALLOWED_MODIFIERS.includes(key.toLowerCase());
 };
 

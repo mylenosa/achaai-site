@@ -106,6 +106,17 @@ export const useInventory = (): UseInventoryReturn => {
         throw new Error('Preço deve ser maior ou igual a zero');
       }
 
+      // Verificar duplicatas antes de salvar
+      const trimmedTitle = title.toLowerCase();
+      const existingItem = items.find(i => 
+        i.id !== item.id && // Não é o mesmo item (para edição)
+        i.title.toLowerCase().trim() === trimmedTitle
+      );
+      
+      if (existingItem) {
+        throw new Error(`Já existe um produto com o nome "${title}"`);
+      }
+
       if (item.id) {
         await updateProduct(Number(item.id), title, item.price ?? null);
       } else {
@@ -113,7 +124,7 @@ export const useInventory = (): UseInventoryReturn => {
       }
       await refreshItems();
     },
-    [ensureStoreId, refreshItems]
+    [ensureStoreId, refreshItems, items]
   );
 
   /** Excluir item */

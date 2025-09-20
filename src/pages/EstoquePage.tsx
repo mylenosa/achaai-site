@@ -116,6 +116,20 @@ export const EstoquePage: FC = () => {
     if (item.price != null && item.price < 0)
       return addToast({ type: 'error', message: 'Preço deve ser ≥ 0' })
 
+    // Verificar duplicatas antes de salvar
+    const trimmedTitle = item.title!.trim().toLowerCase()
+    const existingItem = items.find(i => 
+      i.id !== item.id && // Não é o mesmo item (para edição)
+      i.title.toLowerCase().trim() === trimmedTitle
+    )
+    
+    if (existingItem) {
+      return addToast({ 
+        type: 'error', 
+        message: `Já existe um produto com o nome "${item.title!.trim()}"` 
+      })
+    }
+
     try {
       if (isCreating) {
         const row = await createProduct(storeId, item.title!.trim(), item.price ?? null)

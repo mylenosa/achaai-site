@@ -49,7 +49,7 @@ export const PriceInputExample: React.FC = () => {
         <ul className="list-disc list-inside">
           <li>Digite "1" → R$ 0,01</li>
           <li>Digite "12" → R$ 0,12</li>
-          <li>Digite "1234" → R$ 12,34</li>
+          <li>Digite "1000" → R$ 10,00</li>
           <li>Digite "123456" → R$ 1.234,56</li>
         </ul>
       </div>

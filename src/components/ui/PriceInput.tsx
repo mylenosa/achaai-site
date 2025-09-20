@@ -31,12 +31,16 @@ export const PriceInput: React.FC<PriceInputProps> = ({
     setDisplayValue(value || "");
   }, [value]);
 
-  // Formatar valor como BRL
-  const formatAsBRL = (digits: string): string => {
+  // Formatar valor como BRL de forma simples
+  const formatAsBRL = (input: string): string => {
+    if (!input) return "";
+    
+    // Remover tudo que não é dígito
+    const digits = input.replace(/\D/g, '');
     if (!digits) return "";
     
-    // Converter string de dígitos para número (dividir por 100)
-    const numericValue = parseInt(digits, 10) / 100;
+    // Converter para número e dividir por 100 para centavos
+    const numericValue = parseFloat(digits) / 100;
     
     // Formatar com Intl.NumberFormat
     return new Intl.NumberFormat('pt-BR', {
@@ -45,15 +49,12 @@ export const PriceInput: React.FC<PriceInputProps> = ({
     }).format(numericValue);
   };
 
-  // Extrair apenas dígitos de uma string
-  const extractDigits = (str: string): string => {
-    return str.replace(/\D/g, '');
-  };
-
-  // Obter valor numérico (Number) a partir do estado
-  const getNumericValue = (digits: string): number | null => {
+  // Obter valor numérico a partir do input
+  const getNumericValue = (input: string): number | null => {
+    if (!input) return null;
+    const digits = input.replace(/\D/g, '');
     if (!digits) return null;
-    return parseInt(digits, 10) / 100;
+    return parseFloat(digits) / 100;
   };
 
   // Verificar se é tecla de navegação permitida
@@ -79,9 +80,8 @@ export const PriceInput: React.FC<PriceInputProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-    const digits = extractDigits(inputValue);
-    const formatted = formatAsBRL(digits);
-    const numericValue = getNumericValue(digits);
+    const formatted = formatAsBRL(inputValue);
+    const numericValue = getNumericValue(inputValue);
     
     setDisplayValue(formatted);
     onChange(formatted, numericValue);
@@ -107,9 +107,8 @@ export const PriceInput: React.FC<PriceInputProps> = ({
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pastedText = e.clipboardData.getData('text');
-    const digits = extractDigits(pastedText);
-    const formatted = formatAsBRL(digits);
-    const numericValue = getNumericValue(digits);
+    const formatted = formatAsBRL(pastedText);
+    const numericValue = getNumericValue(pastedText);
     
     setDisplayValue(formatted);
     onChange(formatted, numericValue);
@@ -146,7 +145,7 @@ export const PriceInput: React.FC<PriceInputProps> = ({
       </div>
       {!value && (
         <p className="text-xs text-gray-500 mt-1">
-          Digite apenas números (ex: 1234 = R$ 12,34)
+          Digite apenas números (ex: 1000 = R$ 10,00)
         </p>
       )}
     </div>
